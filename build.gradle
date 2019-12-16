@@ -1,0 +1,132 @@
+import org.gradle.internal.jvm.Jvm
+
+plugins {
+    id 'com.github.johnrengelman.shadow' version '4.0.2'
+}
+
+allprojects {
+    apply plugin: 'java'
+
+    group 'com.github.noonmaru.tap'
+    version '1.0'
+
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
+    compileJava.options.encoding = 'UTF-8'
+    javadoc.options.encoding = 'UTF-8'
+
+    repositories {
+        mavenCentral() // junit
+        mavenLocal() // nms spigot
+        maven { url = "https://oss.sonatype.org/content/repositories/snapshots/" } // bungeecord chat
+        maven { url = "https://jitpack.io/"} //github library
+    }
+}
+
+subprojects {
+    apply plugin: 'maven-publish'
+
+    dependencies {
+        testCompile group: 'junit', name: 'junit', version: '4.12'
+
+        Project api = project(':api')
+        if (project != api)
+            compile api
+    }
+
+    Project api = project(':api')
+
+    if (project != api) {
+        project.tasks.forEach { t ->
+
+            if (t.getName() != 'clean') {
+                t.onlyIf {
+                    gradle.taskGraph.hasTask(':spigotJar') || parent.hasProperty('withNMS')
+                }
+            }
+        }
+    }
+
+    task sourcesJar(type: Jar) {
+        archiveClassifier = 'sources'
+        from sourceSets.main.allJava
+    }
+
+    task javadocJar(type: Jar) {
+        archiveClassifier = 'javadoc'
+        from javadoc
+    }
+
+    publishing {
+        publications {
+            Tap(MavenPublication) {
+                artifactId = "$parent.name-$project.name"
+                from components.java
+                artifact sourcesJar
+                artifact javadocJar
+                pom {
+                    name = parent.name + "-" + project.name
+                    description = 'Noonmaru minecraft library'
+                    url = 'https://github.com/noonmaru/tap'
+                    licenses {
+                        license {
+                            name = 'GPL-2.0'
+                            url = 'http://www.opensource.org/licenses/gpl-2.0.php'
+                        }
+                    }
+                    developers {
+                        developer {
+                            id = 'noonmaru'
+                            name = 'Noonmaru'
+                            email = 'noonmaru10@gmail.com'
+                            url = 'https://github.com/noonmaru'
+                        }
+                    }
+                    scm {
+                        connection = 'scm:git:git://github.com/noonmaru/tap.git'
+                        developerConnection = 'scm:git:ssh://github.com/noonmaru/tap.git'
+                        url = 'https://github.com/noonmaru/tap'
+                    }
+                }
+            }
+        }
+    }
+}
+
+project(':api') {
+    processResources {
+        filesMatching('**/*.yml') {
+            expand project.properties
+        }
+    }
+
+    repositories {
+        maven { url = 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/' }
+    }
+
+    dependencies {
+        compileOnly files(Jvm.current().toolsJar)
+        compileOnly 'org.spigotmc:spigot-api:1.12.2-R0.1-SNAPSHOT'
+        compile 'com.github.noonmaru:collections:1.0'
+        compile 'com.github.noonmaru:task:1.0'
+        compile 'com.github.noonmaru:math:1.0'
+        compile 'com.github.noonmaru:tools:1.0'
+    }
+}
+
+shadowJar {
+    archiveClassifier = 'universal'
+
+    dependencies {
+        exclude(dependency('com.google.code.gson:gson'))
+    }
+}
+
+dependencies {
+    compile subprojects
+}
+
+task spigotJar(type: Copy) {
+    from shadowJar
+    into 'W:\\Servers\\tap\\plugins'
+}

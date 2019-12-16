@@ -1,0 +1,8 @@
+name: Tap
+version: $version
+main: com.nemosw.spigot.tap.plugin.TapPlugin
+author: Nemo
+commands:
+  tap:
+    usage: /<command> help
+    description: TapLoader plugin test command
