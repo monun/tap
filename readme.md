@@ -1,7 +1,6 @@
 # Tap
 
 [![Build Status](https://travis-ci.org/noonmaru/tap.svg?branch=master)](https://travis-ci.org/noonmaru/tap)
-[![Coverage Status](https://coveralls.io/repos/github/noonmaru/tap/badge.svg?branch=master)](https://coveralls.io/github/noonmaru/tap?branch=master)
 [![Maintainability](https://api.codeclimate.com/v1/badges/6a20ddcbcde03208b75e/maintainability)](https://codeclimate.com/github/noonmaru/tap/maintainability)
 [![](https://jitpack.io/v/noonmaru/tap.svg)](https://jitpack.io/#noonmaru/tap)
 ![JitPack - Downloads](https://img.shields.io/jitpack/dm/github/noonmaru/tap)
