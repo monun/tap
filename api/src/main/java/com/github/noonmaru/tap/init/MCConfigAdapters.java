@@ -16,11 +16,11 @@
 
 package com.github.noonmaru.tap.init;
 
+import com.github.noonmaru.tools.gson.config.ConfigAdapter;
+import com.github.noonmaru.tools.gson.config.ConfigUtils;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
-import com.nemosw.tools.gson.config.ConfigAdapter;
-import com.nemosw.tools.gson.config.ConfigUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;

@@ -17,8 +17,8 @@
 package com.github.noonmaru.tap.nbt;
 
 
+import com.github.noonmaru.tools.gson.JsonIO;
 import com.google.gson.JsonObject;
-import com.nemosw.tools.gson.JsonIO;
 
 import java.io.*;
 

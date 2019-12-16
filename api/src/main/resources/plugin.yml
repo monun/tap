@@ -1,6 +1,6 @@
 name: Tap
 version: $version
-main: com.nemosw.spigot.tap.plugin.TapPlugin
+main: com.github.noonmaru.plugin.tap.plugin.TapPlugin
 author: Nemo
 commands:
   tap:

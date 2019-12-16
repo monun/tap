@@ -20,7 +20,7 @@ import com.github.noonmaru.tap.ChatType;
 import com.github.noonmaru.tap.packet.InfoPacket;
 import com.github.noonmaru.tap.text.TextComponent;
 import com.github.noonmaru.tap.v1_12_R1.text.NMSTextComponent;
-import com.nemosw.tools.reflection.ReflectionUtils;
+import com.github.noonmaru.tools.reflection.ReflectionUtils;
 import net.minecraft.server.v1_12_R1.ChatMessageType;
 import net.minecraft.server.v1_12_R1.PacketPlayOutChat;
 import net.minecraft.server.v1_12_R1.PacketPlayOutPlayerListHeaderFooter;

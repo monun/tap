@@ -18,7 +18,7 @@ package com.github.noonmaru.tap.event.entity.impl;
 
 import com.github.noonmaru.tap.event.ASMEventExecutor;
 import com.github.noonmaru.tap.event.entity.EntityListener;
-import com.nemosw.tools.asm.ClassDefiner;
+import com.github.noonmaru.tools.asm.ClassDefiner;
 import org.bukkit.event.Event;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.MethodVisitor;

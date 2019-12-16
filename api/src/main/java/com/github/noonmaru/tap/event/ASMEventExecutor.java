@@ -16,7 +16,7 @@
 
 package com.github.noonmaru.tap.event;
 
-import com.nemosw.tools.asm.ClassDefiner;
+import com.github.noonmaru.tools.asm.ClassDefiner;
 import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.Warning;

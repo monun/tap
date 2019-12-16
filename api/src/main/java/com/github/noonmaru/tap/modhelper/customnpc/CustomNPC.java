@@ -17,7 +17,7 @@
 package com.github.noonmaru.tap.modhelper.customnpc;
 
 import com.github.noonmaru.tap.LibraryLoader;
-import com.nemosw.tools.asm.ClassDefiner;
+import com.github.noonmaru.tools.asm.ClassDefiner;
 import org.bukkit.entity.LivingEntity;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Label;
