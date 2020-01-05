@@ -1,6 +1,6 @@
 name: Tap
 version: $version
-main: com.github.noonmaru.plugin.tap.plugin.TapPlugin
+main: com.github.noonmaru.tap.plugin.TapPlugin
 author: Nemo
 commands:
   tap:

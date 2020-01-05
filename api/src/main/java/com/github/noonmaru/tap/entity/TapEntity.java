@@ -18,6 +18,8 @@ package com.github.noonmaru.tap.entity;
 
 import com.github.noonmaru.tap.Tap;
 import com.github.noonmaru.tap.math.BoundingBox;
+import com.github.noonmaru.tap.world.TapWorld;
+import org.bukkit.World;
 import org.bukkit.entity.Entity;
 
 public interface TapEntity
@@ -35,6 +37,10 @@ public interface TapEntity
     float getWidth();
 
     float getHeight();
+
+    TapWorld getWorld();
+
+    void setWorld(TapWorld world);
 
     double getPrevX();
 
@@ -65,6 +71,10 @@ public interface TapEntity
     boolean isDead();
 
     BoundingBox getBoundingBox();
+
+    World getBukkitWorld();
+
+    void setBukkitWorld(World world);
 
     void setPosition(double x, double y, double z);
 

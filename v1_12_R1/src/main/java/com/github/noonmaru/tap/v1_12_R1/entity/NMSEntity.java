@@ -18,7 +18,13 @@ package com.github.noonmaru.tap.v1_12_R1.entity;
 
 import com.github.noonmaru.tap.entity.TapEntity;
 import com.github.noonmaru.tap.v1_12_R1.math.NMSBoundingBox;
+import com.github.noonmaru.tap.v1_12_R1.world.NMSWorld;
+import com.github.noonmaru.tap.v1_12_R1.world.NMSWorldSupport;
+import com.github.noonmaru.tap.world.TapWorld;
 import net.minecraft.server.v1_12_R1.Entity;
+import net.minecraft.server.v1_12_R1.World;
+import net.minecraft.server.v1_12_R1.WorldServer;
+import org.bukkit.craftbukkit.v1_12_R1.CraftWorld;
 
 public class NMSEntity implements TapEntity
 {
@@ -57,6 +63,23 @@ public class NMSEntity implements TapEntity
     public float getHeight()
     {
         return this.entity.length;
+    }
+
+    @Override
+    public TapWorld getWorld()
+    {
+        return NMSWorldSupport.getInstance().wrapWorld((WorldServer) entity.world);
+    }
+
+    @Override
+    public void setWorld(TapWorld world)
+    {
+        World w = ((NMSWorld) world).getHandle();
+
+        if (w == null)
+            throw new IllegalArgumentException("Invalid world");
+
+        entity.world = w;
     }
 
     @Override
@@ -147,6 +170,18 @@ public class NMSEntity implements TapEntity
     public NMSBoundingBox getBoundingBox()
     {
         return new NMSBoundingBox(this.entity.getBoundingBox());
+    }
+
+    @Override
+    public org.bukkit.World getBukkitWorld()
+    {
+        return entity.world.getWorld();
+    }
+
+    @Override
+    public void setBukkitWorld(org.bukkit.World world)
+    {
+        entity.world = ((CraftWorld) world).getHandle();
     }
 
     @Override
