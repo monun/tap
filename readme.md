@@ -12,15 +12,8 @@
 > * ##### Features
 >  * Java agent support (asm)
 >  * Packets
->  * NMS Blocks
->  * NMS Entities
->  * NMS NBT
->  * NMS Inventory
->  * NMS Items
->  * NMS World
 >  * Fast math
 >  * Mojang user profile
->  * Fake scoreboard
 >  * Entity specificEntity events listener
 >  * Sub commands Module
 
@@ -35,7 +28,7 @@
 >
 >...
 >dependencies {
->    implementation 'com.github.noonmaru:tap:1.0'
+>    implementation 'com.github.noonmaru:tap:2.0'
 >}
 >```
 >
@@ -56,7 +49,7 @@
 >```
 >```groovy
 >dependencies {
->    implementation 'com.github.noonmaru:tap-v1_12_R1:1.0'
+>    implementation 'com.github.noonmaru:tap-v1_15_R1:2.0'
 >}
 >```
 

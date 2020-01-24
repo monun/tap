@@ -2,24 +2,32 @@ import org.gradle.internal.jvm.Jvm
 
 plugins {
     id 'com.github.johnrengelman.shadow' version '5.2.0'
-    id 'org.jetbrains.kotlin.jvm' version '1.3.61'
+    id 'org.jetbrains.kotlin.jvm' version '1.3.61' apply false
 }
 
 allprojects {
     apply plugin: 'java'
+    apply plugin: 'org.jetbrains.kotlin.jvm'
 
     group pluginGroup
     version pluginVersion
 
     sourceCompatibility = 1.8
     targetCompatibility = 1.8
+
     compileJava.options.encoding = 'UTF-8'
     javadoc.options.encoding = 'UTF-8'
 
     repositories {
         mavenCentral() // junit
-        maven { url = "https://oss.sonatype.org/content/repositories/snapshots/" } // bungeecord chat
-        maven { url = "https://jitpack.io/"} //github library
+        maven {
+            name = 'spigotmc-repo'
+            url = 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/'
+        }
+        maven {
+            name = 'sonatype'
+            url = 'https://oss.sonatype.org/content/groups/public/'
+        }
     }
 }
 
@@ -37,11 +45,10 @@ subprojects {
     Project api = project(':api')
 
     if (project != api) {
-        project.tasks.forEach { t ->
-
-            if (t.getName() != 'clean') {
-                t.onlyIf {
-                    gradle.taskGraph.hasTask(':spigotJar') || parent.hasProperty('withNMS')
+        project.tasks.forEach {
+            if (it.getName() != 'clean') {
+                it.onlyIf {
+                    gradle.taskGraph.hasTask(':shadowJar') || parent.hasProperty('withNMS')
                 }
             }
         }
@@ -106,16 +113,13 @@ project(':api') {
 
     dependencies {
         compileOnly files(Jvm.current().toolsJar)
-        compileOnly 'org.spigotmc:spigot-api:1.15.2-R0.1-SNAPSHOT'
-        compile 'com.github.noonmaru:collections:1.0'
-        compile 'com.github.noonmaru:task:1.0'
-        compile 'com.github.noonmaru:math:1.0'
-        compile 'com.github.noonmaru:tools:1.0'
+        implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
+        implementation 'org.spigotmc:spigot-api:1.15.2-R0.1-SNAPSHOT'
     }
 }
 
 shadowJar {
-    archiveClassifier.set = 'dist'
+    archiveClassifier.set 'dist'
 
     dependencies {
         exclude(dependency('com.google.code.gson:gson'))
@@ -126,7 +130,10 @@ dependencies {
     compile subprojects
 }
 
+
 task spigotJar(type: Copy) {
     from shadowJar
     into 'W:\\Servers\\test\\plugins'
 }
+
+tasks.build.finalizedBy(spigotJar)
