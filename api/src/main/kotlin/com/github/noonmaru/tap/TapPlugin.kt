@@ -16,9 +16,15 @@
 
 package com.github.noonmaru.tap
 
+import com.github.noonmaru.tap.attach.Tools
 import org.bukkit.plugin.java.JavaPlugin
 
 /**
  * @author Nemo
  */
-class TapPlugin : JavaPlugin()
+class TapPlugin : JavaPlugin() {
+
+    override fun onEnable() {
+        Tools.loadAttachLibrary(dataFolder)
+    }
+}

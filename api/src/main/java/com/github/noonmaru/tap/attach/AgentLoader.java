@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.jar.Attributes;
 import java.util.jar.Attributes.Name;
 import java.util.jar.JarEntry;
@@ -139,13 +140,13 @@ public final class AgentLoader
         {
             String agentPath = unqualify(agentClass);
             jos.putNextEntry(new JarEntry(agentPath));
-            jos.write(Tools.getBytesFromStream(classLoader.getResourceAsStream(agentPath)));
+            jos.write(Tools.getBytesFromStream(Objects.requireNonNull(classLoader.getResourceAsStream(agentPath))));
             jos.closeEntry();
 
             for (String name : resources)
             {
                 jos.putNextEntry(new JarEntry(name));
-                jos.write(Tools.getBytesFromStream(classLoader.getResourceAsStream(name)));
+                jos.write(Tools.getBytesFromStream(Objects.requireNonNull(classLoader.getResourceAsStream(name))));
                 jos.closeEntry();
             }
 

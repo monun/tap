@@ -24,6 +24,7 @@ import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
+import java.util.Objects;
 
 public final class Tools
 {
@@ -65,13 +66,13 @@ public final class Tools
 
             try
             {
-                Files.copy(in, file.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                Files.copy(Objects.requireNonNull(in), file.toPath(), StandardCopyOption.REPLACE_EXISTING);
             }
             finally
             {
-                try
-                {
-                    in.close();
+                try {
+                    if (in != null)
+                        in.close();
                 }
                 catch (IOException e)
                 {
@@ -85,12 +86,12 @@ public final class Tools
 
     public static byte[] getBytesFromClass(Class<?> clazz) throws IOException
     {
-        return getBytesFromStream(clazz.getClassLoader().getResourceAsStream(clazz.getName().replace('.', '/') + ".class"));
+        return getBytesFromStream(Objects.requireNonNull(clazz.getClassLoader().getResourceAsStream(clazz.getName().replace('.', '/') + ".class")));
     }
 
     public static byte[] getBytesFromResource(ClassLoader classLoader, String resource) throws IOException
     {
-        return getBytesFromStream(classLoader.getResourceAsStream(resource));
+        return getBytesFromStream(Objects.requireNonNull(classLoader.getResourceAsStream(resource)));
     }
 
     public static byte[] getBytesFromStream(InputStream in) throws IOException
