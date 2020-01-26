@@ -28,6 +28,11 @@ allprojects {
             name = 'sonatype'
             url = 'https://oss.sonatype.org/content/groups/public/'
         }
+        maven { url = "https://jitpack.io/"} //github library
+    }
+
+    dependencies {
+        implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
     }
 }
 
@@ -108,13 +113,16 @@ project(':api') {
     }
 
     repositories {
-        maven { url = 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/' }
+        maven {
+            name = 'papermc-repo'
+            url = 'https://papermc.io/repo/repository/maven-public/'
+        }
     }
 
     dependencies {
         compileOnly files(Jvm.current().toolsJar)
-        implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
-        implementation 'org.spigotmc:spigot-api:1.15.2-R0.1-SNAPSHOT'
+        implementation 'com.destroystokyo.paper:paper-api:1.15.2-R0.1-SNAPSHOT'
+        compile group: 'org.ow2.asm', name: 'asm', version: '7.0'
     }
 }
 
