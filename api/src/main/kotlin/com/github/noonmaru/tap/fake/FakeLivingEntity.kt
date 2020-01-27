@@ -31,5 +31,6 @@ open class FakeLivingEntity(private val livingEntity: LivingEntity) : FakeEntity
 
         player.sendPacket(spawnPacket)
         player.sendPacket(metaPacket)
+
     }
 }

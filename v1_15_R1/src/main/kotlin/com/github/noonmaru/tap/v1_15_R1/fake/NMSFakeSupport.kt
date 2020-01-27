@@ -20,7 +20,8 @@ import com.github.noonmaru.tap.fake.FakeSupport
 import org.bukkit.Bukkit
 import org.bukkit.World
 import org.bukkit.craftbukkit.v1_15_R1.CraftServer
-import org.bukkit.craftbukkit.v1_15_R1.entity.CraftPlayer
+import org.bukkit.craftbukkit.v1_15_R1.CraftWorld
+import org.bukkit.craftbukkit.v1_15_R1.entity.CraftEntity
 import org.bukkit.entity.Entity
 
 /**
@@ -36,14 +37,14 @@ class NMSFakeSupport : FakeSupport {
     }
 
     override fun isInvisible(entity: Entity): Boolean {
-        entity as CraftPlayer
+        entity as CraftEntity
         val nmsEntity = entity.handle
 
         return nmsEntity.isInvisible
     }
 
     override fun setInvisible(entity: Entity, invisible: Boolean) {
-        entity as CraftPlayer
+        entity as CraftEntity
         val nmsEntity = entity.handle
 
         nmsEntity.isInvisible = invisible
@@ -58,9 +59,10 @@ class NMSFakeSupport : FakeSupport {
         yaw: Float,
         pitch: Float
     ) {
-        entity as CraftPlayer
+        entity as CraftEntity
         val nmsEntity = entity.handle
 
+        nmsEntity.world = (world as CraftWorld).handle
         nmsEntity.setPositionRotation(x, y, z, yaw, pitch)
     }
 }

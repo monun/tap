@@ -24,6 +24,9 @@ import org.bukkit.World
 import org.bukkit.entity.Entity
 import org.bukkit.entity.Player
 import org.bukkit.util.BoundingBox
+import org.bukkit.util.Vector
+import java.util.*
+import kotlin.collections.HashSet
 
 /**
  * @author Nemo
@@ -53,14 +56,13 @@ abstract class FakeEntity internal constructor(private val entity: Entity) {
 
     private var prevUpdateLocation: Location = entity.location
 
-    val prevLocation: Location = entity.location
-        get() = field.clone()
+    private val prevLocation: Location = prevUpdateLocation.clone()
 
-
-    val location: Location = entity.location
-        get() = field.clone()
+    private val location: Location = prevLocation.clone()
 
     val trackers = HashSet<Player>()
+
+    private val ignores = Collections.newSetFromMap(WeakHashMap<Player, Boolean>())
 
     var trackingRange = 128.0
 
@@ -81,7 +83,16 @@ abstract class FakeEntity internal constructor(private val entity: Entity) {
         manager.enqueue(this)
     }
 
+    fun getLocation(): Location {
+        return prevLocation.clone()
+    }
+
+    fun getToLocation(): Location {
+        return location.clone()
+    }
+
     fun setPosition(
+        world: World = prevLocation.world,
         x: Double = prevLocation.x,
         y: Double = prevLocation.y,
         z: Double = prevLocation.z,
@@ -89,6 +100,7 @@ abstract class FakeEntity internal constructor(private val entity: Entity) {
         pitch: Float = prevLocation.pitch
     ) {
         location.run {
+            this.world = world
             this.x = x
             this.y = y
             this.z = z
@@ -102,11 +114,29 @@ abstract class FakeEntity internal constructor(private val entity: Entity) {
 
     fun setPosition(loc: Location) {
         loc.run {
-            setPosition(x, y, z, yaw, pitch)
+            setPosition(world, x, y, z, yaw, pitch)
         }
     }
 
+    fun move(
+        moveX: Double = 0.0,
+        moveY: Double = 0.0,
+        moveZ: Double = 0.0,
+        yaw: Float = prevLocation.yaw,
+        pitch: Float = prevLocation.pitch
+    ) {
+        prevLocation.run {
+            setPosition(prevLocation.world, x + moveX, y + moveY, z + moveZ, yaw, pitch)
+        }
+    }
+
+    fun move(v: Vector, yaw: Float = prevLocation.yaw, pitch: Float = prevLocation.pitch) {
+        move(v.x, v.y, v.z, yaw, pitch)
+    }
+
     open fun onUpdate() {
+        queued = false
+
         if (updateLoc) {
             updateLoc = false
             updateLocation()
@@ -131,9 +161,12 @@ abstract class FakeEntity internal constructor(private val entity: Entity) {
 
         if (from.world == to.world && (deltaX < -32768L || deltaX > 32767L || deltaY < -32768L || deltaY > 32767L || deltaZ < -32768L || deltaZ > 32767L)) { //Relative
             prevUpdateLocation.run {
+                world = to.world
                 x += deltaX / 4096.0
                 y += deltaY / 4096.0
                 z += deltaZ / 4096.0
+                yaw = to.yaw
+                pitch = to.pitch
             }
 
             val yaw = to.yaw
@@ -150,11 +183,11 @@ abstract class FakeEntity internal constructor(private val entity: Entity) {
                     yaw,
                     pitch, false
                 )
-
             trackers.sendPacketAll(packet)
 
         } else {
             prevUpdateLocation.run {
+                world = to.world
                 x = to.x
                 y = to.y
                 z = to.z
@@ -168,23 +201,25 @@ abstract class FakeEntity internal constructor(private val entity: Entity) {
         }
 
         prevLocation.apply {
-            x = to.x
-            y = to.y
-            z = to.z
-            yaw = to.yaw
-            pitch = to.pitch
+            this.world = to.world
+            this.x = to.x
+            this.y = to.y
+            this.z = to.z
+            this.yaw = to.yaw
+            this.pitch = to.pitch
         }
     }
 
     internal fun updateTrackers() {
-        val box = (trackingRange / 2).let { r -> BoundingBox.of(prevLocation, r, r, r) }
+        val box = trackingRange.let { r -> BoundingBox.of(prevLocation, r, r, r) }
         removeOutOfRangeTrackers(box.expand(16.0))
 
-        val players = entity.world.getNearbyEntities(box) { entity -> entity is Player && entity.isValid }
+        val players = prevLocation.world.getNearbyEntities(box) { entity -> entity is Player && entity.isValid }
+
         for (player in players) {
             player as Player
 
-            if (trackers.add(player)) {
+            if (player !in ignores && trackers.add(player)) {
                 spawnTo(player)
             }
         }
@@ -192,8 +227,8 @@ abstract class FakeEntity internal constructor(private val entity: Entity) {
 
     private fun removeOutOfRangeTrackers(box: BoundingBox) {
         trackers.removeIf { player ->
-            if (prevLocation.world != player.world || !box.overlaps(player.boundingBox)) {
-                val packet = EntityPacket.destroy(intArrayOf(player.entityId))
+            if (!player.isValid || prevLocation.world != player.world || !box.overlaps(player.boundingBox)) {
+                val packet = EntityPacket.destroy(intArrayOf(entity.entityId))
                 player.sendPacket(packet)
                 true
             } else
@@ -202,11 +237,10 @@ abstract class FakeEntity internal constructor(private val entity: Entity) {
     }
 
     @Suppress("UNCHECKED_CAST")
-    fun <T : Entity> applyMetadata(applier: (entity: T) -> Boolean) {
-        if (applier.invoke(entity as T)) {
-            updateMeta = true
-            enqueue()
-        }
+    fun <T : Entity> applyMetadata(applier: (entity: T) -> Unit) {
+        applier.invoke(entity as T)
+        updateMeta = true
+        enqueue()
     }
 
     private fun updateMeta() {
@@ -216,8 +250,25 @@ abstract class FakeEntity internal constructor(private val entity: Entity) {
 
     abstract fun spawnTo(player: Player)
 
+    fun showTo(player: Player) {
+        ignores.remove(player)
+    }
+
+    fun hideTo(player: Player) {
+        if (ignores.add(player) && trackers.remove(player)) {
+            val packet = EntityPacket.destroy(intArrayOf(entity.entityId))
+            player.sendPacket(packet)
+        }
+    }
+
+    fun canSeeTo(player: Player): Boolean {
+        return player in ignores
+    }
+
     fun remove() {
         valid = false
+        val packet = EntityPacket.destroy(intArrayOf(entity.entityId))
+        trackers.sendPacketAll(packet)
     }
 }
 

@@ -35,7 +35,7 @@ class FakeEntityManager : Runnable {
 
     private var trackerUpdatePerTick = 0.0
 
-    fun createFakeEntity(
+    fun <T : FakeEntity> createFakeEntity(
         world: World,
         x: Double,
         y: Double,
@@ -43,7 +43,7 @@ class FakeEntityManager : Runnable {
         yaw: Float,
         pitch: Float,
         entityClass: Class<out Entity>
-    ): FakeEntity {
+    ): T {
         val entity =
             entityClass.createFakeEntity() ?: throw NullPointerException("Cannot create Entity for $entityClass")
         entity.setPositionAndRotation(world, x, y, z, yaw, pitch)
@@ -53,10 +53,11 @@ class FakeEntityManager : Runnable {
         entities.add(fake)
         fake.updateTrackers()
 
-        return fake
+        @Suppress("UNCHECKED_CAST")
+        return fake as T
     }
 
-    fun createFakeEntity(loc: Location, entityClass: Class<out Entity>): FakeEntity {
+    fun <T : FakeEntity> createFakeEntity(loc: Location, entityClass: Class<out Entity>): T {
         return createFakeEntity(loc.world, loc.x, loc.y, loc.z, loc.yaw, loc.pitch, entityClass)
     }
 
@@ -73,11 +74,12 @@ class FakeEntityManager : Runnable {
     }
 
     private fun updateEntities() {
-        var entity: FakeEntity
-        while (queue.poll().also { entity = it } != null) {
-            if (entity.valid) {
-                entity.onUpdate()
-            }
+        while (true) {
+            queue.poll()?.also { entity ->
+                if (entity.valid) {
+                    entity.onUpdate()
+                }
+            } ?: break
         }
     }
 
@@ -88,6 +90,7 @@ class FakeEntityManager : Runnable {
         }
 
         var count = trackerUpdatePerTick.let { trackerCount += it; trackerCount }.toInt()
+//        var count = 1
         trackerCount -= count.toDouble()
 
         while (count > 0) {
@@ -104,7 +107,7 @@ class FakeEntityManager : Runnable {
 
     private fun recalculateUpdatePerTick() {
         trackerCount = 0.0
-        trackerUpdatePerTick = entities.count() / 40.0
+        trackerUpdatePerTick = entities.count() / 32.0
     }
 }
 
