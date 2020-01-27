@@ -35,7 +35,7 @@ abstract class FakeEntity internal constructor(internal open val entity: Entity)
     var glowing
         get() = entity.isGlowing
         set(value) {
-            entity.isGlowing = true
+            entity.isGlowing = value
             updateMeta = true
             enqueue()
         }

@@ -116,7 +116,7 @@ class CommandManager : TabExecutor {
         }
 
         val componentLabel = args[0]
-        val container = commandMap[componentLabel]?.run {
+        commandMap[componentLabel]?.run {
             permission?.let {
                 sender.sendMessage(permissionMessage)
                 return true
