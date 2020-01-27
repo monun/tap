@@ -133,9 +133,7 @@ dependencies {
 }
 
 
-task spigotJar(type: Copy) {
+task distJar(type: Copy) {
     from shadowJar
     into 'W:\\Servers\\1.15.2-sample\\plugins'
 }
-
-tasks.build.finalizedBy(spigotJar)
