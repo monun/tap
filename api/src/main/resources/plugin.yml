@@ -1,7 +1,8 @@
 name: $pluginName
 version: $pluginVersion
 main: $pluginMain
-author: Nemo
+author: Noonmaru
+api-version: '1.13'
 commands:
   tap:
     usage: /<command> help
