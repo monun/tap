@@ -27,60 +27,60 @@ import org.bukkit.inventory.ItemStack
 /**
  * @author Nemo
  */
-class FakeArmorStand(override val entity: ArmorStand) : FakeLivingEntity(entity) {
+class FakeArmorStand(private val armorStand: ArmorStand) : FakeLivingEntity(armorStand) {
 
     var mark
-        get() = entity.isMarker
+        get() = armorStand.isMarker
         set(value) {
-            entity.isMarker = value
+            armorStand.isMarker = value
             updateMeta = true
             enqueue()
         }
 
     var headPose
-        get() = entity.headPose
+        get() = armorStand.headPose
         set(value) {
-            entity.headPose = value
+            armorStand.headPose = value
             updateMeta = true
             enqueue()
         }
 
     var bodyPose
-        get() = entity.bodyPose
+        get() = armorStand.bodyPose
         set(value) {
-            entity.bodyPose = value
+            armorStand.bodyPose = value
             updateMeta = true
             enqueue()
         }
 
     var leftArmPose
-        get() = entity.leftArmPose
+        get() = armorStand.leftArmPose
         set(value) {
-            entity.leftArmPose = value
+            armorStand.leftArmPose = value
             updateMeta = true
             enqueue()
         }
 
     var rightArmPose
-        get() = entity.rightArmPose
+        get() = armorStand.rightArmPose
         set(value) {
-            entity.rightArmPose = value
+            armorStand.rightArmPose = value
             updateMeta = true
             enqueue()
         }
 
     var leftLegPose
-        get() = entity.leftLegPose
+        get() = armorStand.leftLegPose
         set(value) {
-            entity.leftLegPose = value
+            armorStand.leftLegPose = value
             updateMeta = true
             enqueue()
         }
 
     var rightLegPose
-        get() = entity.rightLegPose
+        get() = armorStand.rightLegPose
         set(value) {
-            entity.rightLegPose = value
+            armorStand.rightLegPose = value
             updateMeta = true
             enqueue()
         }
@@ -91,10 +91,10 @@ class FakeArmorStand(override val entity: ArmorStand) : FakeLivingEntity(entity)
         super.spawnTo(player)
 
         EquipmentSlot.values().forEach { slot ->
-            val item = entity.getItem(slot)
+            val item = armorStand.getItem(slot)
 
             if (item.amount > 0) {
-                val packet = EntityPacket.equipment(entity.entityId, slot, item)
+                val packet = EntityPacket.equipment(armorStand.entityId, slot, item)
 
                 player.sendPacket(packet)
             }
@@ -102,7 +102,7 @@ class FakeArmorStand(override val entity: ArmorStand) : FakeLivingEntity(entity)
     }
 
     fun setItem(slot: EquipmentSlot, item: ItemStack) {
-        entity.setItem(slot, item)
+        armorStand.setItem(slot, item)
         updateEquipment = true
         enqueue()
     }
@@ -114,10 +114,10 @@ class FakeArmorStand(override val entity: ArmorStand) : FakeLivingEntity(entity)
             updateEquipment = false
 
             EquipmentSlot.values().forEach { slot ->
-                val item = entity.getItem(slot)
+                val item = armorStand.getItem(slot)
 
                 if (item.amount > 0) {
-                    val packet = EntityPacket.equipment(entity.entityId, slot, item)
+                    val packet = EntityPacket.equipment(armorStand.entityId, slot, item)
 
                     trackers.sendPacketAll(packet)
                 }

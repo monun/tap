@@ -28,7 +28,7 @@ import org.bukkit.util.BoundingBox
 /**
  * @author Nemo
  */
-abstract class FakeEntity internal constructor(internal open val entity: Entity) {
+abstract class FakeEntity internal constructor(private val entity: Entity) {
 
     internal lateinit var manager: FakeEntityManager
 
@@ -51,15 +51,13 @@ abstract class FakeEntity internal constructor(internal open val entity: Entity)
     val world: World
         get() = entity.world
 
-    private var prevUpdateLocation: Location
+    private var prevUpdateLocation: Location = entity.location
 
-    var prevLocation: Location
-        private set
+    val prevLocation: Location = entity.location
         get() = field.clone()
 
 
-    var location: Location
-        private set
+    val location: Location = entity.location
         get() = field.clone()
 
     val trackers = HashSet<Player>()
@@ -74,14 +72,6 @@ abstract class FakeEntity internal constructor(internal open val entity: Entity)
 
     var valid = true
         private set
-
-    init {
-        entity.let {
-            this.prevLocation = it.location
-            this.location = prevLocation.clone()
-            this.prevUpdateLocation = prevLocation.clone()
-        }
-    }
 
     protected fun enqueue() {
         if (queued)
