@@ -33,9 +33,12 @@ public final class RegisteredEntityHandler implements Comparable<RegisteredEntit
 
     private final Listener listener;
 
+    private boolean valid;
+
     public RegisteredEntityHandler(@NotNull final HandlerStatement statement, @NotNull final Listener listener) {
         this.statement = statement;
         this.listener = listener;
+        this.valid = true;
     }
 
     @NotNull
@@ -67,5 +70,13 @@ public final class RegisteredEntityHandler implements Comparable<RegisteredEntit
         } catch (EventException e) {
             e.printStackTrace();
         }
+    }
+
+    public void remove() {
+        valid = false;
+    }
+
+    public boolean isValid() {
+        return valid;
     }
 }

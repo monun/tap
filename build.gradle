@@ -24,6 +24,12 @@ allprojects {
             name = 'spigotmc-repo'
             url = 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/'
         }
+        repositories {
+            maven {
+                name = 'papermc-repo'
+                url = 'https://papermc.io/repo/repository/maven-public/'
+            }
+        }
         maven {
             name = 'sonatype'
             url = 'https://oss.sonatype.org/content/groups/public/'
@@ -32,7 +38,7 @@ allprojects {
     }
 
     dependencies {
-        implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
+        compileOnly "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
     }
 }
 
@@ -112,26 +118,14 @@ project(':api') {
         }
     }
 
-    repositories {
-        maven {
-            name = 'papermc-repo'
-            url = 'https://papermc.io/repo/repository/maven-public/'
-        }
-    }
-
     dependencies {
         compileOnly files(Jvm.current().toolsJar)
-        implementation 'com.destroystokyo.paper:paper-api:1.15.2-R0.1-SNAPSHOT'
-        compile group: 'org.ow2.asm', name: 'asm', version: '7.0'
+        compileOnly 'com.destroystokyo.paper:paper-api:1.15.2-R0.1-SNAPSHOT'
     }
 }
 
 shadowJar {
     archiveClassifier.set 'dist'
-
-    dependencies {
-        exclude(dependency('com.google.code.gson:gson'))
-    }
 }
 
 dependencies {
@@ -141,7 +135,7 @@ dependencies {
 
 task spigotJar(type: Copy) {
     from shadowJar
-    into 'W:\\Servers\\test\\plugins'
+    into 'W:\\Servers\\1.15.2-sample\\plugins'
 }
 
 tasks.build.finalizedBy(spigotJar)

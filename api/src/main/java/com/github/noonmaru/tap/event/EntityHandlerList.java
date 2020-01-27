@@ -18,6 +18,7 @@ package com.github.noonmaru.tap.event;
 
 import com.github.noonmaru.tap.collection.SortedList;
 import org.bukkit.event.Event;
+import org.bukkit.event.Listener;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -34,21 +35,37 @@ public final class EntityHandlerList {
         handlerList.add(handler);
     }
 
-    @NotNull
+    public synchronized void unregister(@NotNull final RegisteredEntityHandler handler) {
+        handlers = null;
+        handlerList.binaryRemove(handler);
+    }
+
+    public void unregister(@NotNull final Listener listener) {
+        handlers = null;
+        handlerList.removeIf(handler -> {
+            if (listener == handler.getListener()) {
+                handler.remove();
+                return true;
+            }
+
+            return false;
+        });
+    }
+
     public synchronized void bake() {
         if (handlers != null) return;
         handlers = handlerList.toArray(new RegisteredEntityHandler[0]);
     }
 
     @NotNull
-    public RegisteredEntityHandler[] getRegisteredHandlers() {
+    private RegisteredEntityHandler[] getRegisteredHandlers() {
         RegisteredEntityHandler[] handlers;
         while ((handlers = this.handlers) == null) bake();
         return handlers;
     }
 
     public void callEvent(@NotNull final Event event, @NotNull final EventEntityProvider provider) {
-        for (RegisteredEntityHandler handler : handlerList) {
+        for (RegisteredEntityHandler handler : getRegisteredHandlers()) {
             if (provider == handler.getStatement().getProvider()) {
                 handler.callEvent(event);
             }

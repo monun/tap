@@ -1,4 +1,4 @@
-name: $pluginVersion
+name: $pluginName
 version: $pluginVersion
 main: $pluginMain
 author: Nemo

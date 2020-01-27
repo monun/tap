@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-package com.github.noonmaru.tap.effect.v1_15_R1
+package com.github.noonmaru.tap.v1_15_R1.effect
 
 import com.github.noonmaru.tap.effect.FireworkSupport
 import net.minecraft.server.v1_15_R1.*
@@ -56,7 +56,6 @@ class NMSFireworkSupport : FireworkSupport() {
             sendPacket(PacketPlayOutEntityStatus(fireworks, 17.toByte()))
             sendPacket(PacketPlayOutEntityDestroy(fireworks.id))
         }
-
     }
 
     override fun playFirework(world: BukkitWorld, loc: Location, effect: FireworkEffect, distance: Double) {

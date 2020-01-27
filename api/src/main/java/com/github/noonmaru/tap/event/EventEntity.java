@@ -16,6 +16,7 @@
 
 package com.github.noonmaru.tap.event;
 
+import org.bukkit.event.Listener;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -37,9 +38,27 @@ public final class EventEntity {
         }
     }
 
+    public void unregister(@NotNull final RegisteredEntityListener registeredListener) {
+        for (RegisteredEntityHandler handler : registeredListener.getHandlers()) {
+            handler.remove();
+            slots.get(handler.getStatement().getRegistrationClass()).unregister(handler);
+        }
+    }
+
+    public void unregister(@NotNull final ListenerStatement statement, @NotNull final Listener listener) {
+        for (HandlerStatement handlerStatement : statement.getHandlerStatements()) {
+            EntityHandlerList handlerList = slots.get(handlerStatement.getRegistrationClass());
+
+            if (handlerList != null) {
+                handlerList.unregister(listener);
+            }
+        }
+    }
+
     @Nullable
     public EntityHandlerList getHandlerList(@NotNull final Class<?> eventClass) {
         return slots.get(eventClass);
     }
+
 
 }

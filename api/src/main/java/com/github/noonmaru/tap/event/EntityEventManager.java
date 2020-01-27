@@ -16,6 +16,7 @@
 
 package com.github.noonmaru.tap.event;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.MapMaker;
 import org.bukkit.entity.Entity;
 import org.bukkit.event.Event;
@@ -58,19 +59,20 @@ public final class EntityEventManager {
     @NotNull
     public RegisteredEntityListener registerEvents(@NotNull final Entity entity, @NotNull final Listener listener) {
 
-        if (entity.isValid())
-            throw new IllegalArgumentException("Invalid entity: " + entity);
+        Preconditions.checkArgument(entity.isValid(), "Invalid entity: " + entity);
 
+        ListenerStatement listenerStatement = createRegisteredListenerStatement(listener.getClass());
         EventEntity eventEntity = entities.computeIfAbsent(entity, target -> new EventEntity());
-        RegisteredEntityListener registeredEntityListener = createRegisteredEntityListener(listener);
+
+        RegisteredEntityListener registeredEntityListener = new RegisteredEntityListener(eventEntity, listenerStatement, listener);
         eventEntity.register(registeredEntityListener);
 
         return registeredEntityListener;
     }
 
     @NotNull
-    private RegisteredEntityListener createRegisteredEntityListener(@NotNull final Listener listener) {
-        ListenerStatement listenerStatement = statements.computeIfAbsent(listener.getClass(), clazz -> {
+    private ListenerStatement createRegisteredListenerStatement(@NotNull final Class<?> listenerClass) {
+        return statements.computeIfAbsent(listenerClass, clazz -> {
             ListenerStatement statement = ListenerStatement.getOrCreate(clazz);
 
             for (HandlerStatement statementStatement : statement.getHandlerStatements()) {
@@ -79,8 +81,6 @@ public final class EntityEventManager {
 
             return statement;
         });
-
-        return new RegisteredEntityListener(listenerStatement, listener);
     }
 
     private void registerEvent(@NotNull final HandlerStatement statement) {
@@ -94,6 +94,18 @@ public final class EntityEventManager {
         });
 
         listener.addProvider(statement.getProvider());
+    }
+
+    public void unregisterEvent(@NotNull final Entity entity, @NotNull final Listener listener) {
+        EventEntity eventEntity = entities.get(entity);
+
+        if (eventEntity != null) {
+            ListenerStatement statement = statements.get(listener.getClass());
+
+            if (statement != null) {
+                eventEntity.unregister(statement, listener);
+            }
+        }
     }
 
     private class EventListener implements Listener {

@@ -26,11 +26,17 @@ import java.util.ArrayList;
  */
 public final class RegisteredEntityListener {
 
+    private final EventEntity eventEntity;
+
+    private final ListenerStatement statement;
+
     private final Listener listener;
 
     private final ImmutableList<RegisteredEntityHandler> handlers;
 
-    public RegisteredEntityListener(ListenerStatement statement, Listener listener) {
+    public RegisteredEntityListener(EventEntity eventEntity, ListenerStatement statement, Listener listener) {
+        this.eventEntity = eventEntity;
+        this.statement = statement;
         this.listener = listener;
 
         ImmutableList<HandlerStatement> handlerStatements = statement.getHandlerStatements();
@@ -49,5 +55,9 @@ public final class RegisteredEntityListener {
 
     public ImmutableList<RegisteredEntityHandler> getHandlers() {
         return handlers;
+    }
+
+    public void unregister() {
+        eventEntity.unregister(this);
     }
 }

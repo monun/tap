@@ -351,19 +351,19 @@ abstract class AbstractMap<K, V> implements Map<K, V> {
                 }
 
                 public int size() {
-                    return com.github.noonmaru.collections.mut.AbstractMap.this.size();
+                    return AbstractMap.this.size();
                 }
 
                 public boolean isEmpty() {
-                    return com.github.noonmaru.collections.mut.AbstractMap.this.isEmpty();
+                    return AbstractMap.this.isEmpty();
                 }
 
                 public void clear() {
-                    com.github.noonmaru.collections.mut.AbstractMap.this.clear();
+                    AbstractMap.this.clear();
                 }
 
                 public boolean contains(Object k) {
-                    return com.github.noonmaru.collections.mut.AbstractMap.this.containsKey(k);
+                    return AbstractMap.this.containsKey(k);
                 }
             };
             keySet = ks;
@@ -409,19 +409,19 @@ abstract class AbstractMap<K, V> implements Map<K, V> {
                 }
 
                 public int size() {
-                    return com.github.noonmaru.collections.mut.AbstractMap.this.size();
+                    return AbstractMap.this.size();
                 }
 
                 public boolean isEmpty() {
-                    return com.github.noonmaru.collections.mut.AbstractMap.this.isEmpty();
+                    return AbstractMap.this.isEmpty();
                 }
 
                 public void clear() {
-                    com.github.noonmaru.collections.mut.AbstractMap.this.clear();
+                    AbstractMap.this.clear();
                 }
 
                 public boolean contains(Object v) {
-                    return com.github.noonmaru.collections.mut.AbstractMap.this.containsValue(v);
+                    return AbstractMap.this.containsValue(v);
                 }
             };
             values = vals;
@@ -547,7 +547,7 @@ abstract class AbstractMap<K, V> implements Map<K, V> {
      * @return a shallow copy of this map
      */
     protected Object clone() throws CloneNotSupportedException {
-        com.github.noonmaru.collections.mut.AbstractMap<?, ?> result = (com.github.noonmaru.collections.mut.AbstractMap<?, ?>) super.clone();
+        AbstractMap<?, ?> result = (AbstractMap<?, ?>) super.clone();
         result.keySet = null;
         result.values = null;
         return result;
