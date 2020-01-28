@@ -54,6 +54,9 @@ abstract class FakeEntity internal constructor(private val entity: Entity) {
     val world: World
         get() = entity.world
 
+    val boundingBox
+        get() = entity.boundingBox
+
     private var prevUpdateLocation: Location = entity.location
 
     private val prevLocation: Location = prevUpdateLocation.clone()

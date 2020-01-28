@@ -37,6 +37,22 @@ class FakeArmorStand(private val armorStand: ArmorStand) : FakeLivingEntity(armo
             enqueue()
         }
 
+    var argms
+        get() = armorStand.hasArms()
+        set(value) {
+            armorStand.setArms(value)
+            updateMeta = true
+            enqueue()
+        }
+
+    var basePlate
+        get() = armorStand.hasBasePlate()
+        set(value) {
+            armorStand.setBasePlate(value)
+            updateMeta = true
+            enqueue()
+        }
+
     var headPose
         get() = armorStand.headPose
         set(value) {
