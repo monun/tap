@@ -7,15 +7,15 @@
 ![GitHub](https://img.shields.io/github/license/noonmaru/tap)
 ![Twitch Status](https://img.shields.io/twitch/status/hptgrm)
 
-> Minecraft Spigot NMS Library
+> Paper library written in Kotlin
 
 > * ##### Features
 >  * Java agent support (asm)
 >  * Packets
->  * Fast math
 >  * Mojang user profile
 >  * Entity specificEntity events listener
 >  * Sub commands Module
+>  * FakeEntity Module
 
 > * ##### Gradle
 >```groovy
@@ -28,7 +28,7 @@
 >
 >...
 >dependencies {
->    implementation 'com.github.noonmaru:tap:2.0'
+>    implementation 'com.github.noonmaru:tap:2.0-beta-1'
 >}
 >```
 >
@@ -49,15 +49,6 @@
 >```
 >```groovy
 >dependencies {
->    implementation 'com.github.noonmaru:tap-v1_15_R1:2.0'
+>    implementation 'com.github.noonmaru:tap-v1_15_R1:2.0-beta-1'
 >}
->```
-
-> * ##### Code sample
->```java
->//send a sound packet
->Player player = Bukkit.getPlayer("Heptagram");
->Location loc = player.getEyeLocation();
->Packet.EFFECT.namedSound(Sounds.ENTITY_ZOMBIE_BREAK_DOOR_WOOD, SoundCategory.MASTER, 
->    loc.getX(), loc.getY(), loc.getZ(), 0.75F, 2.0F).sendTo(Bukkit.getOnlinePlayers());
 >```
