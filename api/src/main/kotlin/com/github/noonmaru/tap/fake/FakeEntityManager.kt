@@ -17,7 +17,6 @@
 package com.github.noonmaru.tap.fake
 
 import org.bukkit.Location
-import org.bukkit.World
 import org.bukkit.entity.ArmorStand
 import org.bukkit.entity.Entity
 import org.bukkit.entity.LivingEntity
@@ -36,17 +35,12 @@ class FakeEntityManager : Runnable {
     private var trackerUpdatePerTick = 0.0
 
     fun <T : FakeEntity> createFakeEntity(
-        world: World,
-        x: Double,
-        y: Double,
-        z: Double,
-        yaw: Float,
-        pitch: Float,
+        loc: Location,
         entityClass: Class<out Entity>
     ): T {
         val entity =
             entityClass.createFakeEntity() ?: throw NullPointerException("Cannot create Entity for $entityClass")
-        entity.setPositionAndRotation(world, x, y, z, yaw, pitch)
+        entity.setPositionAndRotation(loc)
         val fake = entity.toFake()
         fake.manager = this
 
@@ -55,10 +49,6 @@ class FakeEntityManager : Runnable {
 
         @Suppress("UNCHECKED_CAST")
         return fake as T
-    }
-
-    fun <T : FakeEntity> createFakeEntity(loc: Location, entityClass: Class<out Entity>): T {
-        return createFakeEntity(loc.world, loc.x, loc.y, loc.z, loc.yaw, loc.pitch, entityClass)
     }
 
     internal fun enqueue(entity: FakeEntity) {
@@ -108,6 +98,16 @@ class FakeEntityManager : Runnable {
     private fun recalculateUpdatePerTick() {
         trackerCount = 0.0
         trackerUpdatePerTick = entities.count() / 32.0
+    }
+
+    fun destroyAll() {
+        entities.forEach {
+            it.remove()
+        }
+
+        entities.clear()
+        queue.clear()
+        trackerQueue.clear()
     }
 }
 

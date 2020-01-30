@@ -160,9 +160,7 @@ abstract class FakeEntity internal constructor(private val entity: Entity) {
         val deltaZ = from.z delta to.z
         val move = Vector(deltaX / 4096.0, deltaY / 4096.0, deltaZ / 4096.0)
 
-        to.run {
-            entity.setPositionAndRotation(world, x, y, z, yaw, pitch)
-        }
+        entity.setPositionAndRotation(to)
 
         if (from.world == to.world && (deltaX < -32768L || deltaX > 32767L || deltaY < -32768L || deltaY > 32767L || deltaZ < -32768L || deltaZ > 32767L)) { //Relative
             prevUpdateLocation.run {
@@ -178,7 +176,7 @@ abstract class FakeEntity internal constructor(private val entity: Entity) {
             val packet = if (from.yaw == yaw && from.pitch == pitch)
                 EntityPacket.relativeMove(entity.entityId, move, false)
             else
-                EntityPacket.relativeMoveAndLook(entity.entityId, move, yaw, pitch, false)
+                EntityPacket.lookAndRelativeMove(entity.entityId, move, yaw, pitch, false)
 
             trackers.sendServerPacketAll(packet)
 

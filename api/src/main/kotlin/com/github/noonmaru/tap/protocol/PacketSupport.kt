@@ -20,22 +20,27 @@ import com.comphenix.protocol.PacketType
 import com.comphenix.protocol.events.PacketContainer
 import com.comphenix.protocol.wrappers.EnumWrappers
 import com.comphenix.protocol.wrappers.WrappedDataWatcher
+import com.github.noonmaru.tap.fake.createFakeEntity
+import com.github.noonmaru.tap.fake.networkId
+import org.bukkit.FireworkEffect
 import org.bukkit.Location
-import org.bukkit.entity.ArmorStand
-import org.bukkit.entity.Entity
-import org.bukkit.entity.EntityType
-import org.bukkit.entity.LivingEntity
+import org.bukkit.entity.*
 import org.bukkit.inventory.EquipmentSlot
 import org.bukkit.inventory.ItemStack
 import org.bukkit.util.Vector
 import java.util.*
 
+
+val EntityPacket = EntityPacketSupport()
+
+val EffectPacket = EffectPacketSupport()
+
 class EntityPacketSupport {
 
-    fun mobSpawn(
+    fun spawnMob(
         entityId: Int,
         uuid: UUID,
-        type: EntityType,
+        typeId: Int,
         loc: Location,
         headPitch: Float,
         velocity: Vector
@@ -46,27 +51,29 @@ class EntityPacketSupport {
                 .write(0, entityId)
             uuiDs
                 .write(0, uuid)
-            entityTypeModifier
-                .write(1, type)
+            integers
+                .write(1, typeId)
             doubles
                 .write(0, loc.x)
                 .write(1, loc.y)
                 .write(2, loc.z)
-            float
-                .write(0, loc.yaw * 256.0F / 360.0F)
-                .write(0, loc.pitch * 256.0F / 360.0F)
-                .write(0, headPitch * 256.0F / 360.0F)
             integers
                 .write(2, (velocity.x.coerceIn(-3.9, 3.9) * 8000.0).toInt())
                 .write(3, (velocity.y.coerceIn(-3.9, 3.9) * 8000.0).toInt())
                 .write(4, (velocity.z.coerceIn(-3.9, 3.9) * 8000.0).toInt())
+            bytes
+                .write(0, (loc.yaw * 256.0F / 360.0F).toByte())
+                .write(0, (loc.pitch * 256.0F / 360.0F).toByte())
+                .write(0, (headPitch * 256.0F / 360.0F).toByte())
+
         }
     }
 
-    fun mobSpawn(living: LivingEntity): PacketContainer {
+    fun spawnMob(living: LivingEntity): PacketContainer {
         return living.run {
 
-            mobSpawn(entityId, uniqueId, living.type, location, location.yaw, living.velocity)
+            @Suppress("DEPRECATION")
+            spawnMob(entityId, uniqueId, living.networkId, location, location.yaw, living.velocity)
         }
     }
 
@@ -75,8 +82,8 @@ class EntityPacketSupport {
         return PacketContainer(PacketType.Play.Server.ENTITY_METADATA).apply {
             integers
                 .write(0, entityId)
-            dataWatcherModifier
-                .write(0, dataWatcher.deepClone())
+            watchableCollectionModifier
+                .write(0, dataWatcher.deepClone().watchableObjects)
         }
     }
 
@@ -93,7 +100,7 @@ class EntityPacketSupport {
             integers
                 .write(0, entityId)
             itemSlots
-                .write(0, EnumWrappers.getItemSlotConverter().getSpecific(slot))
+                .write(0, slot.convertToItemSlot())
             itemModifier
                 .write(0, item)
         }
@@ -187,7 +194,7 @@ class EntityPacketSupport {
         }
     }
 
-    fun relativeMoveAndLook(
+    fun lookAndRelativeMove(
         entityId: Int,
         move: Vector,
         yaw: Float, pitch: Float,
@@ -209,12 +216,12 @@ class EntityPacketSupport {
         }
     }
 
-    fun relativeMoveAndLook(entity: Entity) {
+    fun lookAndRelativeMove(entity: Entity) {
 
         return entity.run {
             val loc = entity.location
 
-            relativeMoveAndLook(entityId, velocity, loc.yaw, loc.pitch, isOnGround)
+            lookAndRelativeMove(entityId, velocity, loc.yaw, loc.pitch, isOnGround)
         }
     }
 
@@ -232,4 +239,48 @@ class EntityPacketSupport {
     }
 }
 
-val EntityPacket = EntityPacketSupport()
+private fun EquipmentSlot.convertToItemSlot(): EnumWrappers.ItemSlot {
+    return when (this) {
+        EquipmentSlot.HAND -> EnumWrappers.ItemSlot.MAINHAND
+        EquipmentSlot.OFF_HAND -> EnumWrappers.ItemSlot.OFFHAND
+        EquipmentSlot.FEET -> EnumWrappers.ItemSlot.FEET
+        EquipmentSlot.LEGS -> EnumWrappers.ItemSlot.LEGS
+        EquipmentSlot.CHEST -> EnumWrappers.ItemSlot.CHEST
+        EquipmentSlot.HEAD -> EnumWrappers.ItemSlot.HEAD
+    }
+
+}
+
+class EffectPacketSupport {
+
+    fun firework(loc: Location, effect: FireworkEffect): List<PacketContainer> {
+        return Firework::class.java.createFakeEntity()!!.run {
+            fireworkMeta = fireworkMeta.apply { addEffect(effect) }
+
+            listOf(
+                PacketContainer(PacketType.Play.Server.SPAWN_ENTITY).apply {
+                    integers
+                        .write(0, entityId)
+                    uuiDs
+                        .write(0, uniqueId)
+                    doubles
+                        .write(0, loc.x)
+                        .write(1, loc.y)
+                        .write(2, loc.z)
+                    entityTypeModifier
+                        .write(0, EntityType.FIREWORK)
+                    integers
+                        .write(6, 76)
+                },
+                EntityPacket.metadata(this),
+                PacketContainer(PacketType.Play.Server.ENTITY_STATUS).apply {
+                    integers
+                        .write(0, entityId)
+                    bytes
+                        .write(0, 17.toByte())
+                },
+                EntityPacket.destroy(intArrayOf(entityId))
+            )
+        }
+    }
+}

@@ -23,7 +23,7 @@ import org.bukkit.entity.Player
 
 open class FakeLivingEntity(private val livingEntity: LivingEntity) : FakeEntity(livingEntity) {
     override fun spawnTo(player: Player) {
-        val spawnPacket = EntityPacket.mobSpawn(livingEntity)
+        val spawnPacket = EntityPacket.spawnMob(livingEntity)
         val metaPacket = EntityPacket.metadata(livingEntity)
 
         player.sendServerPacket(spawnPacket)

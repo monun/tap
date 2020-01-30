@@ -17,8 +17,9 @@
 package com.github.noonmaru.tap.v1_15_R1.fake
 
 import com.github.noonmaru.tap.fake.FakeSupport
+import net.minecraft.server.v1_15_R1.IRegistry
 import org.bukkit.Bukkit
-import org.bukkit.World
+import org.bukkit.Location
 import org.bukkit.craftbukkit.v1_15_R1.CraftServer
 import org.bukkit.craftbukkit.v1_15_R1.CraftWorld
 import org.bukkit.craftbukkit.v1_15_R1.entity.CraftEntity
@@ -28,6 +29,13 @@ import org.bukkit.entity.Entity
  * @author Nemo
  */
 class NMSFakeSupport : FakeSupport {
+
+    override fun getNetworkId(entity: Entity): Int {
+        entity as CraftEntity
+
+        return IRegistry.ENTITY_TYPE.a(entity.handle.entityType)
+    }
+
     @Suppress("UNCHECKED_CAST")
     override fun <T : Entity> createEntity(entityClass: Class<out Entity>): T? {
         return NMSEntityTypes.findType(entityClass)?.run {
@@ -50,19 +58,26 @@ class NMSFakeSupport : FakeSupport {
         nmsEntity.isInvisible = invisible
     }
 
+    override fun setPosition(entity: Entity, loc: Location) {
+        entity as CraftEntity
+        val nmsEntity = entity.handle
+
+        loc.run {
+            nmsEntity.world = (world as CraftWorld).handle
+            nmsEntity.setPosition(x, y, z)
+        }
+    }
+
     override fun setPositionAndRotation(
         entity: Entity,
-        world: World,
-        x: Double,
-        y: Double,
-        z: Double,
-        yaw: Float,
-        pitch: Float
+        loc: Location
     ) {
         entity as CraftEntity
         val nmsEntity = entity.handle
 
-        nmsEntity.world = (world as CraftWorld).handle
-        nmsEntity.setPositionRotation(x, y, z, yaw, pitch)
+        loc.run {
+            nmsEntity.world = (world as CraftWorld).handle
+            nmsEntity.setPositionRotation(x, y, z, yaw, pitch)
+        }
     }
 }

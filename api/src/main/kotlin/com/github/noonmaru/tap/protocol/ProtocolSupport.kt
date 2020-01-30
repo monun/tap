@@ -27,7 +27,7 @@ fun Player.sendServerPacket(packet: PacketContainer) {
     protocolManager.sendServerPacket(this, packet)
 }
 
-fun Iterable<out Player>.sendServerPacketAll(packet: PacketContainer) {
+fun Iterable<Player>.sendServerPacketAll(packet: PacketContainer) {
     protocolManager.let { pm ->
         for (player in this) {
             pm.sendServerPacket(player, packet)

@@ -17,7 +17,7 @@
 package com.github.noonmaru.tap.fake
 
 import com.github.noonmaru.tap.loader.LibraryLoader
-import org.bukkit.World
+import org.bukkit.Location
 import org.bukkit.entity.Entity
 
 /**
@@ -25,27 +25,38 @@ import org.bukkit.entity.Entity
  */
 interface FakeSupport {
 
+    fun getNetworkId(entity: Entity): Int
+
     fun <T : Entity> createEntity(entityClass: Class<out Entity>): T?
 
-    fun setPositionAndRotation(entity: Entity, world: World, x: Double, y: Double, z: Double, yaw: Float, pitch: Float)
+    fun setPosition(entity: Entity, loc: Location)
+
+    fun setPositionAndRotation(entity: Entity, loc: Location)
 
     fun setInvisible(entity: Entity, invisible: Boolean)
 
     fun isInvisible(entity: Entity): Boolean
 }
 
-internal val NMS = LibraryLoader.load(FakeSupport::class.java)
+internal val FakeSupportNMS = LibraryLoader.load(FakeSupport::class.java)
 
-fun <T : Entity> Class<T>.createFakeEntity(): T? {
-    return NMS.createEntity(this)
-}
+val Entity.networkId
+    get() = FakeSupportNMS.getNetworkId(this)
 
 var Entity.invisible
-    get() = NMS.isInvisible(this)
+    get() = FakeSupportNMS.isInvisible(this)
     set(value) {
-        NMS.setInvisible(this, value)
+        FakeSupportNMS.setInvisible(this, value)
     }
 
-fun Entity.setPositionAndRotation(world: World, x: Double, y: Double, z: Double, yaw: Float, pitch: Float) {
-    NMS.setPositionAndRotation(this, world, x, y, z, yaw, pitch)
+fun <T : Entity> Class<T>.createFakeEntity(): T? {
+    return FakeSupportNMS.createEntity(this)
+}
+
+fun Entity.setPosition(loc: Location) {
+    FakeSupportNMS.setPosition(this, loc)
+}
+
+fun Entity.setPositionAndRotation(loc: Location) {
+    FakeSupportNMS.setPositionAndRotation(this, loc)
 }
