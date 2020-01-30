@@ -16,9 +16,9 @@
 
 package com.github.noonmaru.tap.fake
 
-import com.github.noonmaru.tap.packet.EntityPacket
-import com.github.noonmaru.tap.packet.sendPacket
-import com.github.noonmaru.tap.packet.sendPacketAll
+import com.github.noonmaru.tap.protocol.EntityPacket
+import com.github.noonmaru.tap.protocol.sendPacket
+import com.github.noonmaru.tap.protocol.sendPacketAll
 import org.bukkit.Location
 import org.bukkit.World
 import org.bukkit.entity.Entity
