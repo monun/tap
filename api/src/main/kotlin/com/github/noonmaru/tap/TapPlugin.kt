@@ -16,13 +16,7 @@
 
 package com.github.noonmaru.tap
 
-import com.comphenix.protocol.PacketType
-import com.comphenix.protocol.ProtocolLibrary
-import com.comphenix.protocol.events.PacketContainer
 import com.github.noonmaru.tap.attach.Tools
-import org.bukkit.event.EventHandler
-import org.bukkit.event.Listener
-import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.plugin.java.JavaPlugin
 
 /**
@@ -32,25 +26,5 @@ class TapPlugin : JavaPlugin() {
 
     override fun onEnable() {
         Tools.loadAttachLibrary(dataFolder)
-
-        server.pluginManager.registerEvents(object : Listener {
-            @EventHandler
-            fun onPlayerInteract(event: PlayerInteractEvent) {
-                val player = event.player
-                val loc = player.location
-                PacketContainer(PacketType.Play.Server.EXPLOSION).apply {
-                    doubles
-                        .write(0, loc.x)
-                        .write(1, loc.y)
-                        .write(2, loc.z)
-                    float
-                        .write(0, 3.0F)
-                    blockPositionCollectionModifier
-                        .write(0, emptyList())
-
-                    ProtocolLibrary.getProtocolManager().sendserverpacket
-                }
-            }
-        }, this)
     }
 }

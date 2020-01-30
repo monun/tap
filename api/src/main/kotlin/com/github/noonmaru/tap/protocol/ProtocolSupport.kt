@@ -14,20 +14,23 @@
  *  limitations under the License.
  */
 
-package com.github.noonmaru.tap.fake
+package com.github.noonmaru.tap.protocol
 
-import com.github.noonmaru.tap.protocol.EntityPacket
-import com.github.noonmaru.tap.protocol.sendServerPacket
-import org.bukkit.entity.LivingEntity
+import com.comphenix.protocol.ProtocolLibrary
+import com.comphenix.protocol.events.PacketContainer
 import org.bukkit.entity.Player
 
-open class FakeLivingEntity(private val livingEntity: LivingEntity) : FakeEntity(livingEntity) {
-    override fun spawnTo(player: Player) {
-        val spawnPacket = EntityPacket.mobSpawn(livingEntity)
-        val metaPacket = EntityPacket.metadata(livingEntity)
+private val protocolManager
+    get() = ProtocolLibrary.getProtocolManager()
 
-        player.sendServerPacket(spawnPacket)
-        player.sendServerPacket(metaPacket)
+fun Player.sendServerPacket(packet: PacketContainer) {
+    protocolManager.sendServerPacket(this, packet)
+}
 
+fun Iterable<out Player>.sendServerPacketAll(packet: PacketContainer) {
+    protocolManager.let { pm ->
+        for (player in this) {
+            pm.sendServerPacket(player, packet)
+        }
     }
 }

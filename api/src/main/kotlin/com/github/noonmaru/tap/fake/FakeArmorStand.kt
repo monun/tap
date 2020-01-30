@@ -17,8 +17,8 @@
 package com.github.noonmaru.tap.fake
 
 import com.github.noonmaru.tap.protocol.EntityPacket
-import com.github.noonmaru.tap.protocol.sendPacket
-import com.github.noonmaru.tap.protocol.sendPacketAll
+import com.github.noonmaru.tap.protocol.sendServerPacket
+import com.github.noonmaru.tap.protocol.sendServerPacketAll
 import org.bukkit.entity.ArmorStand
 import org.bukkit.entity.Player
 import org.bukkit.inventory.EquipmentSlot
@@ -106,14 +106,8 @@ class FakeArmorStand(private val armorStand: ArmorStand) : FakeLivingEntity(armo
     override fun spawnTo(player: Player) {
         super.spawnTo(player)
 
-        EquipmentSlot.values().forEach { slot ->
-            val item = armorStand.getItem(slot)
-
-            if (item.amount > 0) {
-                val packet = EntityPacket.equipment(armorStand.entityId, slot, item)
-
-                player.sendPacket(packet)
-            }
+        EntityPacket.equipment(armorStand).forEach { packet ->
+            player.sendServerPacket(packet)
         }
     }
 
@@ -135,7 +129,7 @@ class FakeArmorStand(private val armorStand: ArmorStand) : FakeLivingEntity(armo
                 if (item.amount > 0) {
                     val packet = EntityPacket.equipment(armorStand.entityId, slot, item)
 
-                    trackers.sendPacketAll(packet)
+                    trackers.sendServerPacketAll(packet)
                 }
             }
         }

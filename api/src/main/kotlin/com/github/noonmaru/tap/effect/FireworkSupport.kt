@@ -16,24 +16,15 @@
 
 package com.github.noonmaru.tap.effect
 
-import com.github.noonmaru.tap.loader.LibraryLoader
 import org.bukkit.FireworkEffect
 import org.bukkit.Location
 import org.bukkit.World
 import org.bukkit.entity.Player
 
-abstract class FireworkSupport {
-    abstract fun playFirework(player: Player, loc: Location, effect: FireworkEffect)
-
-    abstract fun playFirework(world: World, loc: Location, effect: FireworkEffect, distance: Double)
-}
-
-private val SUPPORT: FireworkSupport = LibraryLoader.load(FireworkSupport::class.java)
-
 fun Player.playFirework(loc: Location, effect: FireworkEffect) {
-    SUPPORT.playFirework(this, loc, effect)
+
 }
 
 fun World.playFirework(loc: Location, effect: FireworkEffect, distance: Double = 128.0) {
-    SUPPORT.playFirework(this, loc, effect, distance)
+
 }

@@ -16,9 +16,10 @@
 
 package com.github.noonmaru.tap.fake
 
+import com.comphenix.protocol.wrappers.WrappedDataWatcher
 import com.github.noonmaru.tap.protocol.EntityPacket
-import com.github.noonmaru.tap.protocol.sendPacket
-import com.github.noonmaru.tap.protocol.sendPacketAll
+import com.github.noonmaru.tap.protocol.sendServerPacket
+import com.github.noonmaru.tap.protocol.sendServerPacketAll
 import org.bukkit.Location
 import org.bukkit.World
 import org.bukkit.entity.Entity
@@ -157,6 +158,7 @@ abstract class FakeEntity internal constructor(private val entity: Entity) {
         val deltaX = from.x delta to.x
         val deltaY = from.y delta to.y
         val deltaZ = from.z delta to.z
+        val move = Vector(deltaX / 4096.0, deltaY / 4096.0, deltaZ / 4096.0)
 
         to.run {
             entity.setPositionAndRotation(world, x, y, z, yaw, pitch)
@@ -165,9 +167,7 @@ abstract class FakeEntity internal constructor(private val entity: Entity) {
         if (from.world == to.world && (deltaX < -32768L || deltaX > 32767L || deltaY < -32768L || deltaY > 32767L || deltaZ < -32768L || deltaZ > 32767L)) { //Relative
             prevUpdateLocation.run {
                 world = to.world
-                x += deltaX / 4096.0
-                y += deltaY / 4096.0
-                z += deltaZ / 4096.0
+                add(move)
                 yaw = to.yaw
                 pitch = to.pitch
             }
@@ -176,17 +176,11 @@ abstract class FakeEntity internal constructor(private val entity: Entity) {
             val pitch = to.pitch
 
             val packet = if (from.yaw == yaw && from.pitch == pitch)
-                EntityPacket.relativeMove(entity.entityId, deltaX.toShort(), deltaY.toShort(), deltaZ.toShort(), false)
+                EntityPacket.relativeMove(entity.entityId, move, false)
             else
-                EntityPacket.relativeMoveAndLook(
-                    entity.entityId,
-                    deltaX.toShort(),
-                    deltaY.toShort(),
-                    deltaZ.toShort(),
-                    yaw,
-                    pitch, false
-                )
-            trackers.sendPacketAll(packet)
+                EntityPacket.relativeMoveAndLook(entity.entityId, move, yaw, pitch, false)
+
+            trackers.sendServerPacketAll(packet)
 
         } else {
             prevUpdateLocation.run {
@@ -198,9 +192,9 @@ abstract class FakeEntity internal constructor(private val entity: Entity) {
                 pitch = to.pitch
             }
 
-            val packet = EntityPacket.teleport(entity)
+            val packet = to.run { EntityPacket.teleport(entity) }
 
-            trackers.sendPacketAll(packet)
+            trackers.sendServerPacketAll(packet)
         }
 
         prevLocation.apply {
@@ -232,7 +226,7 @@ abstract class FakeEntity internal constructor(private val entity: Entity) {
         trackers.removeIf { player ->
             if (!player.isValid || prevLocation.world != player.world || !box.overlaps(player.boundingBox)) {
                 val packet = EntityPacket.destroy(intArrayOf(entity.entityId))
-                player.sendPacket(packet)
+                player.sendServerPacket(packet)
                 true
             } else
                 false
@@ -247,8 +241,8 @@ abstract class FakeEntity internal constructor(private val entity: Entity) {
     }
 
     private fun updateMeta() {
-        val packet = EntityPacket.metadata(entity)
-        trackers.sendPacketAll(packet)
+        val packet = EntityPacket.metadata(entity.entityId, WrappedDataWatcher.getEntityWatcher(entity))
+        trackers.sendServerPacketAll(packet)
     }
 
     abstract fun spawnTo(player: Player)
@@ -260,7 +254,7 @@ abstract class FakeEntity internal constructor(private val entity: Entity) {
     fun hideTo(player: Player) {
         if (ignores.add(player) && trackers.remove(player)) {
             val packet = EntityPacket.destroy(intArrayOf(entity.entityId))
-            player.sendPacket(packet)
+            player.sendServerPacket(packet)
         }
     }
 
@@ -271,7 +265,7 @@ abstract class FakeEntity internal constructor(private val entity: Entity) {
     fun remove() {
         valid = false
         val packet = EntityPacket.destroy(intArrayOf(entity.entityId))
-        trackers.sendPacketAll(packet)
+        trackers.sendServerPacketAll(packet)
     }
 }
 
