@@ -38,7 +38,7 @@
 >* First, Follow the tutorial -> https://www.spigotmc.org/wiki/spigot-gradle/
 >* Clone this git repository
 >* Use the following Gradle command -> `gradlew publishTapPublicationToMavenLocal -PwithNMS`
->* Add the following code to build.gradle
+>* Write the code below in build.gradle
 >```groovy
 >allprojects {
 >    repositories {
