@@ -131,5 +131,6 @@ dependencies {
 
 task distJar(type: Copy) {
     from shadowJar
-    into 'W:\\Servers\\1.15.2-sample\\plugins'
+    into 'W:\\Servers\\capigtalism\\plugins'
+    into 'W:\\Servers\\heroes\\plugins'
 }

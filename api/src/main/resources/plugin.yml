@@ -1,7 +1,7 @@
 name: $pluginName
 version: $pluginVersion
 main: $pluginMain
-depend: [ProtocolLib]
+depend: [Kotlin, ProtocolLib]
 author: Noonmaru
 api-version: '1.13'
 commands:
