@@ -121,11 +121,18 @@ fun Any.applyConfig(config: ConfigurationSection): Boolean {
                 if (adapter != null) {
                     value = adapter.invoke(field, value)
                 }
+            } else if (type.isEnum) {
+                value = EnumSupport.valueOf(type, value.toString())
             }
 
             field.set(this, value)
         } else {
             value = field.get(this)
+
+            if (value.javaClass.isEnum) {
+                value = EnumSupport.name(value)
+            }
+
             config.set(name, value)
             absent = true
         }
