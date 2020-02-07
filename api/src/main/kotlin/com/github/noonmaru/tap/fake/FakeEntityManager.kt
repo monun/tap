@@ -20,6 +20,7 @@ import org.bukkit.Location
 import org.bukkit.entity.ArmorStand
 import org.bukkit.entity.Entity
 import org.bukkit.entity.LivingEntity
+import org.bukkit.entity.Player
 import java.util.*
 
 class FakeEntityManager : Runnable {
@@ -34,12 +35,17 @@ class FakeEntityManager : Runnable {
 
     private var trackerUpdatePerTick = 0.0
 
+    private val _players = Collections.newSetFromMap(WeakHashMap<Player, Boolean>())
+
+    val players: Set<Player>
+        get() = _players
+
     fun <T : FakeEntity> createFakeEntity(
         loc: Location,
         entityClass: Class<out Entity>
     ): T {
         val entity =
-            entityClass.createFakeEntity() ?: throw NullPointerException("Cannot create Entity for $entityClass")
+            entityClass.createFakeEntity() ?: throw NullPointerException("Cannot create FakeEntity for $entityClass")
         entity.setPositionAndRotation(loc)
         val fake = entity.toFake()
         fake.manager = this
@@ -49,6 +55,16 @@ class FakeEntityManager : Runnable {
 
         @Suppress("UNCHECKED_CAST")
         return fake as T
+    }
+
+    fun addPlayer(player: Player) {
+        _players.add(player)
+    }
+
+    fun unregisterPlayer(player: Player) {
+        _players.remove(player)
+
+        entities.forEach { it.removeTracker(player) }
     }
 
     internal fun enqueue(entity: FakeEntity) {
