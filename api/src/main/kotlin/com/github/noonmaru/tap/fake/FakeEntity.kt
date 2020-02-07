@@ -209,26 +209,33 @@ abstract class FakeEntity internal constructor(private val entity: Entity) {
         val box = trackingRange.let { r -> BoundingBox.of(prevLocation, r, r, r) }
         removeOutOfRangeTrackers(box.expand(16.0))
 
-        val players = prevLocation.world.getNearbyEntities(box) { entity -> entity is Player && entity.isValid }
+        val players = getNearbyPlayers(box)
 
         for (player in players) {
-            player as Player
-
             if (player !in ignores && trackers.add(player)) {
                 spawnTo(player)
             }
         }
     }
 
+    private fun getNearbyPlayers(box: BoundingBox): List<Player> {
+        return manager.players.filter { player -> player.isValid && player.world == world && box.overlaps(player.boundingBox) }
+    }
+
     private fun removeOutOfRangeTrackers(box: BoundingBox) {
         trackers.removeIf { player ->
-            if (!player.isValid || prevLocation.world != player.world || !box.overlaps(player.boundingBox)) {
-                val packet = EntityPacket.destroy(intArrayOf(entity.entityId))
-                player.sendServerPacket(packet)
+            if (!player.isValid || world != player.world || !box.overlaps(player.boundingBox)) {
+                destroyTo(player)
                 true
             } else
                 false
         }
+    }
+
+    fun removeTracker(player: Player) {
+        trackers.remove(player)
+
+
     }
 
     @Suppress("UNCHECKED_CAST")
@@ -251,13 +258,18 @@ abstract class FakeEntity internal constructor(private val entity: Entity) {
 
     fun hideTo(player: Player) {
         if (ignores.add(player) && trackers.remove(player)) {
-            val packet = EntityPacket.destroy(intArrayOf(entity.entityId))
-            player.sendServerPacket(packet)
+            destroyTo(player)
         }
     }
 
     fun canSeeTo(player: Player): Boolean {
         return player in ignores
+    }
+
+    private fun destroyTo(player: Player) {
+        val packet = EntityPacket.destroy(intArrayOf(entity.entityId))
+
+        player.sendServerPacket(packet)
     }
 
     fun remove() {
