@@ -24,7 +24,7 @@ import java.lang.reflect.Field
 
 @Target(AnnotationTarget.FIELD)
 @Retention(AnnotationRetention.RUNTIME)
-annotation class Config(val value: String = "")
+annotation class Config(val value: String = "", val required: Boolean = true)
 
 @Target(AnnotationTarget.FIELD)
 @Retention(AnnotationRetention.RUNTIME)
@@ -97,6 +97,9 @@ private object PrimitiveSupport {
  * 설정을 인스턴스의 [Config] 속성에 적용합니다.
  * 결손된 값이 있다면 [ConfigurationSection]에 저장하고 **true**를 반환합니다.
  *
+ * @param config 적용할 설정
+ * @param separateByClass 클래스별 섹션 분리 여부
+ *
  * @return 결손된 값이 있을 경우 **true**, 모든 값이 로딩됐을 경우 **false**
  *
  * @see Config
@@ -105,47 +108,84 @@ private object PrimitiveSupport {
  * @see RangeFloat
  * @see RangeDouble
  */
-fun Any.applyConfig(config: ConfigurationSection): Boolean {
+fun Any.applyConfig(config: ConfigurationSection, separateByClass: Boolean = false): Boolean {
     var absent = false
     val configurables = javaClass.getConfigurables()
 
-    for ((name, field) in configurables) {
-        var value = config.get(name)
+    for ((clazz, list) in configurables) {
+        val sectionPath = if (separateByClass) clazz.simpleName.toConfigKey() else ""
+        var section = if (sectionPath.isNotBlank()) config.getConfigurationSection(sectionPath) else config
 
-        if (value != null) {
-            val type = field.type
+        for ((field, settings) in list) {
+            val key = settings.value.let { if (it.isNotBlank()) it else field.name.toConfigKey() }
+            var value = section?.get(key)
 
-            if (type.isPrimitive) {
-                val adapter = PrimitiveSupport.findAdapter(type)
+            println("$key $value $section")
+            println("------------")
 
-                if (adapter != null) {
-                    value = adapter.invoke(field, value)
+            if (value != null) {
+                val type = field.type
+                if (type.isPrimitive) {
+                    value = PrimitiveSupport.findAdapter(type)?.invoke(field, value)
+                } else if (type.isEnum) {
+                    try {
+                        value = EnumSupport.valueOf(type, value.toString())
+                    } catch (e: IllegalArgumentException) {
+                        println("Not found Enum $type for $value")
+                        e.printStackTrace()
+                    }
                 }
-            } else if (type.isEnum) {
-                value = EnumSupport.valueOf(type, value.toString())
+
+                value?.let {
+                    try {
+                        field.set(this, it)
+                    } catch (e: Exception) {
+                        println("Type mismatch! ${type.name} != ${it.javaClass.name}")
+                        e.printStackTrace()
+                    }
+                }
+                continue
             }
 
-            field.set(this, value)
-        } else {
             value = field.get(this)
+
+            if (!settings.required && (value == null || (value is Number && value.isZero()))) { //필요하지 않을경우 스킵
+                continue
+            }
 
             if (value.javaClass.isEnum) {
                 value = EnumSupport.name(value)
             }
 
-            config.set(name, value)
             absent = true
+
+            if (section == null) section = config.createSection(sectionPath)
+
+            section.set(key, value)
         }
     }
 
     return absent
 }
 
+private fun Number.isZero(): Boolean {
+    return when (this) {
+        is Int -> toInt() == 0
+        is Long -> toLong() == 0L
+        is Float -> toFloat() == 0.0F
+        else -> toDouble() == 0.0
+    }
+}
+
 /**
  * 파일로부터 불러온 설정을 인스턴스의 [Config] 속성에 적용합니다.
  * 결손된 값이 있다면 [ConfigurationSection]에 저장하고 **true**를 반환합니다.
  *
- * @return 결손된 값이 있을 경우 **true**, 모든 값이 로딩됐을 경우 **false**
+
+ * @param configFile 적용할 설정파일
+ * @param separateByClass 클래스별 섹션 분리 여부
+ *
+ * @return 결손된 값이 있을 경우 (파일이 수정됨) **true**, 모든 값이 로딩됐을 경우 **false**
  *
  * @see Config
  * @see RangeInt
@@ -153,7 +193,7 @@ fun Any.applyConfig(config: ConfigurationSection): Boolean {
  * @see RangeFloat
  * @see RangeDouble
  */
-fun Any.applyConfig(configFile: File): Boolean {
+fun Any.applyConfig(configFile: File, separateByClass: Boolean = false): Boolean {
     if (!configFile.exists()) {
         val config = YamlConfiguration()
         applyConfig(config)
@@ -164,7 +204,7 @@ fun Any.applyConfig(configFile: File): Boolean {
 
     val config = YamlConfiguration.loadConfiguration(configFile)
 
-    if (applyConfig(config)) {
+    if (applyConfig(config, separateByClass)) {
         config.save(configFile)
 
         return true
@@ -173,26 +213,23 @@ fun Any.applyConfig(configFile: File): Boolean {
     return false
 }
 
-private fun Class<*>.getConfigurables(): List<Pair<String, Field>> {
+private fun Class<*>.getConfigurables(): Map<Class<*>, List<Pair<Field, Config>>> {
 
     val superClasses = getSuperClasses(Any::class.java).reversed()
-    val list = ArrayList<Pair<String, Field>>()
+    val list: MutableMap<Class<*>, List<Pair<Field, Config>>> = LinkedHashMap()
 
     for (clazz in superClasses) {
+        val configFields = ArrayList<Pair<Field, Config>>()
 
         for (field in clazz.declaredFields) {
-            field.getAnnotation(Config::class.java)?.let {
+            field.getAnnotation(Config::class.java)?.let { config ->
                 field.isAccessible = true
 
-                var key = it.value
-
-                if (key.isBlank()) {
-                    key = field.name.toConfigKey()
-                }
-
-                list += Pair(key, field)
+                configFields += Pair(field, config)
             }
         }
+
+        list += Pair(clazz, configFields)
     }
 
     return list
