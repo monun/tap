@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Noonmaru
+ * Copyright (c) 2020 Noonmaru
  *
  * Licensed under the General Public License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -445,7 +445,7 @@ abstract class AbstractMap<K, V> implements Map<K, V> {
      *
      * @param o object to be compared for equality with this map
      * @return {@code true} if the specified object is equal to this map
-     * @implSpec This implementation first checks if the specified object is this map;
+     * @implSpec This implementation first checks if the specified object is this map
      * if so it returns {@code true}.  Then, it checks if the specified
      * object is a map whose size is identical to the size of this map; if
      * not, it returns {@code false}.  If so, it iterates over this map's
