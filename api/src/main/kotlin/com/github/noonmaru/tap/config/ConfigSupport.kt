@@ -95,7 +95,7 @@ private object PrimitiveSupport {
 
 /**
  * 설정을 인스턴스의 [Config] 속성에 적용합니다.
- * 결손된 값이 있다면 [ConfigurationSection]에 저장하고 **true**를 반환합니다.
+ * 결손된 값이 있다면 설정에 저장하고 **true**를 반환합니다.
  *
  * @param config 적용할 설정
  * @param separateByClass 클래스별 섹션 분리 여부
@@ -179,7 +179,7 @@ private fun Number.isZero(): Boolean {
 
 /**
  * 파일로부터 불러온 설정을 인스턴스의 [Config] 속성에 적용합니다.
- * 결손된 값이 있다면 [ConfigurationSection]에 저장하고 **true**를 반환합니다.
+ * 결손된 값이 있다면 설정에 저장하고 **true**를 반환합니다.
  *
 
  * @param configFile 적용할 설정파일
