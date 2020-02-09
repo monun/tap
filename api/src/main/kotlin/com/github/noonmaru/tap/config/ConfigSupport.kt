@@ -120,9 +120,6 @@ fun Any.applyConfig(config: ConfigurationSection, separateByClass: Boolean = fal
             val key = settings.value.let { if (it.isNotBlank()) it else field.name.toConfigKey() }
             var value = section?.get(key)
 
-            println("$key $value $section")
-            println("------------")
-
             if (value != null) {
                 val type = field.type
                 if (type.isPrimitive) {
