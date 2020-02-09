@@ -59,9 +59,9 @@ subprojects {
             compile api
     }
 
-    dokka {
-        outputFormat = 'html'
-    }
+//    dokka {
+//        outputFormat = 'html'
+//    }
 
     task sourcesJar(type: Jar) {
         archiveClassifier.set 'sources'
