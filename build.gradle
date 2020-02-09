@@ -59,21 +59,8 @@ subprojects {
             compile api
     }
 
-    Project api = project(':api')
-
-    if (project != api) {
-        project.tasks.forEach {
-            if (it.getName() != 'clean') {
-                it.onlyIf {
-                    gradle.taskGraph.hasTask(':shadowJar') || parent.hasProperty('withNMS')
-                }
-            }
-        }
-    }
-
     dokka {
         outputFormat = 'html'
-        outputDirectory = "$buildDir/dokka"
     }
 
     task sourcesJar(type: Jar) {
@@ -103,6 +90,18 @@ subprojects {
                             url = 'http://www.opensource.org/licenses/gpl-2.0.php'
                         }
                     }
+                }
+            }
+        }
+    }
+
+    Project api = project(':api')
+
+    if (project != api) {
+        project.tasks.forEach {
+            if (it.getName() != 'clean') {
+                it.onlyIf {
+                    gradle.taskGraph.hasTask(':shadowJar') || parent.hasProperty('withNMS')
                 }
             }
         }
