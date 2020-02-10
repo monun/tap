@@ -32,7 +32,7 @@ annotation class RangeInt(val min: Int = Int.MIN_VALUE, val max: Int = Int.MAX_V
 
 @Target(AnnotationTarget.FIELD)
 @Retention(AnnotationRetention.RUNTIME)
-annotation class RangeLong(val min: Long = Long.MIN_VALUE, val max: Long = Long.MAX_VALUE)
+annotation class RangeLong(val min: Long = java.lang.Long.MIN_VALUE, val max: Long = java.lang.Long.MAX_VALUE)
 
 @Target(AnnotationTarget.FIELD)
 @Retention(AnnotationRetention.RUNTIME)
@@ -41,6 +41,10 @@ annotation class RangeFloat(val min: Float = java.lang.Float.MAX_VALUE, val max:
 @Target(AnnotationTarget.FIELD)
 @Retention(AnnotationRetention.RUNTIME)
 annotation class RangeDouble(val min: Double = java.lang.Double.MAX_VALUE, val max: Double = java.lang.Double.MIN_VALUE)
+
+@Target(AnnotationTarget.CLASS)
+@Retention(AnnotationRetention.RUNTIME)
+annotation class Name(val value: String)
 
 private object PrimitiveSupport {
 
@@ -113,7 +117,7 @@ fun Any.applyConfig(config: ConfigurationSection, separateByClass: Boolean = fal
     val configurables = javaClass.getConfigurables()
 
     for ((clazz, list) in configurables) {
-        val sectionPath = if (separateByClass) clazz.simpleName.toConfigKey() else ""
+        val sectionPath = if (separateByClass) clazz.configKey else ""
         var section = if (sectionPath.isNotBlank()) config.getConfigurationSection(sectionPath) else config
 
         for ((field, settings) in list) {
@@ -164,6 +168,13 @@ fun Any.applyConfig(config: ConfigurationSection, separateByClass: Boolean = fal
 
     return absent
 }
+
+private val Class<*>.configKey: String
+    get() {
+        val name = getAnnotation(Name::class.java)
+
+        return name?.value ?: simpleName.toConfigKey()
+    }
 
 private fun Number.isZero(): Boolean {
     return when (this) {
