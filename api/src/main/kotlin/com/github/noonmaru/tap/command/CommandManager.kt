@@ -65,6 +65,8 @@ class CommandManager : TabExecutor {
             args: ArgumentList
         ): Boolean {
 
+            println("CALL")
+
             val next = if (args.hasNext()) args.next() else null
 
             try {
@@ -92,7 +94,7 @@ class CommandManager : TabExecutor {
     private fun CommandSender.getExecutablesByPermission(sender: CommandSender): List<CommandContainer> {
         return commandMap.values.filter {
             val perm = it.permission
-            !perm.isNullOrBlank() && sender.hasPermission(perm)
+            perm.isNullOrBlank() || sender.hasPermission(perm)
         }
     }
 
@@ -111,6 +113,7 @@ class CommandManager : TabExecutor {
         //명령어 목록 출력
         if (args.isEmpty()) {
             val labels = executables.joinToString(separator = " ", transform = { it.label })
+
             sender.sendMessage("/$label $labels")
             return true
         }
@@ -123,7 +126,7 @@ class CommandManager : TabExecutor {
             }
 
             component.let {
-                if (args.count() <= it.argsCount && it.onCommand(
+                if (args.count() >= it.argsCount && it.onCommand(
                         sender,
                         label,
                         componentLabel,
@@ -176,11 +179,8 @@ fun createHelp(
     val builder = StringBuilder()
     builder.append('/').append(label).append(' ').append(componentLabel)
 
-    if (usage.isNullOrBlank())
-        builder.append(' ').append(usage)
-
-    if (description.isNullOrBlank())
-        builder.append(' ').append(usage)
+    usage?.let { builder.append(' ').append(it) }
+    description?.let { builder.append(' ').append(it) }
 
     return builder.toString()
 }
