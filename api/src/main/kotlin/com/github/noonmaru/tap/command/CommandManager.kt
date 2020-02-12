@@ -65,8 +65,6 @@ class CommandManager : TabExecutor {
             args: ArgumentList
         ): Boolean {
 
-            println("CALL")
-
             val next = if (args.hasNext()) args.next() else null
 
             try {
