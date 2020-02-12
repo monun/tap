@@ -91,19 +91,15 @@ class CommandManager : TabExecutor {
         }
     }
 
-    private fun CommandSender.getExecutablesByPermission(sender: CommandSender): List<CommandContainer> {
+    private fun CommandSender.getExecutablesByPermission(): List<CommandContainer> {
         return commandMap.values.filter {
             val perm = it.permission
-            perm.isNullOrBlank() || sender.hasPermission(perm)
+            perm.isNullOrBlank() || hasPermission(perm)
         }
     }
 
-    private fun Iterable<CommandContainer>.getNearestCommand(label: String): CommandContainer? {
-        return commandMap.values.minBy { calcLevenshteinDistance(label, it.label) }
-    }
-
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
-        val executables = sender.getExecutablesByPermission(sender)
+        val executables = sender.getExecutablesByPermission()
 
         if (executables.isEmpty()) {
             sender.sendMessage("/$label 실행 가능한 명령이 없습니다. 명령을 등록해주세요.")
@@ -168,6 +164,10 @@ class CommandManager : TabExecutor {
 
         return emptyList()
     }
+}
+
+private fun Iterable<CommandContainer>.getNearestCommand(label: String): CommandContainer? {
+    return minBy { calcLevenshteinDistance(label, it.label) }
 }
 
 fun createHelp(
