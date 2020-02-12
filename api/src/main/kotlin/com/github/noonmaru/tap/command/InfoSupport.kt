@@ -25,10 +25,9 @@ fun pageHeader(
     nameColor: ChatColor = ChatColor.GOLD,
     name: String,
     page: Int,
-    total: Int,
-    size: Int
+    total: Int
 ): String {
-    return "$lineColor$line $nameColor$name ${ChatColor.RED}[ ${ChatColor.AQUA}$page ${ChatColor.RESET}/ ${ChatColor.GRAY}$total ${ChatColor.RESET}] ${ChatColor.LIGHT_PURPLE} $size $lineColor$line"
+    return "$lineColor$line $nameColor$name ${ChatColor.RED}[ ${ChatColor.AQUA}$page ${ChatColor.RESET}/ ${ChatColor.GRAY}$total ${ChatColor.RESET}] $lineColor$line"
 }
 
 fun <T> pageInformation(
@@ -48,7 +47,7 @@ fun <T> pageInformation(
     val end = min((page + 1) * length, size)
     val info = ArrayList<String>(end - index + 1)
 
-    info += pageHeader(lineColor, line, nameColor, name, page, total, size)
+    info += pageHeader(lineColor, line, nameColor, name, page + 1, total + 1)
 
     while (index < end) {
         info += describer.invoke(index, list[index])
