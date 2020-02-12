@@ -21,6 +21,6 @@ class CommandDebug : CommandComponent {
         componentLabel: String,
         args: ArgumentList
     ): List<String> {
-        return listOf("Heptagram", "ehdgh141").tabComplete(args.next())
+        return listOf("Heptagram", "ehdgh141").tabComplete(args.last())
     }
 }

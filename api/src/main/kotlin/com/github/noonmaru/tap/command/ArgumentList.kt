@@ -47,6 +47,14 @@ class ArgumentList(private val arguments: Array<out String>, cursor: Int) {
         return arguments[cursor++]
     }
 
+    fun first(): String {
+        return arguments.first()
+    }
+
+    fun last(): String {
+        return arguments.last()
+    }
+
     fun joinToString(separator: String = " "): String {
         return StringUtils.join(arguments, separator, cursor, arguments.size)
     }
