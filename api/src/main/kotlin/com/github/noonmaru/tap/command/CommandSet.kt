@@ -72,7 +72,7 @@ fun JavaPlugin.command(label: String, init: CommandBuilder.() -> Unit): CommandS
 
 class CommandSet internal constructor(builder: CommandBuilder) : TabExecutor {
 
-    val containers: Map<String, CommandContainer>
+    private val containers: Map<String, CommandContainer>
 
     init {
         val components = TreeMap<String, CommandContainer>(String.CASE_INSENSITIVE_ORDER)
