@@ -234,8 +234,6 @@ abstract class FakeEntity internal constructor(private val entity: Entity) {
 
     fun removeTracker(player: Player) {
         trackers.remove(player)
-
-
     }
 
     @Suppress("UNCHECKED_CAST")

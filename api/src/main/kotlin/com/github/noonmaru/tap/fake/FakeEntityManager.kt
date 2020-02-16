@@ -40,10 +40,10 @@ class FakeEntityManager : Runnable {
     val players: Set<Player>
         get() = _players
 
-    fun <T : FakeEntity> createFakeEntity(
+    fun createFakeEntity(
         loc: Location,
         entityClass: Class<out Entity>
-    ): T {
+    ): FakeEntity {
         val entity =
             entityClass.createFakeEntity() ?: throw NullPointerException("Cannot create FakeEntity for $entityClass")
         entity.setPositionAndRotation(loc)
@@ -53,8 +53,14 @@ class FakeEntityManager : Runnable {
         entities.add(fake)
         fake.updateTrackers()
 
-        @Suppress("UNCHECKED_CAST")
-        return fake as T
+        return fake
+    }
+
+    inline fun <reified T : FakeEntity> createFakeEntity(loc: Location): T {
+        return when (T::class) {
+            FakeArmorStand::class -> createFakeEntity(loc, ArmorStand::class.java)
+            else -> throw NullPointerException("Cannot create Abstract fake entity")
+        } as T
     }
 
     fun addPlayer(player: Player) {
