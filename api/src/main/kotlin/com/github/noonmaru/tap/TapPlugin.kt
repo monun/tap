@@ -18,6 +18,7 @@ package com.github.noonmaru.tap
 
 import com.github.noonmaru.tap.attach.Tools
 import com.github.noonmaru.tap.command.command
+import com.github.noonmaru.tap.debug.CommandDebug
 import org.bukkit.plugin.java.JavaPlugin
 
 /**
@@ -29,24 +30,12 @@ class TapPlugin : JavaPlugin() {
 
         //DEBUG
         command("tap") {
-            help("help") {
-
+            help("help")
+            component("debug") {
+                usage = "[Messages]"
+                description = "디버그 명령입니다."
+                CommandDebug()
             }
-
         }
-
-
-//        CommandSet().apply {
-//            addHelp("help")
-//            addCommand("debug", CommandDebug()).apply {
-//                usage = "[Messages]"
-//                description = "디버그 명령입니다."
-//            }
-//        }.let { command ->
-//            getCommand("tap")?.apply {
-//                setExecutor(command)
-//                tabCompleter = command
-//            }
-//        }
     }
 }

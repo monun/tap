@@ -30,7 +30,7 @@ import kotlin.math.min
 
 class CommandBuilder internal constructor(init: CommandBuilder.() -> Unit) {
 
-    internal val components = HashMap<String, CommandContainer.() -> CommandComponent>()
+    internal val inits = HashMap<String, CommandContainer.() -> CommandComponent>()
 
     internal var help: Pair<String, (CommandContainer.() -> Unit)?>? = null
 
@@ -40,14 +40,14 @@ class CommandBuilder internal constructor(init: CommandBuilder.() -> Unit) {
 
     private fun checkLabel(label: String) {
         Preconditions.checkArgument(
-            label !in components && help?.let { it.first != label } ?: true,
+            label !in inits && help?.let { it.first != label } ?: true,
             "Already registered label $label")
     }
 
     fun component(label: String, init: CommandContainer.() -> CommandComponent) {
         checkLabel(label)
 
-        components[label] = init
+        inits[label] = init
     }
 
     fun help(label: String, init: (CommandContainer.() -> Unit)? = null) {
@@ -72,11 +72,11 @@ fun JavaPlugin.command(label: String, init: CommandBuilder.() -> Unit): CommandS
 
 class CommandSet internal constructor(builder: CommandBuilder) : TabExecutor {
 
-    private val components: Map<String, CommandContainer>
+    val containers: Map<String, CommandContainer>
 
     init {
         val components = TreeMap<String, CommandContainer>(String.CASE_INSENSITIVE_ORDER)
-        for ((label, init) in builder.components) {
+        for ((label, init) in builder.inits) {
             components[label] = CommandContainer(label, init)
         }
         builder.help?.let { (label, init) ->
@@ -87,7 +87,7 @@ class CommandSet internal constructor(builder: CommandBuilder) : TabExecutor {
                 CommandHelp()
             }
         }
-        this.components = ImmutableSortedMap.copyOfSorted(components)
+        this.containers = ImmutableSortedMap.copyOfSorted(components)
     }
 
     private inner class CommandHelp : CommandComponent {
@@ -114,7 +114,7 @@ class CommandSet internal constructor(builder: CommandBuilder) : TabExecutor {
                 )
                 info.forEach(sender::sendMessage)
             } catch (e: NumberFormatException) {
-                val container = components[next!!] ?: return false
+                val container = containers[next!!] ?: return false
                 sender.sendMessage(container.let { createHelp(label, it.label, it.usage, it.description) })
             }
 
@@ -123,9 +123,9 @@ class CommandSet internal constructor(builder: CommandBuilder) : TabExecutor {
     }
 
     private fun CommandSender.getExecutablesByPermission(): List<CommandContainer> {
-        return components.values.filter {
-            val perm = it.permission
-            perm.isNullOrBlank() || hasPermission(perm)
+        return containers.values.filter {
+            it.component.test(this) == null
+                    && it.permission?.let { perm -> perm.isBlank() || hasPermission(perm) } ?: true
         }
     }
 
@@ -146,7 +146,7 @@ class CommandSet internal constructor(builder: CommandBuilder) : TabExecutor {
         }
 
         val componentLabel = args[0]
-        components[componentLabel]?.run {
+        containers[componentLabel]?.run {
             permission?.let { permission ->
                 sender.sendMessage(permissionMessage?.replace("<permission>", permission) ?: "권한이 없습니다.")
                 return true
@@ -172,7 +172,6 @@ class CommandSet internal constructor(builder: CommandBuilder) : TabExecutor {
         executables.getNearestCommand(componentLabel)?.let {
             sender.sendMessage("${ChatColor.GRAY}  혹시 이 명령을 찾으셨나요? -> /$label ${it.label}")
 
-
             return true
         }
 
@@ -187,9 +186,9 @@ class CommandSet internal constructor(builder: CommandBuilder) : TabExecutor {
     ): List<String> {
         val componentLabel = args[0]
 
-        if (args.count() == 1) return components.keys.tabComplete(componentLabel)
+        if (args.count() == 1) return containers.keys.tabComplete(componentLabel)
 
-        components[componentLabel]?.run {
+        containers[componentLabel]?.run {
             return component.onTabComplete(sender, label, componentLabel, ArgumentList(args, 1))
         }
 
@@ -216,7 +215,7 @@ fun createHelp(
     return builder.toString()
 }
 
-internal fun calcLevenshteinDistance(a: String, b: String): Int {
+private fun calcLevenshteinDistance(a: String, b: String): Int {
     val len0 = a.length + 1
     val len1 = b.length + 1
     var cost = IntArray(len0)

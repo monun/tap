@@ -32,7 +32,7 @@ interface CommandComponent {
         return emptyList()
     }
 
-    fun test(sender: CommandSender): String? {
+    fun test(sender: CommandSender): (() -> String)? {
         return null
     }
 }
