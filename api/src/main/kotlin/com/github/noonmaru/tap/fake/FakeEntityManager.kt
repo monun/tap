@@ -73,7 +73,7 @@ class FakeEntityManager : Runnable {
         _players.add(player)
     }
 
-    fun unregisterPlayer(player: Player) {
+    fun removePlayer(player: Player) {
         _players.remove(player)
 
         entities.forEach { it.removeTracker(player) }
