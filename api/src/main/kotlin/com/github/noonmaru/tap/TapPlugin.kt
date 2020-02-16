@@ -28,7 +28,7 @@ class TapPlugin : JavaPlugin() {
     override fun onEnable() {
         Tools.loadAttachLibrary(dataFolder)
 
-        //DEBUG
+        //DEBUG (Command DSL)
         command("tap") {
             help("help")
             component("debug") {
