@@ -29,6 +29,6 @@ class CommandContainer internal constructor(val label: String, init: CommandCont
 
     var permission: String? = null
 
-    var permissionMessage: String = "권한이 없습니다."
+    var permissionMessage: String? = null
 
 }

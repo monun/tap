@@ -21,14 +21,14 @@ import com.google.common.collect.ImmutableSortedMap
 import org.bukkit.ChatColor
 import org.bukkit.command.Command
 import org.bukkit.command.CommandSender
-import org.bukkit.command.PluginCommand
 import org.bukkit.command.TabExecutor
+import org.bukkit.plugin.java.JavaPlugin
 import java.util.*
 import kotlin.math.max
 import kotlin.math.min
 
 
-class CommandBuilder internal constructor(internal val pluginCommand: PluginCommand, init: CommandBuilder.() -> Unit) {
+class CommandBuilder internal constructor(init: CommandBuilder.() -> Unit) {
 
     internal val components = HashMap<String, CommandContainer.() -> CommandComponent>()
 
@@ -61,8 +61,13 @@ class CommandBuilder internal constructor(internal val pluginCommand: PluginComm
     }
 }
 
-fun command(pluginCommand: PluginCommand, init: CommandBuilder.() -> Unit): CommandSet {
-    return CommandBuilder(pluginCommand, init).build()
+fun JavaPlugin.command(label: String, init: CommandBuilder.() -> Unit): CommandSet? {
+    return getCommand(label)?.let { command ->
+        CommandBuilder(init).build().apply {
+            command.setExecutor(this)
+            command.tabCompleter = this
+        }
+    }
 }
 
 class CommandSet internal constructor(builder: CommandBuilder) : TabExecutor {
@@ -76,16 +81,13 @@ class CommandSet internal constructor(builder: CommandBuilder) : TabExecutor {
         }
         builder.help?.let { (label, init) ->
             components[label] = CommandContainer(label) {
+                usage = "<Page | Command>"
+                description = "명령 사용 방법을 확인합니다."
                 init?.let { it() }
                 CommandHelp()
             }
         }
         this.components = ImmutableSortedMap.copyOfSorted(components)
-
-        builder.pluginCommand.apply {
-            setExecutor(this@CommandSet)
-            tabCompleter = this@CommandSet
-        }
     }
 
     private inner class CommandHelp : CommandComponent {
@@ -145,8 +147,8 @@ class CommandSet internal constructor(builder: CommandBuilder) : TabExecutor {
 
         val componentLabel = args[0]
         components[componentLabel]?.run {
-            permission?.let {
-                sender.sendMessage(permissionMessage)
+            permission?.let { permission ->
+                sender.sendMessage(permissionMessage?.replace("<permission>", permission) ?: "권한이 없습니다.")
                 return true
             }
 
