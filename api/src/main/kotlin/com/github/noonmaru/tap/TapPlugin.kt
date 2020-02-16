@@ -17,7 +17,7 @@
 package com.github.noonmaru.tap
 
 import com.github.noonmaru.tap.attach.Tools
-import com.github.noonmaru.tap.command.CommandManager
+import com.github.noonmaru.tap.command.CommandSet
 import com.github.noonmaru.tap.debug.CommandDebug
 import org.bukkit.plugin.java.JavaPlugin
 
@@ -29,7 +29,7 @@ class TapPlugin : JavaPlugin() {
         Tools.loadAttachLibrary(dataFolder)
 
         //DEBUG
-        CommandManager().apply {
+        CommandSet().apply {
             addHelp("help")
             addCommand("debug", CommandDebug()).apply {
                 usage = "[Messages]"

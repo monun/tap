@@ -16,44 +16,75 @@
 
 package com.github.noonmaru.tap.command
 
-import com.google.common.collect.ImmutableList
+import com.google.common.base.Preconditions
+import com.google.common.collect.ImmutableSortedMap
 import org.bukkit.ChatColor
 import org.bukkit.command.Command
 import org.bukkit.command.CommandSender
+import org.bukkit.command.PluginCommand
 import org.bukkit.command.TabExecutor
 import java.util.*
 import kotlin.math.max
 import kotlin.math.min
 
-/**
- * @author Nemo
- */
-class CommandManager : TabExecutor {
 
-    private val commandMap = TreeMap<String, CommandContainer>(String.CASE_INSENSITIVE_ORDER)
+class CommandBuilder internal constructor(internal val pluginCommand: PluginCommand, init: CommandBuilder.() -> Unit) {
 
-    private var _commands: List<CommandContainer>? = null
-    val commands: List<CommandContainer>
-        get() {
-            if (_commands == null) {
-                _commands = ImmutableList.copyOf(commandMap.values)
-            }
+    internal val components = HashMap<String, CommandContainer.() -> CommandComponent>()
 
-            return _commands ?: throw AssertionError("null")
-        }
+    internal var help: Pair<String, (CommandContainer.() -> Unit)?>? = null
 
-    fun addCommand(label: String, component: CommandComponent): CommandContainer {
-        return CommandContainer(label, component).apply {
-            commandMap[label] = this
-        }
+    init {
+        this.init()
     }
 
-    fun addHelp(label: String): CommandComponent {
-        return CommandHelp().apply {
-            addCommand(label, this).run {
-                usage = "<Page> | <Command>"
-                description = "명령을 확인합니다."
+    private fun checkLabel(label: String) {
+        Preconditions.checkArgument(
+            label !in components && help?.let { it.first != label } ?: true,
+            "Already registered label $label")
+    }
+
+    fun component(label: String, init: CommandContainer.() -> CommandComponent) {
+        checkLabel(label)
+
+        components[label] = init
+    }
+
+    fun help(label: String, init: (CommandContainer.() -> Unit)? = null) {
+        checkLabel(label)
+
+        help = Pair(label, init)
+    }
+
+    fun build(): CommandSet {
+        return CommandSet(this)
+    }
+}
+
+fun command(pluginCommand: PluginCommand, init: CommandBuilder.() -> Unit): CommandSet {
+    return CommandBuilder(pluginCommand, init).build()
+}
+
+class CommandSet internal constructor(builder: CommandBuilder) : TabExecutor {
+
+    private val components: Map<String, CommandContainer>
+
+    init {
+        val components = TreeMap<String, CommandContainer>(String.CASE_INSENSITIVE_ORDER)
+        for ((label, init) in builder.components) {
+            components[label] = CommandContainer(label, init)
+        }
+        builder.help?.let { (label, init) ->
+            components[label] = CommandContainer(label) {
+                init?.let { it() }
+                CommandHelp()
             }
+        }
+        this.components = ImmutableSortedMap.copyOfSorted(components)
+
+        builder.pluginCommand.apply {
+            setExecutor(this@CommandSet)
+            tabCompleter = this@CommandSet
         }
     }
 
@@ -74,14 +105,14 @@ class CommandManager : TabExecutor {
 
                 val info = pageInformation(
                     name = "Help",
-                    list = this@CommandManager.commands,
+                    list = sender.getExecutablesByPermission(),
                     describer = { _, o -> createHelp(label, o.label, o.usage, o.description) },
                     _page = page,
                     length = 9
                 )
                 info.forEach(sender::sendMessage)
             } catch (e: NumberFormatException) {
-                val container = commandMap[next!!] ?: return false
+                val container = components[next!!] ?: return false
                 sender.sendMessage(container.let { createHelp(label, it.label, it.usage, it.description) })
             }
 
@@ -90,7 +121,7 @@ class CommandManager : TabExecutor {
     }
 
     private fun CommandSender.getExecutablesByPermission(): List<CommandContainer> {
-        return commandMap.values.filter {
+        return components.values.filter {
             val perm = it.permission
             perm.isNullOrBlank() || hasPermission(perm)
         }
@@ -113,7 +144,7 @@ class CommandManager : TabExecutor {
         }
 
         val componentLabel = args[0]
-        commandMap[componentLabel]?.run {
+        components[componentLabel]?.run {
             permission?.let {
                 sender.sendMessage(permissionMessage)
                 return true
@@ -154,9 +185,9 @@ class CommandManager : TabExecutor {
     ): List<String> {
         val componentLabel = args[0]
 
-        if (args.count() == 1) return commandMap.keys.tabComplete(componentLabel)
+        if (args.count() == 1) return components.keys.tabComplete(componentLabel)
 
-        commandMap[componentLabel]?.run {
+        components[componentLabel]?.run {
             return component.onTabComplete(sender, label, componentLabel, ArgumentList(args, 1))
         }
 
