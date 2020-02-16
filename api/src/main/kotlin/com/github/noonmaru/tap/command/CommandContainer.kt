@@ -19,7 +19,9 @@ package com.github.noonmaru.tap.command
 /**
  * @author Nemo
  */
-data class CommandContainer(val label: String, val component: CommandComponent) {
+class CommandContainer internal constructor(val label: String, init: CommandContainer.() -> CommandComponent) {
+
+    val component: CommandComponent = init()
 
     var usage: String? = null
 
@@ -28,4 +30,5 @@ data class CommandContainer(val label: String, val component: CommandComponent) 
     var permission: String? = null
 
     var permissionMessage: String = "권한이 없습니다."
+
 }

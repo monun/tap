@@ -145,6 +145,7 @@ fun Any.applyConfig(config: ConfigurationSection, separateByClass: Boolean = fal
                         e.printStackTrace()
                     }
                 }
+
                 continue
             }
 
