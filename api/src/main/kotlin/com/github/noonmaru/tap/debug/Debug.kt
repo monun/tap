@@ -3,11 +3,11 @@ package com.github.noonmaru.tap.debug
 import com.github.noonmaru.tap.command.ArgumentList
 import com.github.noonmaru.tap.command.CommandComponent
 import com.github.noonmaru.tap.command.tabComplete
-import com.github.noonmaru.tap.item.saveToJsonString
 import net.md_5.bungee.api.chat.ClickEvent
 import net.md_5.bungee.api.chat.ComponentBuilder
 import net.md_5.bungee.api.chat.HoverEvent
 import net.md_5.bungee.api.chat.TextComponent
+import org.bukkit.ChatColor
 import org.bukkit.Material
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
@@ -41,19 +41,19 @@ class CommandDebugBookMeta : CommandComponent {
         val book = ItemStack(Material.WRITTEN_BOOK)
         val meta = book.itemMeta as BookMeta
         val component = TextComponent().apply {
-            text = "Hello"
+            text = "Hello\n"
             clickEvent = ClickEvent(ClickEvent.Action.RUN_COMMAND, "/say hello")
         }
 
         val component2 = TextComponent().apply {
             text = "hover"
             hoverEvent = HoverEvent(
-                HoverEvent.Action.SHOW_ITEM,
-                ComponentBuilder(ItemStack(Material.STICK).saveToJsonString()).create()
+                HoverEvent.Action.SHOW_TEXT,
+                ComponentBuilder("Hello World\nnest${ChatColor.RED}SDF").create()
             )
         }
 
-        meta.spigot().addPage(arrayOf(component), arrayOf(component2))
+        meta.spigot().addPage(arrayOf(component, component2))
         meta.author = "TEST"
         meta.title = "TITLE"
         meta.generation = BookMeta.Generation.ORIGINAL

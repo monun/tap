@@ -43,11 +43,11 @@ internal abstract class Template {
             ScriptEngineManager().getEngineByName("js")
         }
 
-        internal val pattern = Pattern.compile("\\\$(\\{.+?}|\\w+)")
+        internal val pattern = Pattern.compile("\\\$((\\{.+?})|(\\w+(-\\w*)*))")
 
-        private val expressionPattern = Pattern.compile("\\\$(\\{.+?})")
+        private val expressionPattern = Pattern.compile("\$(\\{.+?})")
 
-        private val variablePattern = Pattern.compile("\\w+((\\.\\w+)?)*")
+        private val variablePattern = Pattern.compile("(\\w+(-\\w*)*)")
 
         fun createTemplate(s: String): Template {
             return if (expressionPattern.matcher(s).find()) {
