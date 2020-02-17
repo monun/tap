@@ -147,6 +147,10 @@ class CommandSet internal constructor(builder: CommandBuilder) : TabExecutor {
 
         val componentLabel = args[0]
         containers[componentLabel]?.run {
+            component.test(sender)?.let {
+                sender.sendMessage(it())
+                return true
+            }
             permission?.let { permission ->
                 sender.sendMessage(permissionMessage?.replace("<permission>", permission) ?: "권한이 없습니다.")
                 return true
