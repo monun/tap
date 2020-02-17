@@ -22,7 +22,6 @@ import org.bukkit.entity.Entity
 import org.bukkit.entity.LivingEntity
 import org.bukkit.entity.Player
 import java.util.*
-import kotlin.reflect.KClass
 
 class FakeEntityManager : Runnable {
 
@@ -55,18 +54,6 @@ class FakeEntityManager : Runnable {
         fake.updateTrackers()
 
         return fake
-    }
-
-    @Suppress("UNCHECKED_CAST")
-    fun <T : FakeEntity> createFakeEntity(loc: Location, type: KClass<T>): T {
-        return when (type) {
-            FakeArmorStand::class -> createFakeEntity(loc, ArmorStand::class.java)
-            else -> throw NullPointerException("Cannot create Abstract fake entity")
-        } as T
-    }
-
-    inline fun <reified T : FakeEntity> createFakeEntity(loc: Location): T {
-        return createFakeEntity(loc, T::class)
     }
 
     fun addPlayer(player: Player) {

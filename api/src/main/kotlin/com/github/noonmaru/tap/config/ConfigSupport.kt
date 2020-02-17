@@ -122,6 +122,7 @@ fun Any.applyConfig(config: ConfigurationSection, separateByClass: Boolean = fal
 
         for ((field, settings) in list) {
             val key = settings.value.let { if (it.isNotBlank()) it else field.name.toConfigKey() }
+
             var value = section?.get(key)
 
             if (value != null) {
