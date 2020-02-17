@@ -19,6 +19,7 @@ package com.github.noonmaru.tap
 import com.github.noonmaru.tap.attach.Tools
 import com.github.noonmaru.tap.command.command
 import com.github.noonmaru.tap.debug.CommandDebug
+import com.github.noonmaru.tap.debug.CommandDebugBookMeta
 import org.bukkit.plugin.java.JavaPlugin
 
 /**
@@ -35,6 +36,10 @@ class TapPlugin : JavaPlugin() {
                 usage = "[Messages]"
                 description = "디버그 명령입니다."
                 CommandDebug()
+            }
+            component("book") {
+                description = "BookMeta Support를 테스트합니다."
+                CommandDebugBookMeta()
             }
         }
     }
