@@ -36,11 +36,11 @@ annotation class RangeLong(val min: Long = java.lang.Long.MIN_VALUE, val max: Lo
 
 @Target(AnnotationTarget.FIELD)
 @Retention(AnnotationRetention.RUNTIME)
-annotation class RangeFloat(val min: Float = java.lang.Float.MAX_VALUE, val max: Float = java.lang.Float.MIN_VALUE)
+annotation class RangeFloat(val min: Float = java.lang.Float.MIN_VALUE, val max: Float = java.lang.Float.MAX_VALUE)
 
 @Target(AnnotationTarget.FIELD)
 @Retention(AnnotationRetention.RUNTIME)
-annotation class RangeDouble(val min: Double = java.lang.Double.MAX_VALUE, val max: Double = java.lang.Double.MIN_VALUE)
+annotation class RangeDouble(val min: Double = java.lang.Double.MIN_VALUE, val max: Double = java.lang.Double.MAX_VALUE)
 
 @Target(AnnotationTarget.CLASS)
 @Retention(AnnotationRetention.RUNTIME)
