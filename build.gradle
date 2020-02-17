@@ -137,5 +137,5 @@ shadowJar {
 
 task distJar(type: Copy) {
     from shadowJar
-    into 'W:\\Servers\\psychic\\plugins'
+    into 'W:\\Servers\\psychics\\plugins'
 }
