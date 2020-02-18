@@ -117,6 +117,10 @@ class FakeArmorStand(private val armorStand: ArmorStand) : FakeLivingEntity(armo
         enqueue()
     }
 
+    fun getItem(slot: EquipmentSlot): ItemStack {
+        return armorStand.getItem(slot)
+    }
+
     override fun onUpdate() {
         super.onUpdate()
 
