@@ -45,12 +45,14 @@ internal abstract class Template {
 
         internal val pattern = Pattern.compile("\\\$((\\{.+?})|(\\w+(-\\w*)*))")
 
-        private val expressionPattern = Pattern.compile("\$(\\{.+?})")
-
         private val variablePattern = Pattern.compile("(\\w+(-\\w*)*)")
 
+        private val expressionRegex = Regex("\\\$(\\{.+?})")
+
         fun createTemplate(s: String): Template {
-            return if (expressionPattern.matcher(s).find()) {
+            println("$s ${s.matches(expressionRegex)}")
+
+            return if (s.matches(expressionRegex)) {
                 Expression()
             } else {
                 Variable()
@@ -69,6 +71,7 @@ internal abstract class Template {
 
         override fun process(config: ConfigurationSection): String? {
             val groups = token.findMatchGroups(variablePattern)
+
             if (groups.isEmpty()) return null
             if (groups.count() == 1) return config.find(groups.first())?.toString()
 
