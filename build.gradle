@@ -124,7 +124,7 @@ project(':api') {
         compileOnly files(Jvm.current().toolsJar)
         compileOnly 'com.destroystokyo.paper:paper-api:1.13.2-R0.1-SNAPSHOT'
         compileOnly 'com.comphenix.protocol:ProtocolLib:4.5.0'
-//        compileOnly fileTree(dir: '../libs', include: ['*.jar']) //서버 오류로 일반 파일로 변경
+//        compileOnly fileTree(dir: '../libs', include: ['*.jar']) //dumlloy 오류시 ProtocolLib.jar을 통한 의존성 컴파일
     }
 }
 
