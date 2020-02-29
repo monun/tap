@@ -68,7 +68,7 @@ subprojects {
     tasks {
         create<Jar>("sourcesJar") {
             archiveClassifier.set("sources")
-            from(sourceSets.main.get().allSource)
+            from(sourceSets["main"].allSource)
         }
 
         if (project.name == "api") {
@@ -97,8 +97,6 @@ subprojects {
                 task.onlyIf {
                     gradle.taskGraph.hasTask(":shadowJar") || parent!!.hasProperty("withNMS")
                 }
-
-                println(task.name)
             }
         }
     }
