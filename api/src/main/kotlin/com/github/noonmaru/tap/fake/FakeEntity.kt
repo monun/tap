@@ -20,6 +20,7 @@ import com.comphenix.protocol.wrappers.WrappedDataWatcher
 import com.github.noonmaru.tap.protocol.EntityPacket
 import com.github.noonmaru.tap.protocol.sendServerPacket
 import com.github.noonmaru.tap.protocol.sendServerPacketAll
+import com.google.common.base.Preconditions
 import org.bukkit.Location
 import org.bukkit.World
 import org.bukkit.entity.Entity
@@ -32,7 +33,7 @@ import kotlin.collections.HashSet
 /**
  * @author Nemo
  */
-abstract class FakeEntity internal constructor(private val entity: Entity) {
+open class FakeEntity internal constructor(private val entity: Entity) {
 
     internal lateinit var manager: FakeEntityManager
 
@@ -64,7 +65,11 @@ abstract class FakeEntity internal constructor(private val entity: Entity) {
 
     private val location: Location = prevLocation.clone()
 
-    val trackers = HashSet<Player>()
+    private val passengers = HashSet<FakeEntity>()
+
+    private var vehicle: FakeEntity? = null
+
+    internal val trackers = HashSet<Player>()
 
     private val ignores = Collections.newSetFromMap(WeakHashMap<Player, Boolean>())
 
@@ -103,7 +108,9 @@ abstract class FakeEntity internal constructor(private val entity: Entity) {
         yaw: Float = prevLocation.yaw,
         pitch: Float = prevLocation.pitch
     ) {
-        location.run {
+        vehicle?.removePassenger(this)
+
+        location.apply {
             this.world = world
             this.x = x
             this.y = y
@@ -152,6 +159,8 @@ abstract class FakeEntity internal constructor(private val entity: Entity) {
     }
 
     private fun updateLocation() {
+        if (vehicle != null) return
+
         val from = prevUpdateLocation
         val to = location
 
@@ -203,6 +212,25 @@ abstract class FakeEntity internal constructor(private val entity: Entity) {
             this.yaw = to.yaw
             this.pitch = to.pitch
         }
+
+        //Passenger update
+        passengers.forEach { passenger ->
+            updatePassengerPos(passenger)
+        }
+    }
+
+    private fun updatePassengerPos(passenger: FakeEntity) {
+        val to = this.location
+
+        passenger.location.apply {
+            world = to.world
+            x = to.x
+            y = to.y + entity.mountedYOffset + entity.yOffset
+            z = to.z
+            yaw = to.yaw
+            pitch = to.pitch
+            passenger.entity.setPositionAndRotation(this)
+        }
     }
 
     internal fun updateTrackers() {
@@ -214,6 +242,11 @@ abstract class FakeEntity internal constructor(private val entity: Entity) {
         for (player in players) {
             if (player !in ignores && trackers.add(player)) {
                 spawnTo(player)
+
+                vehicle?.updatePassengers()
+
+                if (passengers.isNotEmpty())
+                    updatePassengers()
             }
         }
     }
@@ -248,7 +281,48 @@ abstract class FakeEntity internal constructor(private val entity: Entity) {
         trackers.sendServerPacketAll(packet)
     }
 
-    abstract fun spawnTo(player: Player)
+    private fun checkPassenger(passenger: FakeEntity) {
+        checkState()
+        passenger.checkState()
+        require(this != passenger) { "entity == passenger" }
+        require(this.manager == passenger.manager) { "Different FakeManager" }
+    }
+
+    fun addPassenger(passenger: FakeEntity) {
+        checkPassenger(passenger)
+
+        passenger.vehicle?.let { vehicle ->
+            vehicle.removePassenger(vehicle)
+        }
+
+        if (this.passengers.add(passenger)) {
+            passenger.vehicle = this
+            updatePassengerPos(passenger)
+            updatePassengers()
+        }
+    }
+
+    fun removePassenger(passenger: FakeEntity) {
+        checkPassenger(passenger)
+
+        if (this.passengers.remove(passenger)) {
+            passenger.vehicle = null
+            updatePassengers()
+        }
+    }
+
+    private fun updatePassengers() {
+        trackers.sendServerPacketAll(
+            EntityPacket.mount(
+                this.entity.entityId,
+                this.passengers.map { it.entity.entityId }.toIntArray()
+            )
+        )
+    }
+
+    protected open fun spawnTo(player: Player) {
+        player.sendServerPacket(this.entity.createSpawnPacket())
+    }
 
     fun showTo(player: Player) {
         ignores.remove(player)
@@ -270,10 +344,23 @@ abstract class FakeEntity internal constructor(private val entity: Entity) {
         player.sendServerPacket(packet)
     }
 
+    fun checkState() {
+        Preconditions.checkState(valid, "Invalid $this")
+    }
+
     fun remove() {
-        valid = false
+        vehicle?.removePassenger(this)
+
+        passengers.apply {
+            forEach {
+                it.vehicle = null
+            }
+            clear()
+        }
+
         val packet = EntityPacket.destroy(intArrayOf(entity.entityId))
         trackers.sendServerPacketAll(packet)
+        valid = false
     }
 }
 

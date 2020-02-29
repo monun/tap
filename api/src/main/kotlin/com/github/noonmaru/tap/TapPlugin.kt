@@ -20,6 +20,14 @@ import com.github.noonmaru.tap.attach.Tools
 import com.github.noonmaru.tap.command.command
 import com.github.noonmaru.tap.debug.CommandDebug
 import com.github.noonmaru.tap.debug.CommandDebugBookMeta
+import com.github.noonmaru.tap.fake.FakeArmorStand
+import com.github.noonmaru.tap.fake.FakeEntityManager
+import org.bukkit.Material
+import org.bukkit.entity.Shulker
+import org.bukkit.event.EventHandler
+import org.bukkit.event.Listener
+import org.bukkit.event.player.PlayerInteractEvent
+import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.plugin.java.JavaPlugin
 
 /**
@@ -42,5 +50,44 @@ class TapPlugin : JavaPlugin() {
                 CommandDebugBookMeta()
             }
         }
+
+
+        val fakeEntityManager = FakeEntityManager()
+
+        server.pluginManager.registerEvents(object : Listener {
+            @EventHandler
+            fun onJoin(event: PlayerJoinEvent) {
+                fakeEntityManager.addPlayer(event.player)
+            }
+
+            @EventHandler
+            fun onInteract(event: PlayerInteractEvent) {
+                val loc = event.player.location.apply {
+                    add(direction.multiply(5))
+                    yaw = 0.0F
+                    pitch = 0.0F
+                }
+                val stand = fakeEntityManager.createFakeEntity<FakeArmorStand>(loc).apply {
+                    invisible = true
+                    mark = true
+                }
+                val block = fakeEntityManager.createFallingBlock(loc, Material.RED_CONCRETE.createBlockData()).apply {
+                    glowing = true
+                }
+                val shulker = fakeEntityManager.createFakeEntity(loc, Shulker::class.java).apply {
+                    invisible = true
+                }
+
+                stand.addPassenger(shulker)
+                stand.addPassenger(block)
+
+                fakeEntityManager.destroyAll()
+            }
+        }, this)
+
+        server.scheduler.runTaskTimer(this, Runnable {
+            fakeEntityManager.run()
+        }, 0, 1)
+
     }
 }

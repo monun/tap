@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-package com.github.noonmaru.tap.v1_14_R1.mojang
+package com.github.noonmaru.tap.v1_13_R1.mojang
 
 import com.github.noonmaru.tap.mojang.MojangProfile
 import com.github.noonmaru.tap.mojang.ProfileSupport

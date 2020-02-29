@@ -116,15 +116,15 @@ project(':api') {
     }
 
     repositories {
-        mavenLocal()
-//        maven { url = 'https://repo.dmulloy2.net/nexus/repository/public/' } //Protocol Lib
+//        mavenLocal()
+        maven { url = 'https://repo.dmulloy2.net/nexus/repository/public/' } //Protocol Lib
     }
 
     dependencies {
         compileOnly files(Jvm.current().toolsJar)
         compileOnly 'com.destroystokyo.paper:paper-api:1.13.2-R0.1-SNAPSHOT'
-//        compileOnly 'com.comphenix.protocol:ProtocolLib:4.5.0'
-        compileOnly fileTree(dir: '../libs', include: ['*.jar']) //서버 오류로 일반 파일로 변경
+        compileOnly 'com.comphenix.protocol:ProtocolLib:4.5.0'
+//        compileOnly fileTree(dir: '../libs', include: ['*.jar']) //서버 오류로 일반 파일로 변경
     }
 }
 
@@ -139,5 +139,5 @@ shadowJar {
 
 task distJar(type: Copy) {
     from shadowJar
-    into 'W:\\Servers\\psychics\\plugins'
+    into 'W:\\Servers\\test\\plugins'
 }
