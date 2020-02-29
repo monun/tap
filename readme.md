@@ -28,7 +28,7 @@
 >
 >...
 >dependencies {
->    implementation 'com.github.noonmaru:tap:2.2'
+>    implementation 'com.github.noonmaru:tap:2.3'
 >}
 >```
 >
@@ -37,7 +37,7 @@
 > **If you want to use net.minecraft.server implementation, Follow the instructions below**
 >* First, Follow the tutorial -> https://www.spigotmc.org/wiki/spigot-gradle/
 >* Clone this git repository
->* Use the following Gradle command -> `gradlew publishTapPublicationToMavenLocal -PwithNMS`
+>* Use the following Gradle command -> `gradlew publishToMavenLocal -PwithNMS`
 >* Write the code below in build.gradle
 >```groovy
 >allprojects {
@@ -49,6 +49,7 @@
 >```
 >```groovy
 >dependencies {
->    implementation 'com.github.noonmaru:tap-v1_15_R1:2.2'
+>    implementation 'com.github.noonmaru:tap:2.3'
+>    implementation 'com.github.noonmaru:tap-v1_15_R1:2.3'
 >}
 >```
