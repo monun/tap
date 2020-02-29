@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-package com.github.noonmaru.tap.v1_13_R1.fake
+package com.github.noonmaru.tap.v1_13_R2.fake
 
 import net.minecraft.server.v1_13_R2.EntityTypes
 import net.minecraft.server.v1_13_R2.IRegistry
