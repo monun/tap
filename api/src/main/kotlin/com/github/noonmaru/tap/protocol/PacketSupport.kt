@@ -21,7 +21,6 @@ import com.comphenix.protocol.events.PacketContainer
 import com.comphenix.protocol.wrappers.EnumWrappers
 import com.comphenix.protocol.wrappers.WrappedDataWatcher
 import com.github.noonmaru.tap.fake.createFakeEntity
-import com.github.noonmaru.tap.fake.networkId
 import org.bukkit.FireworkEffect
 import org.bukkit.Location
 import org.bukkit.entity.*
@@ -69,13 +68,13 @@ class EntityPacketSupport {
         }
     }
 
-    fun spawnMob(living: LivingEntity): PacketContainer {
-        return living.run {
-
-            @Suppress("DEPRECATION")
-            spawnMob(entityId, uniqueId, living.networkId, location, location.yaw, living.velocity)
-        }
-    }
+//    fun spawnMob(living: LivingEntity): PacketContainer {
+//        return living.run {
+//
+//            @Suppress("DEPRECATION")
+//            spawnMob(entityId, uniqueId, living.networkId, location, location.yaw, living.velocity)
+//        }
+//    }
 
     fun metadata(entityId: Int, dataWatcher: WrappedDataWatcher): PacketContainer {
 
@@ -222,6 +221,13 @@ class EntityPacketSupport {
             val loc = entity.location
 
             lookAndRelativeMove(entityId, velocity, loc.yaw, loc.pitch, isOnGround)
+        }
+    }
+
+    fun mount(entityId: Int, mountEntityIds: IntArray): PacketContainer {
+        return PacketContainer(PacketType.Play.Server.MOUNT).apply {
+            integers.write(0, entityId)
+            integerArrays.write(0, mountEntityIds)
         }
     }
 

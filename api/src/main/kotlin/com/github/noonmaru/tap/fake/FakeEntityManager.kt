@@ -17,10 +17,8 @@
 package com.github.noonmaru.tap.fake
 
 import org.bukkit.Location
-import org.bukkit.entity.ArmorStand
-import org.bukkit.entity.Entity
-import org.bukkit.entity.LivingEntity
-import org.bukkit.entity.Player
+import org.bukkit.block.data.BlockData
+import org.bukkit.entity.*
 import java.util.*
 
 class FakeEntityManager : Runnable {
@@ -54,6 +52,48 @@ class FakeEntityManager : Runnable {
         fake.updateTrackers()
 
         return fake
+    }
+
+    inline fun <reified T : FakeEntity> createFakeEntity(loc: Location): T {
+        val type: Class<out Entity> = when (T::class.java) {
+            FakeArmorStand::class.java -> ArmorStand::class.java
+            else -> throw IllegalArgumentException("Unsupported FakeEntity ${T::class.java}")
+        }
+
+        return createFakeEntity(loc, type) as T
+    }
+
+    @Throws(IllegalArgumentException::class)
+    fun createFallingBlock(
+        loc: Location,
+        data: BlockData
+    ): FakeFallingBlock {
+        val fallingBlock = createFallingBlock(data).apply {
+            setPositionAndRotation(loc)
+        }
+
+        return addFakeEntity(fallingBlock)
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    private fun <T : FakeEntity> addFakeEntity(entity: Entity): T {
+        val fake = entity.toFake()
+
+        entities += fake
+        fake.updateTrackers()
+
+        return fake as T
+    }
+
+    private fun Entity.toFake(): FakeEntity {
+        return when (this) {
+            is FallingBlock -> FakeFallingBlock(this)
+            is ArmorStand -> FakeArmorStand(this)
+            is LivingEntity -> FakeLivingEntity(this)
+            else -> FakeEntity(this)
+        }.apply {
+            manager = this@FakeEntityManager
+        }
     }
 
     fun addPlayer(player: Player) {
@@ -126,10 +166,3 @@ class FakeEntityManager : Runnable {
     }
 }
 
-private fun Entity.toFake(): FakeEntity {
-    return when (this) {
-        is ArmorStand -> FakeArmorStand(this)
-        is LivingEntity -> FakeLivingEntity(this)
-        else -> throw UnsupportedOperationException("Unsupported Entity $this")
-    }
-}

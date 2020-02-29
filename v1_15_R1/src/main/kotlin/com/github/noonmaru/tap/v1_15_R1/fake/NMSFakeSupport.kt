@@ -17,13 +17,17 @@
 package com.github.noonmaru.tap.v1_15_R1.fake
 
 import com.github.noonmaru.tap.fake.FakeSupport
+import net.minecraft.server.v1_15_R1.EntityFallingBlock
 import net.minecraft.server.v1_15_R1.IRegistry
 import org.bukkit.Bukkit
 import org.bukkit.Location
+import org.bukkit.block.data.BlockData
 import org.bukkit.craftbukkit.v1_15_R1.CraftServer
 import org.bukkit.craftbukkit.v1_15_R1.CraftWorld
+import org.bukkit.craftbukkit.v1_15_R1.block.data.CraftBlockData
 import org.bukkit.craftbukkit.v1_15_R1.entity.CraftEntity
 import org.bukkit.entity.Entity
+import org.bukkit.entity.FallingBlock
 
 /**
  * @author Nemo
@@ -79,5 +83,37 @@ class NMSFakeSupport : FakeSupport {
             nmsEntity.world = (world as CraftWorld).handle
             nmsEntity.setPositionRotation(x, y, z, yaw, pitch)
         }
+    }
+
+    override fun getMountedYOffset(entity: Entity): Double {
+        entity as CraftEntity
+
+        return entity.handle.aS()
+    }
+
+    override fun getYOffset(entity: Entity): Double {
+        entity as CraftEntity
+
+        return entity.handle.aR()
+    }
+
+    override fun createSpawnPacket(entity: Entity): Any {
+        entity as CraftEntity
+
+        return entity.handle.L()
+    }
+
+    override fun createFallingBlock(blockData: BlockData): FallingBlock {
+        val entity =
+            EntityFallingBlock(
+                (Bukkit.getWorlds().first() as CraftWorld).handle,
+                0.0,
+                0.0,
+                0.0,
+                (blockData as CraftBlockData).state
+            )
+        entity.ticksLived = 1
+
+        return entity.bukkitEntity as FallingBlock
     }
 }

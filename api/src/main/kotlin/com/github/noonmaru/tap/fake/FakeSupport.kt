@@ -16,9 +16,12 @@
 
 package com.github.noonmaru.tap.fake
 
+import com.comphenix.protocol.events.PacketContainer
 import com.github.noonmaru.tap.loader.LibraryLoader
 import org.bukkit.Location
+import org.bukkit.block.data.BlockData
 import org.bukkit.entity.Entity
+import org.bukkit.entity.FallingBlock
 
 /**
  * @author Nemo
@@ -36,6 +39,14 @@ interface FakeSupport {
     fun setInvisible(entity: Entity, invisible: Boolean)
 
     fun isInvisible(entity: Entity): Boolean
+
+    fun getMountedYOffset(entity: Entity): Double
+
+    fun getYOffset(entity: Entity): Double
+
+    fun createSpawnPacket(entity: Entity): Any
+
+    fun createFallingBlock(blockData: BlockData): FallingBlock
 }
 
 internal val FakeSupportNMS = LibraryLoader.load(FakeSupport::class.java)
@@ -49,6 +60,14 @@ var Entity.invisible
         FakeSupportNMS.setInvisible(this, value)
     }
 
+val Entity.mountedYOffset
+    get() = FakeSupportNMS.getMountedYOffset(this)
+
+val Entity.yOffset
+    get() = FakeSupportNMS.getYOffset(this)
+
+//this.locY() + this.aS() + entity.aR()
+
 fun <T : Entity> Class<T>.createFakeEntity(): T? {
     return FakeSupportNMS.createEntity(this)
 }
@@ -59,4 +78,12 @@ fun Entity.setPosition(loc: Location) {
 
 fun Entity.setPositionAndRotation(loc: Location) {
     FakeSupportNMS.setPositionAndRotation(this, loc)
+}
+
+fun Entity.createSpawnPacket(): PacketContainer {
+    return PacketContainer.fromPacket(FakeSupportNMS.createSpawnPacket(this))
+}
+
+fun createFallingBlock(blockData: BlockData): FallingBlock {
+    return FakeSupportNMS.createFallingBlock(blockData)
 }
