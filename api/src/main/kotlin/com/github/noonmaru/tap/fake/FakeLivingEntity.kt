@@ -16,15 +16,12 @@
 
 package com.github.noonmaru.tap.fake
 
+import com.comphenix.protocol.events.PacketContainer
 import com.github.noonmaru.tap.protocol.EntityPacket
-import com.github.noonmaru.tap.protocol.sendServerPacket
 import org.bukkit.entity.LivingEntity
-import org.bukkit.entity.Player
 
 open class FakeLivingEntity(private val livingEntity: LivingEntity) : FakeEntity(livingEntity) {
-    override fun spawnTo(player: Player) {
-        super.spawnTo(player)
-
-        player.sendServerPacket(EntityPacket.metadata(livingEntity))
+    override fun createMetaPacket(): PacketContainer? {
+        return EntityPacket.metadata(livingEntity)
     }
 }
