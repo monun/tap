@@ -192,7 +192,7 @@ open class FakeEntity internal constructor(private val entity: Entity) {
 
         if (from.world != to.world || (deltaX < -32768L || deltaX > 32767L || deltaY < -32768L || deltaY > 32767L || deltaZ < -32768L || deltaZ > 32767L)) { // Teleport
             from.set(to)
-            trackers.sendServerPacketAll(EntityPacket.teleport(entity))
+            trackers.sendServerPacketAll(EntityPacket.teleport(entity, to))
         } else { //Relative
             from.apply {
                 world = to.world
