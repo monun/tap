@@ -157,7 +157,7 @@ class CommandSet internal constructor(builder: CommandBuilder) : TabExecutor {
             }
 
             component.let {
-                if (args.count() >= it.argsCount && it.onCommand(
+                if (args.count() - 1 >= it.argsCount && it.onCommand(
                         sender,
                         label,
                         componentLabel,
