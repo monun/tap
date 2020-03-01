@@ -44,7 +44,6 @@ class EntityPacketSupport {
         headPitch: Float,
         velocity: Vector
     ): PacketContainer {
-
         return PacketContainer(PacketType.Play.Server.SPAWN_ENTITY_LIVING).apply {
             integers
                 .write(0, entityId)
@@ -64,20 +63,10 @@ class EntityPacketSupport {
                 .write(0, (loc.yaw * 256.0F / 360.0F).toByte())
                 .write(0, (loc.pitch * 256.0F / 360.0F).toByte())
                 .write(0, (headPitch * 256.0F / 360.0F).toByte())
-
         }
     }
 
-//    fun spawnMob(living: LivingEntity): PacketContainer {
-//        return living.run {
-//
-//            @Suppress("DEPRECATION")
-//            spawnMob(entityId, uniqueId, living.networkId, location, location.yaw, living.velocity)
-//        }
-//    }
-
     fun metadata(entityId: Int, dataWatcher: WrappedDataWatcher): PacketContainer {
-
         return PacketContainer(PacketType.Play.Server.ENTITY_METADATA).apply {
             integers
                 .write(0, entityId)
@@ -87,14 +76,12 @@ class EntityPacketSupport {
     }
 
     fun metadata(entity: Entity): PacketContainer {
-
         return entity.run {
             metadata(entityId, WrappedDataWatcher.getEntityWatcher(entity))
         }
     }
 
     fun equipment(entityId: Int, slot: EquipmentSlot, item: ItemStack): PacketContainer {
-
         return PacketContainer(PacketType.Play.Server.ENTITY_EQUIPMENT).apply {
             integers
                 .write(0, entityId)
@@ -106,7 +93,6 @@ class EntityPacketSupport {
     }
 
     fun equipment(living: LivingEntity): List<PacketContainer> {
-
         return living.run {
             val slots = EquipmentSlot.values()
             val packets = ArrayList<PacketContainer>(slots.count())
@@ -147,7 +133,6 @@ class EntityPacketSupport {
         pitch: Float,
         onGround: Boolean
     ): PacketContainer {
-
         return PacketContainer(PacketType.Play.Server.ENTITY_TELEPORT).apply {
             integers
                 .write(0, entityId)
@@ -163,16 +148,13 @@ class EntityPacketSupport {
         }
     }
 
-    fun teleport(entity: Entity): PacketContainer {
-
+    fun teleport(entity: Entity, loc: Location, onGround: Boolean = entity.isOnGround): PacketContainer {
         return entity.run {
-            val loc = entity.location
-            teleport(entityId, loc.x, loc.y, loc.z, loc.yaw, loc.pitch, entity.isOnGround)
+            teleport(entityId, loc.x, loc.y, loc.z, loc.yaw, loc.pitch, onGround)
         }
     }
 
     fun relativeMove(entityId: Int, move: Vector, onGround: Boolean): PacketContainer {
-
         return PacketContainer(PacketType.Play.Server.REL_ENTITY_MOVE).apply {
             integers
                 .write(0, entityId)
@@ -186,7 +168,6 @@ class EntityPacketSupport {
     }
 
     fun relativeMove(entity: Entity) {
-
         return entity.run {
 
             relativeMove(entityId, velocity, isOnGround)
@@ -199,7 +180,6 @@ class EntityPacketSupport {
         yaw: Float, pitch: Float,
         onGround: Boolean
     ): PacketContainer {
-
         return PacketContainer(PacketType.Play.Server.REL_ENTITY_MOVE_LOOK).apply {
             integers
                 .write(0, entityId)
@@ -216,7 +196,6 @@ class EntityPacketSupport {
     }
 
     fun lookAndRelativeMove(entity: Entity) {
-
         return entity.run {
             val loc = entity.location
 
@@ -232,7 +211,6 @@ class EntityPacketSupport {
     }
 
     fun destroy(entityIds: IntArray): PacketContainer {
-
         return PacketContainer(PacketType.Play.Server.ENTITY_DESTROY).apply {
             integerArrays
                 .write(0, entityIds)
@@ -240,7 +218,6 @@ class EntityPacketSupport {
     }
 
     fun destroy(entities: Array<out Entity>): PacketContainer {
-
         return destroy(IntArray(entities.size) { entities[it].entityId })
     }
 }
@@ -254,15 +231,12 @@ private fun EquipmentSlot.convertToItemSlot(): EnumWrappers.ItemSlot {
         EquipmentSlot.CHEST -> EnumWrappers.ItemSlot.CHEST
         EquipmentSlot.HEAD -> EnumWrappers.ItemSlot.HEAD
     }
-
 }
 
 class EffectPacketSupport {
-
     fun firework(loc: Location, effect: FireworkEffect): List<PacketContainer> {
         return Firework::class.java.createFakeEntity()!!.run {
             fireworkMeta = fireworkMeta.apply { addEffect(effect) }
-
             listOf(
                 PacketContainer(PacketType.Play.Server.SPAWN_ENTITY).apply {
                     integers
