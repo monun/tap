@@ -16,7 +16,7 @@
 
 package com.github.noonmaru.tap.fake
 
-import com.comphenix.protocol.wrappers.WrappedDataWatcher
+import com.comphenix.protocol.events.PacketContainer
 import com.github.noonmaru.tap.protocol.EntityPacket
 import com.github.noonmaru.tap.protocol.sendServerPacket
 import com.github.noonmaru.tap.protocol.sendServerPacketAll
@@ -35,7 +35,7 @@ import kotlin.collections.HashSet
  */
 open class FakeEntity internal constructor(private val entity: Entity) {
 
-    internal lateinit var manager: FakeEntityManager
+    internal lateinit var manager: FakeManager
 
     var glowing
         get() = entity.isGlowing
@@ -53,23 +53,44 @@ open class FakeEntity internal constructor(private val entity: Entity) {
             enqueue()
         }
 
-    val world: World
-        get() = entity.world
-
     val boundingBox
         get() = entity.boundingBox
 
-    private var prevUpdateLocation: Location = entity.location
+    private val lastUpdateLoc = entity.location
 
-    private val prevLocation: Location = prevUpdateLocation.clone()
+    private val _prevLoc: Location = lastUpdateLoc.clone()
 
-    private val location: Location = prevLocation.clone()
+    val prevLocation
+        get() = _prevLoc.clone()
+
+    private val _loc: Location = _prevLoc.clone()
+
+    val location
+        get() = _loc.clone()
 
     private val passengers = HashSet<FakeEntity>()
 
     private var vehicle: FakeEntity? = null
 
     internal val trackers = HashSet<Player>()
+
+    var show = true
+        set(value) {
+            checkState()
+
+            if (field != value) {
+                field = value
+
+                if (value) { //show
+                    updateTrackers()
+                } else {
+                    trackers.run {
+                        sendServerPacketAll(createDestroyPacket())
+                        clear()
+                    }
+                }
+            }
+        }
 
     private val ignores = Collections.newSetFromMap(WeakHashMap<Player, Boolean>())
 
@@ -92,31 +113,27 @@ open class FakeEntity internal constructor(private val entity: Entity) {
         manager.enqueue(this)
     }
 
-    fun getLocation(): Location {
-        return prevLocation.clone()
-    }
-
-    fun getToLocation(): Location {
-        return location.clone()
-    }
-
     fun setPosition(
-        world: World = prevLocation.world,
-        x: Double = prevLocation.x,
-        y: Double = prevLocation.y,
-        z: Double = prevLocation.z,
-        yaw: Float = prevLocation.yaw,
-        pitch: Float = prevLocation.pitch
+        world: World = _prevLoc.world,
+        x: Double = _prevLoc.x,
+        y: Double = _prevLoc.y,
+        z: Double = _prevLoc.z,
+        yaw: Float = _prevLoc.yaw,
+        pitch: Float = _prevLoc.pitch
     ) {
         vehicle?.removePassenger(this)
 
-        location.apply {
+        _loc.apply {
             this.world = world
             this.x = x
             this.y = y
             this.z = z
             this.yaw = yaw
             this.pitch = pitch
+        }
+
+        passengers.forEach {
+            updatePassengerPos(it)
         }
 
         updateLoc = true
@@ -133,15 +150,15 @@ open class FakeEntity internal constructor(private val entity: Entity) {
         moveX: Double = 0.0,
         moveY: Double = 0.0,
         moveZ: Double = 0.0,
-        yaw: Float = prevLocation.yaw,
-        pitch: Float = prevLocation.pitch
+        yaw: Float = _prevLoc.yaw,
+        pitch: Float = _prevLoc.pitch
     ) {
-        prevLocation.run {
-            setPosition(prevLocation.world, x + moveX, y + moveY, z + moveZ, yaw, pitch)
+        _prevLoc.run {
+            setPosition(_prevLoc.world, x + moveX, y + moveY, z + moveZ, yaw, pitch)
         }
     }
 
-    fun move(v: Vector, yaw: Float = prevLocation.yaw, pitch: Float = prevLocation.pitch) {
+    fun move(v: Vector, yaw: Float = _prevLoc.yaw, pitch: Float = _prevLoc.pitch) {
         move(v.x, v.y, v.z, yaw, pitch)
     }
 
@@ -154,15 +171,17 @@ open class FakeEntity internal constructor(private val entity: Entity) {
         }
         if (updateMeta) {
             updateMeta = false
-            updateMeta()
+            createMetaPacket()?.let { packet ->
+                trackers.sendServerPacketAll(packet)
+            }
         }
     }
 
     private fun updateLocation() {
         if (vehicle != null) return
 
-        val from = prevUpdateLocation
-        val to = location
+        val from = lastUpdateLoc
+        val to = _loc
 
         val deltaX = from.x delta to.x
         val deltaY = from.y delta to.y
@@ -171,8 +190,11 @@ open class FakeEntity internal constructor(private val entity: Entity) {
 
         entity.setPositionAndRotation(to)
 
-        if (from.world == to.world && (deltaX < -32768L || deltaX > 32767L || deltaY < -32768L || deltaY > 32767L || deltaZ < -32768L || deltaZ > 32767L)) { //Relative
-            prevUpdateLocation.run {
+        if (from.world != to.world || (deltaX < -32768L || deltaX > 32767L || deltaY < -32768L || deltaY > 32767L || deltaZ < -32768L || deltaZ > 32767L)) { // Teleport
+            from.set(to)
+            trackers.sendServerPacketAll(EntityPacket.teleport(entity))
+        } else { //Relative
+            from.apply {
                 world = to.world
                 add(move)
                 yaw = to.yaw
@@ -188,31 +210,9 @@ open class FakeEntity internal constructor(private val entity: Entity) {
                 EntityPacket.lookAndRelativeMove(entity.entityId, move, yaw, pitch, false)
 
             trackers.sendServerPacketAll(packet)
-
-        } else {
-            prevUpdateLocation.run {
-                world = to.world
-                x = to.x
-                y = to.y
-                z = to.z
-                yaw = to.yaw
-                pitch = to.pitch
-            }
-
-            val packet = to.run { EntityPacket.teleport(entity) }
-
-            trackers.sendServerPacketAll(packet)
         }
 
-        prevLocation.apply {
-            this.world = to.world
-            this.x = to.x
-            this.y = to.y
-            this.z = to.z
-            this.yaw = to.yaw
-            this.pitch = to.pitch
-        }
-
+        _prevLoc.set(to)
         //Passenger update
         passengers.forEach { passenger ->
             updatePassengerPos(passenger)
@@ -220,21 +220,25 @@ open class FakeEntity internal constructor(private val entity: Entity) {
     }
 
     private fun updatePassengerPos(passenger: FakeEntity) {
-        val to = this.location
+        val loc = _loc
 
-        passenger.location.apply {
-            world = to.world
-            x = to.x
-            y = to.y + entity.mountedYOffset + entity.yOffset
-            z = to.z
-            yaw = to.yaw
-            pitch = to.pitch
-            passenger.entity.setPositionAndRotation(this)
+        passenger._prevLoc.set(passenger._loc)
+        passenger.lastUpdateLoc.set(passenger._loc)
+        passenger._loc.apply {
+            world = loc.world
+            x = loc.x
+            y = loc.y + entity.mountedYOffset + entity.yOffset - 0.01
+            z = loc.z
+            yaw = loc.yaw
+            pitch = loc.pitch
         }
+        passenger.entity.setPositionAndRotation(passenger._loc)
     }
 
     internal fun updateTrackers() {
-        val box = trackingRange.let { r -> BoundingBox.of(prevLocation, r, r, r) }
+        if (!show) return
+
+        val box = trackingRange.let { r -> BoundingBox.of(_prevLoc, r, r, r) }
         removeOutOfRangeTrackers(box.expand(16.0))
 
         val players = getNearbyPlayers(box)
@@ -242,23 +246,26 @@ open class FakeEntity internal constructor(private val entity: Entity) {
         for (player in players) {
             if (player !in ignores && trackers.add(player)) {
                 spawnTo(player)
-
-                vehicle?.updatePassengers()
-
-                if (passengers.isNotEmpty())
-                    updatePassengers()
             }
         }
     }
 
+    protected open fun spawnTo(player: Player) {
+        player.sendServerPacket(entity.createSpawnPacket())
+        createMetaPacket()?.let { player.sendServerPacket(it) }
+        vehicle?.let { player.sendServerPacket(it.createMountPacket()) }
+        if (passengers.isNotEmpty())
+            player.sendServerPacket(createMountPacket())
+    }
+
     private fun getNearbyPlayers(box: BoundingBox): List<Player> {
-        return manager.players.filter { player -> player.isValid && player.world == world && box.overlaps(player.boundingBox) }
+        return manager.players.filter { player -> player.isValid && player.world == _loc.world && box.overlaps(player.boundingBox) }
     }
 
     private fun removeOutOfRangeTrackers(box: BoundingBox) {
         trackers.removeIf { player ->
-            if (!player.isValid || world != player.world || !box.overlaps(player.boundingBox)) {
-                destroyTo(player)
+            if (!player.isValid || player.world != _loc.world || !box.overlaps(player.boundingBox)) {
+                player.sendServerPacket(createDestroyPacket())
                 true
             } else
                 false
@@ -274,11 +281,6 @@ open class FakeEntity internal constructor(private val entity: Entity) {
         applier.invoke(entity as T)
         updateMeta = true
         enqueue()
-    }
-
-    private fun updateMeta() {
-        val packet = EntityPacket.metadata(entity.entityId, WrappedDataWatcher.getEntityWatcher(entity))
-        trackers.sendServerPacketAll(packet)
     }
 
     private fun checkPassenger(passenger: FakeEntity) {
@@ -298,7 +300,7 @@ open class FakeEntity internal constructor(private val entity: Entity) {
         if (this.passengers.add(passenger)) {
             passenger.vehicle = this
             updatePassengerPos(passenger)
-            updatePassengers()
+            notifyPassengers()
         }
     }
 
@@ -307,21 +309,12 @@ open class FakeEntity internal constructor(private val entity: Entity) {
 
         if (this.passengers.remove(passenger)) {
             passenger.vehicle = null
-            updatePassengers()
+            notifyPassengers()
         }
     }
 
-    private fun updatePassengers() {
-        trackers.sendServerPacketAll(
-            EntityPacket.mount(
-                this.entity.entityId,
-                this.passengers.map { it.entity.entityId }.toIntArray()
-            )
-        )
-    }
-
-    protected open fun spawnTo(player: Player) {
-        player.sendServerPacket(this.entity.createSpawnPacket())
+    private fun notifyPassengers() {
+        trackers.sendServerPacketAll(createMountPacket())
     }
 
     fun showTo(player: Player) {
@@ -330,7 +323,7 @@ open class FakeEntity internal constructor(private val entity: Entity) {
 
     fun hideTo(player: Player) {
         if (ignores.add(player) && trackers.remove(player)) {
-            destroyTo(player)
+            player.sendServerPacket(createDestroyPacket())
         }
     }
 
@@ -338,10 +331,16 @@ open class FakeEntity internal constructor(private val entity: Entity) {
         return player in ignores
     }
 
-    private fun destroyTo(player: Player) {
-        val packet = EntityPacket.destroy(intArrayOf(entity.entityId))
+    protected open fun createMetaPacket(): PacketContainer? {
+        return null
+    }
 
-        player.sendServerPacket(packet)
+    private fun createMountPacket(): PacketContainer {
+        return EntityPacket.mount(entity.entityId, passengers.map { it.entity.entityId }.toIntArray())
+    }
+
+    private fun createDestroyPacket(): PacketContainer {
+        return EntityPacket.destroy(intArrayOf(entity.entityId))
     }
 
     fun checkState() {
@@ -366,4 +365,13 @@ open class FakeEntity internal constructor(private val entity: Entity) {
 
 infix fun Double.delta(to: Double): Long {
     return ((to - this) * 4096).toLong()
+}
+
+private fun Location.set(loc: Location) {
+    world = loc.world
+    x = loc.x
+    y = loc.y
+    z = loc.z
+    yaw = loc.yaw
+    pitch = loc.pitch
 }

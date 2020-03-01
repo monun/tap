@@ -21,7 +21,7 @@ import org.bukkit.block.data.BlockData
 import org.bukkit.entity.*
 import java.util.*
 
-class FakeEntityManager : Runnable {
+class FakeManager : Runnable {
 
     private val entities = HashSet<FakeEntity>()
 
@@ -92,7 +92,7 @@ class FakeEntityManager : Runnable {
             is LivingEntity -> FakeLivingEntity(this)
             else -> FakeEntity(this)
         }.apply {
-            manager = this@FakeEntityManager
+            manager = this@FakeManager
         }
     }
 
