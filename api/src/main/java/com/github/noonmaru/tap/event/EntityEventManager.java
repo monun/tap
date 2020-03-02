@@ -146,7 +146,6 @@ public final class EntityEventManager {
             return this.bake = providers.toArray(new EventEntityProvider[0]);
         }
 
-        @NotNull
         private void addProvider(@NotNull final EventEntityProvider provider) {
             this.providers.add(provider);
             this.bake = null;
