@@ -14,8 +14,8 @@
 >  * Packets
 >  * Mojang user profile
 >  * Entity specificEntity events listener
->  * Sub commands Module
->  * FakeEntity Module
+>  * Sub commands
+>  * FakeEntity
 
 > * ##### Gradle
 >```groovy
@@ -53,3 +53,7 @@
 >    implementation 'com.github.noonmaru:tap-v1_15_R1:2.3.1'
 >}
 >```
+><br><br/>
+> ###### Currently the following versions have not been tested.
+> * 1.13.2
+> * 1.14.4
