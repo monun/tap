@@ -20,7 +20,6 @@ package com.github.noonmaru.tap.command
  * @author Nemo
  */
 class CommandContainer internal constructor(val label: String, init: CommandContainer.() -> CommandComponent) {
-
     val component: CommandComponent = init()
 
     var usage: String? = null
@@ -30,5 +29,4 @@ class CommandContainer internal constructor(val label: String, init: CommandCont
     var permission: String? = null
 
     var permissionMessage: String? = null
-
 }
