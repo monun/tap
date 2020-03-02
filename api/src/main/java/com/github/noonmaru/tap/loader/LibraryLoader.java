@@ -112,7 +112,7 @@ public final class LibraryLoader {
      * @return 마인크래프트 버전
      */
     public static String getMinecraftVersion() {
-        Matcher matcher = Pattern.compile("(\\(MC: )([\\d\\.]+)(\\))").matcher(Bukkit.getVersion());
+        Matcher matcher = Pattern.compile("(\\(MC: )([\\d.]+)(\\))").matcher(Bukkit.getVersion());
 
         return matcher.find() ? matcher.group(2) : null;
     }

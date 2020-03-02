@@ -49,6 +49,10 @@ public final class RegisteredEntityListener {
         this.handlers = ImmutableList.copyOf(handlers);
     }
 
+    public ListenerStatement getStatement() {
+        return statement;
+    }
+
     public Listener getListener() {
         return listener;
     }

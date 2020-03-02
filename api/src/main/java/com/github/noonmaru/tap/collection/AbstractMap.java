@@ -101,7 +101,7 @@ abstract class AbstractMap<K, V> implements Map<K, V> {
      * NB: Do not replace with Object.equals until JDK-8015417 is resolved.
      */
     private static boolean eq(Object o1, Object o2) {
-        return o1 == null ? o2 == null : o1.equals(o2);
+        return Objects.equals(o1, o2);
     }
 
     /**
@@ -476,9 +476,7 @@ abstract class AbstractMap<K, V> implements Map<K, V> {
                         return false;
                 }
             }
-        } catch (ClassCastException unused) {
-            return false;
-        } catch (NullPointerException unused) {
+        } catch (ClassCastException | NullPointerException unused) {
             return false;
         }
 
