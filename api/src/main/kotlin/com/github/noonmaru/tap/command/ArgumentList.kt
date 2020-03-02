@@ -18,44 +18,27 @@ package com.github.noonmaru.tap.command
 import org.apache.commons.lang.StringUtils
 import java.util.*
 
-class ArgumentList(private val arguments: Array<out String>, cursor: Int) {
-
+class ArgumentList(private val arguments: Array<out String>, cursor: Int) : Iterator<String> {
     private var cursor: Int = cursor
         set(value) {
             if (value < 0 || value > arguments.size) throw ArrayIndexOutOfBoundsException(value)
             field = value
         }
 
-    fun isLast(): Boolean {
-        return remain() == 1
-    }
+    fun isLast() = remain() == 1
 
-    fun remain(): Int {
-        return arguments.size - cursor
-    }
+    fun remain() = arguments.size - cursor
 
-    fun isEmpty(): Boolean {
-        return arguments.isEmpty()
-    }
+    override operator fun hasNext() = cursor < arguments.size
 
-    operator fun hasNext(): Boolean {
-        return cursor < arguments.size
-    }
-
-    operator fun next(): String {
+    override operator fun next(): String {
         if (cursor >= arguments.size) throw NoSuchElementException()
         return arguments[cursor++]
     }
 
-    fun first(): String {
-        return arguments.first()
-    }
+    fun first() = arguments.first()
 
-    fun last(): String {
-        return arguments.last()
-    }
+    fun last(): String = arguments.last()
 
-    fun joinToString(separator: String = " "): String {
-        return StringUtils.join(arguments, separator, cursor, arguments.size)
-    }
+    fun joinToString(separator: String = " "): String = StringUtils.join(arguments, separator, cursor, arguments.size)
 }

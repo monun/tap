@@ -19,10 +19,8 @@ package com.github.noonmaru.tap.command
 /**
  * @author Nemo
  */
-fun Iterable<String>.tabComplete(label: String): List<String> {
-    return filter { it.regionMatches(0, label, 0, label.count(), true) }
-}
+fun Iterable<String>.tabComplete(label: String): List<String> =
+    filter { it.regionMatches(0, label, 0, label.count(), true) }
 
-fun <T> Iterable<T>.tabComplete(label: String, transformer: (o: T) -> String): List<String> {
-    return filter { transformer.invoke(it).regionMatches(0, label, 0, label.count(), true) }.map(transformer)
-}
+fun <T> Iterable<T>.tabComplete(label: String, transformer: (o: T) -> String): List<String> =
+    filter { transformer.invoke(it).regionMatches(0, label, 0, label.count(), true) }.map(transformer)

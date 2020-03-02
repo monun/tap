@@ -28,11 +28,8 @@ interface CommandComponent {
 
     fun onCommand(sender: CommandSender, label: String, componentLabel: String, args: ArgumentList): Boolean
 
-    fun onTabComplete(sender: CommandSender, label: String, componentLabel: String, args: ArgumentList): List<String> {
-        return emptyList()
-    }
+    fun onTabComplete(sender: CommandSender, label: String, componentLabel: String, args: ArgumentList): List<String> =
+        emptyList()
 
-    fun test(sender: CommandSender): (() -> String)? {
-        return null
-    }
+    fun test(sender: CommandSender): (() -> String)? = null
 }

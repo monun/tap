@@ -35,7 +35,7 @@ class CommandBuilder internal constructor(init: CommandBuilder.() -> Unit) {
     internal var help: Pair<String, (CommandContainer.() -> Unit)?>? = null
 
     init {
-        this.init()
+        init()
     }
 
     private fun checkLabel(label: String) {
@@ -200,9 +200,8 @@ class CommandSet internal constructor(builder: CommandBuilder) : TabExecutor {
     }
 }
 
-private fun Iterable<CommandContainer>.getNearestCommand(label: String): CommandContainer? {
-    return minBy { calcLevenshteinDistance(label, it.label) }
-}
+private fun Iterable<CommandContainer>.getNearestCommand(label: String): CommandContainer? =
+    minBy { calcLevenshteinDistance(label, it.label) }
 
 fun createHelp(
     label: String,
