@@ -52,8 +52,8 @@
 >    implementation 'com.github.noonmaru:tap:2.3.1'
 >    implementation 'com.github.noonmaru:tap-v1_15_R1:2.3.1'
 >}
-
 >```
-> ###### Currently the following versions have not been tested.
+
+> ##### Currently the following versions have not been tested.
 > * 1.13.2
 > * 1.14.4
