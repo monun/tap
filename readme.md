@@ -3,7 +3,6 @@
 [![Build Status](https://travis-ci.org/noonmaru/tap.svg?branch=master)](https://travis-ci.org/noonmaru/tap)
 [![Maintainability](https://api.codeclimate.com/v1/badges/6a20ddcbcde03208b75e/maintainability)](https://codeclimate.com/github/noonmaru/tap/maintainability)
 [![](https://jitpack.io/v/noonmaru/tap.svg)](https://jitpack.io/#noonmaru/tap)
-![JitPack - Downloads](https://img.shields.io/jitpack/dm/github/noonmaru/tap)
 ![GitHub](https://img.shields.io/github/license/noonmaru/tap)
 ![Twitch Status](https://img.shields.io/twitch/status/hptgrm)
 
