@@ -6,7 +6,7 @@
 ![GitHub](https://img.shields.io/github/license/noonmaru/tap)
 ![Twitch Status](https://img.shields.io/twitch/status/hptgrm)
 
-> Paper library written in Kotlin
+> Library for paper written in Kotlin
 
 > * ##### Features
 >  * Java agent support (asm)
