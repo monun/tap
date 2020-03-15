@@ -55,6 +55,22 @@ open class FakeEntity internal constructor(private val entity: Entity) {
             enqueue()
         }
 
+    var customNameVisible
+        get() = entity.isCustomNameVisible
+        set(value) {
+            entity.isCustomNameVisible = value
+            updateMeta = true
+            enqueue()
+        }
+
+    var customName
+        get() = entity.customName
+        set(value) {
+            entity.customName = value
+            updateMeta = true
+            enqueue()
+        }
+
     val boundingBox
         get() = entity.boundingBox
 
