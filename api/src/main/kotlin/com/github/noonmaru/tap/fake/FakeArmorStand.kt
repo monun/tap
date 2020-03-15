@@ -39,7 +39,7 @@ class FakeArmorStand(private val armorStand: ArmorStand) : FakeLivingEntity(armo
             enqueue()
         }
 
-    var argms
+    var arms
         get() = armorStand.hasArms()
         set(value) {
             armorStand.setArms(value)
