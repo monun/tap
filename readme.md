@@ -48,7 +48,7 @@
 >```
 >```groovy
 >dependencies {
->    implementation 'com.github.noonmaru:tap:2.3.1'
+>    implementation 'com.github.noonmaru:tap:2.3.2'
 >    implementation 'com.github.noonmaru:tap-v1_15_R1:2.3.2'
 >}
 >```
