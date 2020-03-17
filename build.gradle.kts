@@ -132,9 +132,8 @@ tasks {
     shadowJar {
         archiveClassifier.set("dist")
     }
-    create<Copy>("distJar") {
-        from(shadowJar)
-        into("W:\\Servers\\test\\plugins")
-        into("W:\\Servers\\human-chess\\plugins")
-    }
+//    create<Copy>("distJar") {
+//        from(shadowJar)
+//        into("W:\\Servers\\test\\plugins")
+//    }
 }

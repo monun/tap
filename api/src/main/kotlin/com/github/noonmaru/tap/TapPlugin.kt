@@ -27,55 +27,5 @@ import org.bukkit.plugin.java.JavaPlugin
 class TapPlugin : JavaPlugin() {
     override fun onEnable() {
         Tools.loadAttachLibrary(dataFolder)
-//        Debug(this)
     }
 }
-
-//class Debug(plugin: TapPlugin) : Listener {
-//
-//    private val fakeManager = FakeManager()
-//
-//    private val fakeStand: FakeArmorStand
-//
-//    private val fakeBlock: FakeFallingBlock
-//
-//    init {
-//        val loc = Bukkit.getWorlds().first().spawnLocation
-//
-//        fakeStand = fakeManager.createFakeEntity(loc)
-//        fakeBlock = fakeManager.createFallingBlock(loc, Material.STONE.createBlockData())
-//
-//        fakeStand.addPassenger(fakeBlock)
-//
-//        plugin.server.scheduler.runTaskTimer(plugin, fakeManager, 0, 1)
-//        plugin.server.pluginManager.registerEvents(this, plugin)
-//    }
-//
-//    @EventHandler
-//    fun onJoin(event: PlayerJoinEvent) {
-//        fakeManager.addPlayer(event.player)
-//        fakeStand.setPosition(event.player.location)
-//    }
-//
-//    @EventHandler
-//    fun onInteract(event: PlayerInteractEvent) {
-//        fakeBlock.show = !fakeBlock.show
-//
-//        fakeStand.apply {
-//            invisible =false
-//            mark = true
-//        }
-//
-//        fakeStand.setPosition(event.player.location.apply {
-//            add(direction.multiply(5))
-//        })
-//
-//        fakeManager.createFakeEntity(event.player.location.apply {
-//            add(direction.multiply(10))
-//        }, Parrot::class.java).applyMetadata<Parrot> {
-//            it.variant = Parrot.Variant.GRAY
-//            it.customName = "앵무새"
-//            it.isCustomNameVisible = true
-//        }
-//    }
-//}
