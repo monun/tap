@@ -1,6 +1,6 @@
 /*
  *
- *  * Copyright (c) 2020 Noonmaru
+ *  * Copyright (c) $year Noonmaru
  *  *
  *  * Licensed under the General Public License, Version 3.0 (the "License");
  *  *  you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import org.bukkit.ChatColor
 import org.bukkit.command.Command
 import org.bukkit.command.CommandSender
 import org.bukkit.command.TabExecutor
+import org.bukkit.entity.Player
 import org.bukkit.plugin.java.JavaPlugin
 import java.util.*
 import kotlin.math.max
@@ -159,14 +160,29 @@ class CommandSet internal constructor(builder: CommandBuilder) : TabExecutor {
             }
 
             component.let {
-                if (args.count() - 1 >= it.argsCount && it.onCommand(
-                        sender,
-                        label,
-                        componentLabel,
-                        ArgumentList(args, 1)
-                    )
-                ) {
-                    return true
+                if (args.count() - 1 >= it.argsCount) {
+                    it.runCatching {
+                        val result = onCommand(
+                            sender,
+                            label,
+                            componentLabel,
+                            ArgumentList(args, 1)
+                        )
+
+                        if (result) return true
+                    }.onFailure { t ->
+                        t.printStackTrace()
+
+                        if (sender is Player) {
+                            sender.sendMessage("${ChatColor.YELLOW}${t.javaClass.name}: ${t.message}")
+                            for (stackTraceElement in t.stackTrace) {
+                                sender.sendMessage("${ChatColor.YELLOW}       at $stackTraceElement")
+                            }
+                        }
+
+                        sender.sendMessage("${ChatColor.RED}/$label $componentLabel 명령을 실행 도중 예외가 발생했습니다.")
+                        return true
+                    }
                 }
 
                 sender.sendMessage(createHelp(label, this.label, this.usage, this.description))
