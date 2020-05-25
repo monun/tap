@@ -37,8 +37,8 @@ allprojects {
         compileOnly(kotlin("stdlib-jdk8"))
     }
 
-    group = properties["pluginGroup"]!!
-    version = properties["pluginVersion"]!!
+    group = requireNotNull(properties["pluginName"]) { "Group is undefined in properties" }
+    version = requireNotNull(properties["pluginVersion"]) { "Version is undefined in properties" }
 
     tasks {
         compileJava {
@@ -134,6 +134,6 @@ tasks {
     }
     create<Copy>("distJar") {
         from(shadowJar)
-        into("W:\\Servers\\test\\plugins")
+        into("W:\\Servers\\sample\\plugins")
     }
 }
