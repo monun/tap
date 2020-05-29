@@ -206,26 +206,31 @@ open class FakeEntity internal constructor(private val entity: Entity) {
 
         entity.setPositionAndRotation(to)
 
-        if (from.world != to.world || (deltaX < -32768L || deltaX > 32767L || deltaY < -32768L || deltaY > 32767L || deltaZ < -32768L || deltaZ > 32767L)) { // Teleport
+        if ((from.world != to.world || (deltaX < -32768L || deltaX > 32767L || deltaY < -32768L || deltaY > 32767L || deltaZ < -32768L || deltaZ > 32767L))) { // Teleport
             from.set(to)
             trackers.sendServerPacketAll(EntityPacket.teleport(entity, to))
         } else { //Relative
-            from.apply {
-                world = to.world
-                add(move)
-                yaw = to.yaw
-                pitch = to.pitch
-            }
-
             val yaw = to.yaw
             val pitch = to.pitch
 
-            val packet = if (from.yaw == yaw && from.pitch == pitch)
-                EntityPacket.relativeMove(entity.entityId, move, false)
-            else
-                EntityPacket.lookAndRelativeMove(entity.entityId, move, yaw, pitch, false)
+            val packet = EntityPacket.lookAndRelativeMove(
+                entity.entityId,
+                deltaX.toShort(),
+                deltaY.toShort(),
+                deltaZ.toShort(),
+                yaw,
+                pitch,
+                false
+            )
 
             trackers.sendServerPacketAll(packet)
+
+            from.apply {
+                this.world = to.world
+                add(move)
+                this.yaw = to.yaw
+                this.pitch = to.pitch
+            }
         }
 
         _prevLoc.set(to)
@@ -380,7 +385,7 @@ open class FakeEntity internal constructor(private val entity: Entity) {
 }
 
 infix fun Double.delta(to: Double): Long {
-    return ((to - this) * 4096).toLong()
+    return ((to - this) * 4096.0).toLong()
 }
 
 private fun Location.set(loc: Location) {

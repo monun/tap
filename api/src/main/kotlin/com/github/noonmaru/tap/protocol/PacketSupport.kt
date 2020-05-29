@@ -1,19 +1,17 @@
 /*
+ * Copyright (c) $date.year Noonmaru
  *
- *  * Copyright (c) 2020 Noonmaru
- *  *
- *  * Licensed under the General Public License, Version 3.0 (the "License");
- *  *  you may not use this file except in compliance with the License.
- *  * You may obtain a copy of the License at
- *  *
- *  * https://opensource.org/licenses/gpl-3.0
- *  *
- *  *  Unless required by applicable law or agreed to in writing, software
- *  *  distributed under the License is distributed on an "AS IS" BASIS,
- *  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  *  See the License for the specific language governing permissions and
- *  *  limitations under the License.
+ *  Licensed under the General Public License, Version 3.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
+ * https://opensource.org/licenses/gpl-3.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package com.github.noonmaru.tap.protocol
@@ -119,9 +117,7 @@ class EntityPacketSupport {
                             packets += equipment(entityId, slot, item)
                     }
                 }
-
             }
-
             packets
         }
     }
@@ -157,13 +153,23 @@ class EntityPacketSupport {
     }
 
     fun relativeMove(entityId: Int, move: Vector, onGround: Boolean): PacketContainer {
+        return relativeMove(
+            entityId,
+            (move.x * 4096.0).toShort(),
+            (move.y * 4096.0).toShort(),
+            (move.z * 4096.0).toShort(),
+            onGround
+        )
+    }
+
+    fun relativeMove(entityId: Int, deltaX: Short, deltaY: Short, deltaZ: Short, onGround: Boolean): PacketContainer {
         return PacketContainer(PacketType.Play.Server.REL_ENTITY_MOVE).apply {
             integers
                 .write(0, entityId)
             shorts
-                .write(0, (move.x * 4096.0).toShort())
-                .write(1, (move.y * 4096.0).toShort())
-                .write(2, (move.z * 4096.0).toShort())
+                .write(0, deltaX)
+                .write(1, deltaY)
+                .write(2, deltaZ)
             booleans
                 .write(0, onGround)
         }
@@ -171,7 +177,6 @@ class EntityPacketSupport {
 
     fun relativeMove(entity: Entity) {
         return entity.run {
-
             relativeMove(entityId, velocity, isOnGround)
         }
     }
@@ -182,13 +187,33 @@ class EntityPacketSupport {
         yaw: Float, pitch: Float,
         onGround: Boolean
     ): PacketContainer {
+        return lookAndRelativeMove(
+            entityId,
+            (move.x * 4096.0).toShort(),
+            (move.y * 4096.0).toShort(),
+            (move.z * 4096.0).toShort(),
+            yaw,
+            pitch,
+            onGround
+        )
+    }
+
+    fun lookAndRelativeMove(
+        entityId: Int,
+        deltaX: Short,
+        deltaY: Short,
+        deltaZ: Short,
+        yaw: Float,
+        pitch: Float,
+        onGround: Boolean
+    ): PacketContainer {
         return PacketContainer(PacketType.Play.Server.REL_ENTITY_MOVE_LOOK).apply {
             integers
                 .write(0, entityId)
             shorts
-                .write(0, (move.x * 4096.0).toShort())
-                .write(1, (move.y * 4096.0).toShort())
-                .write(2, (move.z * 4096.0).toShort())
+                .write(0, deltaX)
+                .write(1, deltaY)
+                .write(2, deltaZ)
             bytes
                 .write(0, (yaw * 256.0 / 360.0).toByte())
                 .write(1, (pitch * 256.0 / 360.0).toByte())
