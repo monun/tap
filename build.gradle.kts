@@ -134,6 +134,6 @@ tasks {
     }
     create<Copy>("distJar") {
         from(shadowJar)
-        into("W:\\Servers\\sample\\plugins")
+        into("W:\\Servers\\naruto\\plugins")
     }
 }
