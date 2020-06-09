@@ -111,6 +111,7 @@ project(":api") {
         compileOnly(files(Jvm.current().toolsJar))
         compileOnly("com.destroystokyo.paper:paper-api:1.13.2-R0.1-SNAPSHOT")
         compileOnly("com.comphenix.protocol:ProtocolLib:4.5.0")
+        implementation("it.unimi.dsi:fastutil:8.3.1")
     }
 
     tasks {
@@ -135,5 +136,13 @@ tasks {
     create<Copy>("distJar") {
         from(shadowJar)
         into("W:\\Servers\\naruto\\plugins")
+    }
+}
+
+if (!hasProperty("debug")) {
+    tasks {
+        shadowJar {
+            relocate("it.unimi.dsi", "com.github.noonmaru.tap.internal.it.unimi.dsi")
+        }
     }
 }
