@@ -204,7 +204,7 @@ open class FakeEntity internal constructor(private val entity: Entity) {
         val deltaZ = from.z delta to.z
         val move = Vector(deltaX / 4096.0, deltaY / 4096.0, deltaZ / 4096.0)
 
-        entity.setPositionAndRotation(to)
+        entity.setLocation(to)
 
         if ((from.world != to.world || (deltaX < -32768L || deltaX > 32767L || deltaY < -32768L || deltaY > 32767L || deltaZ < -32768L || deltaZ > 32767L))) { // Teleport
             from.set(to)
@@ -253,7 +253,7 @@ open class FakeEntity internal constructor(private val entity: Entity) {
             yaw = loc.yaw
             pitch = loc.pitch
         }
-        passenger.entity.setPositionAndRotation(passenger._loc)
+        passenger.entity.setLocation(passenger._loc)
     }
 
     internal fun updateTrackers() {
