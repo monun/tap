@@ -16,26 +16,29 @@
 
 package com.github.noonmaru.tap.nfake.internal
 
+import com.github.noonmaru.tap.hash.pair
+import com.github.noonmaru.tap.math.toSection
 import com.github.noonmaru.tap.nfake.FakeChunk
 import com.github.noonmaru.tap.nfake.FakeEntity
-import com.github.noonmaru.tap.nfake.FakeServer
 import com.github.noonmaru.tap.nfake.FakeWorld
 import com.github.noonmaru.tap.ref.UpstreamReference
 import com.google.common.collect.ImmutableList
+import it.unimi.dsi.fastutil.longs.Long2LongLinkedOpenHashMap
+import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap
+import org.bukkit.Location
 import org.bukkit.World
-import org.bukkit.util.BoundingBox
-import org.bukkit.util.Vector
 
 class FakeWorldImpl(
-    server: FakeServer,
+    server: FakeServerImpl,
     bukkitWorld: World
 ) : FakeWorld {
     private val serverRef = UpstreamReference(server)
     private val bukkitWorldRef = UpstreamReference(bukkitWorld)
     private val _entities = ArrayList<FakeEntity>()
-    private val chunksByHash = Long2ObjectOpenHashMap<>()
+    private val chunksByHash = Long2ObjectOpenHashMap<FakeChunk>()
+    private val unloadQueue = Long2LongLinkedOpenHashMap()
 
-    override val server: FakeServer
+    override val server: FakeServerImpl
         get() = serverRef.get()
 
     override val bukkitWorld: World
@@ -44,15 +47,72 @@ class FakeWorldImpl(
     override val entities: List<FakeEntity>
         get() = ImmutableList.copyOf(_entities)
 
-    override fun getChunkAt(x: Int, z: Int): FakeChunk? {
-        TODO("Not yet implemented")
+    override val chunks: List<FakeChunk>
+        get() = ImmutableList.copyOf(chunksByHash.values)
+
+    override fun getChunkAt(x: Int, z: Int): FakeChunkImpl? {
+        return chunksByHash[x pair z]
     }
 
-    override fun rayTrace(start: Vector, direction: Vector, maxDistance: Double) {
-        TODO("Not yet implemented")
+    internal fun addEntity(entity: FakeEntity) {
+        TODO()
     }
 
-    override fun getNearbyEntities(box: BoundingBox, filter: ((FakeEntity) -> Boolean)?) {
-        TODO("Not yet implemented")
+    internal fun removeEntity(entity: FakeEntity) {
+        TODO()
+    }
+
+    internal fun findNearbyEntities(center: Location, distance: Double, action: (FakeEntityImpl) -> Unit) {
+        val distanceSquared = distance * distance
+        val centerX = center.x
+        val centerY = center.y
+        val centerZ = center.z
+        val minX = (centerX - distance).toSection()
+        val minY = (centerY - distance).toSection().coerceIn(0, 15)
+        val minZ = (centerZ - distance).toSection()
+        val maxX = (centerX + distance).toSection()
+        val maxY = (centerY + distance).toSection().coerceIn(minY, 15)
+        val maxZ = (centerZ + distance).toSection()
+
+        for (chunkX in minX..maxX) {
+            for (chunkZ in minZ..maxZ) {
+                getChunkAt(chunkX, chunkZ)?.let { chunk ->
+                    for (sectionY in minY..maxY) {
+                        for (entity in chunk.getSectionAt(sectionY).entities) {
+                            if (center.distanceSquared(entity.currentLocation) < distanceSquared) {
+                                action(entity)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    internal fun findNearbyEntities(center: Location, distance: Double, action: (FakeEntityImpl) -> Unit) {
+        val distanceSquared = distance * distance
+        val centerX = center.x
+        val centerY = center.y
+        val centerZ = center.z
+        val minX = (centerX - distance).toSection()
+        val minY = (centerY - distance).toSection().coerceIn(0, 15)
+        val minZ = (centerZ - distance).toSection()
+        val maxX = (centerX + distance).toSection()
+        val maxY = (centerY + distance).toSection().coerceIn(minY, 15)
+        val maxZ = (centerZ + distance).toSection()
+
+        for (chunkX in minX..maxX) {
+            for (chunkZ in minZ..maxZ) {
+                getChunkAt(chunkX, chunkZ)?.let { chunk ->
+                    for (sectionY in minY..maxY) {
+                        for (entity in chunk.getSectionAt(sectionY).entities) {
+                            if (center.distanceSquared(entity.currentLocation) < distanceSquared) {
+                                action(entity)
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 }

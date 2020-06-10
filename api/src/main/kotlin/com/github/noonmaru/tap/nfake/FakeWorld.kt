@@ -17,18 +17,12 @@
 package com.github.noonmaru.tap.nfake
 
 import org.bukkit.World
-import org.bukkit.util.BoundingBox
-import org.bukkit.util.Vector
 
 interface FakeWorld {
     val server: FakeServer
     val bukkitWorld: World
-    val entities: List<FakeEntity>
     val chunks: List<FakeChunk>
+    val entities: List<FakeEntity>
 
     fun getChunkAt(x: Int, z: Int): FakeChunk?
-
-    fun rayTrace(start: Vector, direction: Vector, maxDistance: Double)
-
-    fun getNearbyEntities(box: BoundingBox, filter: ((FakeEntity) -> Boolean)? = null)
 }

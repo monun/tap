@@ -44,7 +44,7 @@ class FakeManager {
     ): FakeEntity {
         val entity =
             entityClass.createFakeEntity() ?: throw NullPointerException("Cannot create FakeEntity for $entityClass")
-        entity.setPositionAndRotation(loc)
+        entity.setLocation(loc)
         val fake = entity.toFake()
         fake.manager = this
 
@@ -69,7 +69,7 @@ class FakeManager {
         data: BlockData
     ): FakeFallingBlock {
         val fallingBlock = createFallingBlock(data).apply {
-            setPositionAndRotation(loc)
+            setLocation(loc)
         }
 
         return addFakeEntity(fallingBlock)

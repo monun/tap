@@ -16,14 +16,23 @@
 
 package com.github.noonmaru.tap.nfake
 
+import org.bukkit.Location
 import org.bukkit.World
+import org.bukkit.entity.Entity
+import org.bukkit.entity.Player
 
 interface FakeServer {
     val worlds: List<FakeWorld>
 
     fun adaptWorld(bukkitWorld: World): FakeWorld
 
+    fun spawnEntity(location: Location, clazz: Class<out Entity>): FakeEntity
+
+    fun addPlayer(player: Player)
+
+    fun removePlayer(player: Player)
+
     fun update()
 
-    fun destroy()
+    fun destroyAll()
 }

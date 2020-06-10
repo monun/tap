@@ -16,11 +16,19 @@
 
 package com.github.noonmaru.tap.nfake
 
+import org.bukkit.Location
 import org.bukkit.entity.Entity
 
 interface FakeEntity {
     val world: FakeWorld
     val bukkitEntity: Entity
+    val location: Location
+
+    fun moveTo(target: Location)
+
+    fun move(x: Double, y: Double, z: Double)
+
+    fun moveAndRotation(x: Double, y: Double, z: Double, yaw: Float, pitch: Float)
 
     fun remove()
 }
