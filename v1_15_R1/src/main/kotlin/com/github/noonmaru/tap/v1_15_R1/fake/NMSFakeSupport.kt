@@ -41,10 +41,10 @@ class NMSFakeSupport : FakeSupport {
     }
 
     @Suppress("UNCHECKED_CAST")
-    override fun <T : Entity> createEntity(entityClass: Class<out Entity>, bukkitWorld: World): T? {
+    override fun <T : Entity> createEntity(entityClass: Class<out Entity>, world: World): T? {
         return NMSEntityTypes.findType(entityClass)?.run {
-            val world = (bukkitWorld as CraftWorld).handle
-            this.a(world)?.bukkitEntity as T
+            val nmsWorld = (world as CraftWorld).handle
+            this.a(nmsWorld)?.bukkitEntity as T
         }
     }
 

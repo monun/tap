@@ -14,12 +14,29 @@
  * limitations under the License.
  */
 
-package com.github.noonmaru.tap.nfake
+package com.github.noonmaru.tap.fake
 
-interface FakeChunk {
-    val world: FakeWorld
-    val x: Int
-    val z: Int
+import com.github.noonmaru.tap.fake.internal.FakeServerImpl
+import org.bukkit.Location
+import org.bukkit.entity.Entity
+import org.bukkit.entity.Player
+
+interface FakeServer {
+    companion object {
+        fun create(): FakeServer {
+            return FakeServerImpl()
+        }
+    }
+
     val entities: List<FakeEntity>
-    val valid: Boolean
+
+    fun spawnEntity(location: Location, clazz: Class<out Entity>): FakeEntity
+
+    fun addPlayer(player: Player)
+
+    fun removePlayer(player: Player)
+
+    fun update()
+
+    fun clear()
 }

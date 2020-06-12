@@ -262,7 +262,7 @@ private fun EquipmentSlot.convertToItemSlot(): EnumWrappers.ItemSlot {
 
 class EffectPacketSupport {
     fun firework(loc: Location, effect: FireworkEffect): List<PacketContainer> {
-        return Firework::class.java.createFakeEntity()!!.run {
+        return Firework::class.java.createFakeEntity(loc.world)!!.run {
             fireworkMeta = fireworkMeta.apply { addEffect(effect) }
             listOf(
                 PacketContainer(PacketType.Play.Server.SPAWN_ENTITY).apply {

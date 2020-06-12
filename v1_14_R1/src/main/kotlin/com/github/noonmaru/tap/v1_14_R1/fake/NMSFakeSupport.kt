@@ -21,6 +21,7 @@ import net.minecraft.server.v1_14_R1.EntityFallingBlock
 import net.minecraft.server.v1_14_R1.IRegistry
 import org.bukkit.Bukkit
 import org.bukkit.Location
+import org.bukkit.World
 import org.bukkit.block.data.BlockData
 import org.bukkit.craftbukkit.v1_14_R1.CraftServer
 import org.bukkit.craftbukkit.v1_14_R1.CraftWorld
@@ -41,10 +42,10 @@ class NMSFakeSupport : FakeSupport {
     }
 
     @Suppress("UNCHECKED_CAST")
-    override fun <T : Entity> createEntity(entityClass: Class<out Entity>): T? {
+    override fun <T : Entity> createEntity(entityClass: Class<out Entity>, world: World): T? {
         return NMSEntityTypes.findType(entityClass)?.run {
-            val world = (Bukkit.getServer() as CraftServer).server.worlds.first()
-            this.a(world)?.bukkitEntity as T
+            val nmsWorld = (Bukkit.getServer() as CraftServer).server.worlds.first()
+            this.a(nmsWorld)?.bukkitEntity as T
         }
     }
 
@@ -60,16 +61,6 @@ class NMSFakeSupport : FakeSupport {
         val nmsEntity = entity.handle
 
         nmsEntity.isInvisible = invisible
-    }
-
-    override fun setPosition(entity: Entity, loc: Location) {
-        entity as CraftEntity
-        val nmsEntity = entity.handle
-
-        loc.run {
-            nmsEntity.world = (world as CraftWorld).handle
-            nmsEntity.setPosition(x, y, z)
-        }
     }
 
     override fun setLocation(

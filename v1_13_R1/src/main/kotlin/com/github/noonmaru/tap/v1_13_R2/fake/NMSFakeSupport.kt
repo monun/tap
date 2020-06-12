@@ -21,7 +21,6 @@ import net.minecraft.server.v1_13_R2.*
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.block.data.BlockData
-import org.bukkit.craftbukkit.v1_13_R2.CraftServer
 import org.bukkit.craftbukkit.v1_13_R2.CraftWorld
 import org.bukkit.craftbukkit.v1_13_R2.block.data.CraftBlockData
 import org.bukkit.craftbukkit.v1_13_R2.entity.CraftEntity
@@ -41,10 +40,13 @@ class NMSFakeSupport : FakeSupport {
     }
 
     @Suppress("UNCHECKED_CAST")
-    override fun <T : BukkitEntity> createEntity(entityClass: Class<out BukkitEntity>): T? {
+    override fun <T : org.bukkit.entity.Entity> createEntity(
+        entityClass: Class<out org.bukkit.entity.Entity>,
+        world: org.bukkit.World
+    ): T? {
         return NMSEntityTypes.findType(entityClass)?.run {
-            val world = (Bukkit.getServer() as CraftServer).server.worlds.first()
-            this.a(world)?.bukkitEntity as T
+            val nmsWorld = (world as CraftWorld).handle
+            this.a(nmsWorld)?.bukkitEntity as T
         }
     }
 
@@ -60,16 +62,6 @@ class NMSFakeSupport : FakeSupport {
         val nmsEntity = entity.handle
 
         nmsEntity.isInvisible = invisible
-    }
-
-    override fun setPosition(entity: BukkitEntity, loc: Location) {
-        entity as CraftEntity
-        val nmsEntity = entity.handle
-
-        loc.run {
-            nmsEntity.world = (world as CraftWorld).handle
-            nmsEntity.setPosition(x, y, z)
-        }
     }
 
     override fun setLocation(

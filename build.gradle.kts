@@ -53,10 +53,6 @@ allprojects {
 subprojects {
     apply(plugin = "maven-publish")
 
-    repositories {
-        maven(url = "https://repo.dmulloy2.net/nexus/repository/public/")
-    }
-
     dependencies {
         testImplementation(group = "junit", name = "junit", version = "4.12")
 
@@ -135,7 +131,7 @@ tasks {
     }
     create<Copy>("distJar") {
         from(shadowJar)
-        into("W:\\Servers\\naruto\\plugins")
+        into("W:\\Servers\\sample\\plugins")
     }
 }
 
