@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-package com.github.noonmaru.tap.nfake.internal
+package com.github.noonmaru.tap.fake.internal
 
 import com.comphenix.protocol.events.PacketContainer
 import com.github.noonmaru.tap.protocol.sendServerPacket
 import com.github.noonmaru.tap.ref.UpstreamReference
-import org.bukkit.Location
 import org.bukkit.entity.Player
 
 internal class FakeTracker(
@@ -30,53 +29,80 @@ internal class FakeTracker(
     private val server
         get() = serverRef.get()
 
-    internal var prevLocation = player.location
+    internal var location = player.location
+        private set
+
+    internal var dead = player.isDead
+
+    internal var valid = player.isOnline
+
     private val trackingEntities = HashSet<FakeEntityImpl>()
 
     fun update() {
-        val prevLocation = this.prevLocation
-        val currentLocation = player.location
-        this.prevLocation = currentLocation
+        val currentDead = player.isDead
 
-        if (prevLocation.world != currentLocation.world
+        if (currentDead) {
+            if (!dead) {
+                dead = true
+                for (entity in trackingEntities) {
+                    entity.removeTracker(this@FakeTracker)
+                }
+                clearEntities()
+            }
+
+            if (!player.isOnline) {
+                valid = false
+                return
+            }
+        } else {
+            if (dead) {
+                dead = false
+                this.location = player.location
+                broadcastSelf()
+                return
+            }
+        }
+
+        val prevLocation = this.location
+        val currentLocation = player.location
+        this.location = currentLocation
+
+        if (prevLocation.world !== currentLocation.world
             || prevLocation.x != currentLocation.x
             || prevLocation.y != currentLocation.y
             || prevLocation.z != currentLocation.z
         ) {
-            removeOutOfRangeEntities(currentLocation)
-
-            val trackingEntities = trackingEntities
-
-            server.adaptWorld(currentLocation.world).findNearbyEntities(currentLocation, 240.0) { entity ->
-                if (trackingEntities.add(entity)) {
-                    entity.addTracker(this)
-                    entity.spawnTo(player)
-                }
-            }
+            broadcastSelf()
         }
     }
 
-    private fun removeOutOfRangeEntities(center: Location) {
-        val maxDistanceSquared = (256.0 * 256.0)
-        val i = trackingEntities.iterator()
-
-        while (i.hasNext()) {
-            val entity = i.next()
-            val entityLocation = entity.currentLocation
-
-            if (entityLocation.world != center.world
-                || center.distanceSquared(entityLocation) >= maxDistanceSquared
-            ) {
-
-                i.remove()
-                entity.removeTracker(this)
-                entity.despawnTo(player)
-            }
+    internal fun broadcastSelf() {
+        for (entity in server._entities) {
+            entity.offerComputeQueue(this)
         }
     }
 
     internal fun removeEntity(entity: FakeEntityImpl) {
         this.trackingEntities -= entity
+    }
+
+    internal fun addEntity(entity: FakeEntityImpl) {
+        this.trackingEntities += entity
+    }
+
+    internal fun clearEntities() {
+        trackingEntities.clear()
+    }
+
+    internal fun destroy() {
+        val player = player
+
+        for (entity in trackingEntities) {
+            entity.removeTracker(this@FakeTracker)
+            entity.despawnTo(player)
+        }
+        clearEntities()
+        valid = false
     }
 }
 
