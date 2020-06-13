@@ -24,6 +24,14 @@ interface FakeEntity {
     val server: FakeServer
     val bukkitEntity: Entity
     val location: Location
+    val vehicle: FakeEntity?
+    val passengers: List<FakeEntity>
+
+    fun addPassenger(passenger: FakeEntity): Boolean
+
+    fun removePassenger(passenger: FakeEntity): Boolean
+
+    fun eject(): Boolean
 
     fun moveTo(target: Location)
 

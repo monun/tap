@@ -18,10 +18,12 @@ package com.github.noonmaru.tap.fake.internal
 
 import com.github.noonmaru.tap.fake.FakeEntity
 import com.github.noonmaru.tap.fake.createSpawnPacket
+import com.github.noonmaru.tap.fake.mountedYOffset
 import com.github.noonmaru.tap.fake.setLocation
 import com.github.noonmaru.tap.protocol.EntityPacket
 import com.github.noonmaru.tap.protocol.sendServerPacket
 import com.github.noonmaru.tap.ref.UpstreamReference
+import com.google.common.collect.ImmutableList
 import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.entity.ArmorStand
@@ -52,8 +54,17 @@ class FakeEntityImpl internal constructor(
     private val trackers = HashSet<FakeTracker>()
     private val trackerComputeQueue = ArrayDeque<FakeTracker>()
 
-    private var updateLocation = false
+    override var vehicle: FakeEntityImpl? = null
+        private set
+
+    private val _passengers = HashSet<FakeEntityImpl>()
+    override val passengers: List<FakeEntity>
+        get() = ImmutableList.copyOf(_passengers)
+
     private var updateTrackers = true
+    private var updateLocation = false
+    private var updateTeleport = false
+    private var updatePassengers = false
     private var updateMeta = false
     private var updateArmorStandItem = false
     private var enqueued = false
@@ -93,16 +104,81 @@ class FakeEntityImpl internal constructor(
         }
     }
 
+    private fun check(passenger: FakeEntity): FakeEntityImpl {
+        val impl = passenger as FakeEntityImpl
+
+        checkState()
+        passenger.checkState()
+
+        return impl
+    }
+
+    override fun addPassenger(passenger: FakeEntity): Boolean {
+        passenger.let {
+            var entity: FakeEntityImpl? = this
+
+            while (entity != null) {
+                if (entity === it)
+                    return false
+
+                entity = entity.vehicle
+            }
+
+            passenger.eject()
+        }
+
+        val impl = check(passenger)
+
+        impl.vehicle = this
+        _passengers += impl
+        updatePassengers = true
+        enqueue()
+
+        impl.updateLocation = true
+        impl.enqueue()
+
+        return true
+    }
+
+    override fun removePassenger(passenger: FakeEntity): Boolean {
+        val impl = check(passenger)
+
+        if (impl.vehicle !== this) return false
+
+        impl.vehicle = null
+        _passengers -= impl
+
+        updatePassengers = true
+        enqueue()
+
+        impl.updateLocation = true
+        impl.updateTeleport = true
+        impl.enqueue()
+
+        return true
+    }
+
+    override fun eject(): Boolean {
+        return vehicle?.removePassenger(this) ?: false
+    }
+
     override fun moveTo(target: Location) {
-        if (previousLocation == target) {
+        if (vehicle != null || previousLocation == target) {
             return
         }
 
         currentLocation.set(target)
 
         updateLocation = true
+        updateTrackers = true
         moveTicks = 20
         enqueue()
+
+        for (passenger in _passengers) {
+            passenger.updateLocation = true
+            passenger.updateTrackers = true
+            passenger.enqueue()
+        }
     }
 
     override fun move(x: Double, y: Double, z: Double) {
@@ -142,10 +218,16 @@ class FakeEntityImpl internal constructor(
         enqueued = false
 
         if (!valid) {
+            _passengers.apply {
+                for (passenger in this) {
+                    passenger.vehicle = null
+                }
+                clear()
+            }
+            despawn()
             for (tracker in trackers) {
                 tracker.removeEntity(this@FakeEntityImpl)
             }
-            despawn()
             clearTrackers()
             return
         }
@@ -162,11 +244,26 @@ class FakeEntityImpl internal constructor(
             armorStandItemData.update()
         }
 
+        if (updatePassengers) {
+            updatePassengers = false
+
+            trackers.sendServerPacketAll(
+                EntityPacket.mount(
+                    bukkitEntity.entityId,
+                    _passengers.toIntArray()
+                )
+            )
+        }
+
         if (updateLocation) {
             val result = updateLocation()
 
-            if (result == MoveResult.TELEPORT || --moveTicks <= 0) {
+            if (result == MoveResult.TELEPORT
+                || result == MoveResult.VEHICLE
+                || --moveTicks <= 0
+            ) {
                 updateLocation = false
+                moveTicks = 0
             }
         }
 
@@ -187,10 +284,21 @@ class FakeEntityImpl internal constructor(
     private enum class MoveResult {
         TELEPORT,
         REL_MOVE,
+        VEHICLE
     }
 
     private fun updateLocation(): MoveResult {
         val bukkitEntity = bukkitEntity
+
+        vehicle?.let { vehicle ->
+            val yOffset = vehicle.bukkitEntity.mountedYOffset
+            deltaLocation.mount(vehicle.deltaLocation, yOffset)
+            previousLocation.mount(vehicle.previousLocation, yOffset)
+            currentLocation.mount(vehicle.currentLocation, yOffset)
+            bukkitEntity.setLocation(deltaLocation)
+
+            return MoveResult.VEHICLE
+        }
 
         val from = deltaLocation
         val to = currentLocation
@@ -201,7 +309,8 @@ class FakeEntityImpl internal constructor(
         val moveDelta = Vector(deltaX / 4096.0, deltaY / 4096.0, deltaZ / 4096.0)
 
         val result =
-            if (from.world !== to.world || deltaX < -32768L || deltaX > 32767L || deltaY < -32768L || deltaY > 32767L || deltaZ < -32768L || deltaZ > 32767L) { // Teleport
+            if (updateTeleport || from.world !== to.world || deltaX < -32768L || deltaX > 32767L || deltaY < -32768L || deltaY > 32767L || deltaZ < -32768L || deltaZ > 32767L) { // Teleport
+                updateTeleport = false
                 deltaLocation.set(to)
                 bukkitEntity.setLocation(to)
                 trackers.sendServerPacketAll(EntityPacket.teleport(bukkitEntity, to))
@@ -283,6 +392,20 @@ class FakeEntityImpl internal constructor(
                 player.sendServerPacket(packet)
             }
         }
+
+        _passengers.let { passengers ->
+            if (passengers.isNotEmpty()) {
+                player.sendServerPacket(
+                    EntityPacket.mount(bukkitEntity.entityId, passengers.toIntArray())
+                )
+            }
+        }
+
+        vehicle?.let { vehicle ->
+            player.sendServerPacket(
+                EntityPacket.mount(vehicle.bukkitEntity.entityId, vehicle._passengers.toIntArray())
+            )
+        }
     }
 
     internal fun despawn() {
@@ -316,12 +439,29 @@ class FakeEntityImpl internal constructor(
         }
     }
 
+    fun checkState() {
+        require(valid) {
+            "Invalid ${this.javaClass.simpleName}@${System.identityHashCode(this).toString(0x10)}"
+        }
+    }
+
     override fun remove() {
         if (valid) {
             valid = false
             enqueue()
         }
     }
+}
+
+private fun Collection<FakeEntity>.toIntArray(): IntArray {
+    val size = count()
+    val array = IntArray(size)
+
+    this.forEachIndexed { index, fakeEntity ->
+        array[index] = fakeEntity.bukkitEntity.entityId
+    }
+
+    return array
 }
 
 infix fun Double.delta(to: Double): Long {
@@ -335,4 +475,11 @@ private fun Location.set(loc: Location) {
     z = loc.z
     yaw = loc.yaw
     pitch = loc.pitch
+}
+
+private fun Location.mount(loc: Location, yOffset: Double) {
+    world = loc.world
+    x = loc.x
+    y = loc.y + yOffset
+    z = loc.z
 }
