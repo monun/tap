@@ -106,7 +106,7 @@ project(":api") {
     dependencies {
         compileOnly(files(Jvm.current().toolsJar))
         compileOnly("com.destroystokyo.paper:paper-api:1.13.2-R0.1-SNAPSHOT")
-        compileOnly("com.comphenix.protocol:ProtocolLib:4.5.0")
+        compileOnly("com.comphenix.protocol:ProtocolLib:4.5.1")
         implementation("it.unimi.dsi:fastutil:8.3.1")
     }
 
@@ -131,7 +131,7 @@ tasks {
     }
     create<Copy>("distJar") {
         from(shadowJar)
-        into("W:\\Servers\\sample\\plugins")
+        into("W:\\Servers\\tap\\plugins")
     }
 }
 
