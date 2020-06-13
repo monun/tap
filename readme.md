@@ -1,7 +1,6 @@
 # Tap
 
 [![Build Status](https://travis-ci.org/noonmaru/tap.svg?branch=master)](https://travis-ci.org/noonmaru/tap)
-[![Maintainability](https://api.codeclimate.com/v1/badges/6a20ddcbcde03208b75e/maintainability)](https://codeclimate.com/github/noonmaru/tap/maintainability)
 [![](https://jitpack.io/v/noonmaru/tap.svg)](https://jitpack.io/#noonmaru/tap)
 ![GitHub](https://img.shields.io/github/license/noonmaru/tap)
 
@@ -47,8 +46,8 @@
 >```
 >```groovy
 >dependencies {
->    implementation 'com.github.noonmaru:tap:2.3.3'
->    implementation 'com.github.noonmaru:tap-v1_15_R1:2.3.3'
+>    implementation 'com.github.noonmaru:tap:Tag'
+>    implementation 'com.github.noonmaru:tap-v1_15_R1:Tag'
 >}
 >```
 
