@@ -32,31 +32,14 @@ internal class FakeTracker(
     internal var location = player.location
         private set
 
-    internal var dead = player.isDead
-
     internal var valid = player.isOnline
 
     private val trackingEntities = HashSet<FakeEntityImpl>()
 
     fun update() {
-        val currentDead = player.isDead
-
-        if (currentDead) {
-            if (!dead) {
-                dead = true
-                for (entity in trackingEntities) {
-                    entity.removeTracker(this@FakeTracker)
-                }
-                clearEntities()
-            }
-
-            if (!player.isOnline) {
-                valid = false
-                return
-            }
-        } else {
-            if (dead) {
-                dead = false
+        if (!valid) {
+            if (player.isValid) {
+                valid = true
                 this.location = player.location
                 broadcastSelf()
                 return
@@ -73,6 +56,17 @@ internal class FakeTracker(
             || prevLocation.z != currentLocation.z
         ) {
             broadcastSelf()
+        }
+    }
+
+    internal fun clear() {
+        valid = false
+
+        trackingEntities.apply {
+            for (entity in this) {
+                entity.removeTracker(this@FakeTracker)
+            }
+            clear()
         }
     }
 
