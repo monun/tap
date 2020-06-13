@@ -351,7 +351,7 @@ class FakeEntityImpl internal constructor(
     }
 
     private fun computeTracker(tracker: FakeTracker) {
-        if (tracker.dead) return
+        if (!tracker.valid) return
 
         val spawnDistance = 240.0 * 240.0
         val despawnDistance = 256.0 * 256.0

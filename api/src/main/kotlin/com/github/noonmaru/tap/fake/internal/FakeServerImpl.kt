@@ -21,14 +21,20 @@ import com.github.noonmaru.tap.fake.FakeServer
 import com.github.noonmaru.tap.fake.createFakeEntity
 import com.github.noonmaru.tap.fake.setLocation
 import com.google.common.collect.ImmutableList
+import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.entity.Entity
 import org.bukkit.entity.Player
+import org.bukkit.event.EventHandler
+import org.bukkit.event.HandlerList
+import org.bukkit.event.Listener
+import org.bukkit.event.entity.PlayerDeathEvent
+import org.bukkit.event.player.PlayerQuitEvent
+import org.bukkit.plugin.java.JavaPlugin
 import java.util.*
 import kotlin.collections.ArrayList
 
-class FakeServerImpl
-    : FakeServer {
+class FakeServerImpl(plugin: JavaPlugin) : FakeServer {
 
     private val trackersByPlayer = WeakHashMap<Player, FakeTracker>()
     internal val _entities = ArrayList<FakeEntityImpl>()
@@ -40,7 +46,17 @@ class FakeServerImpl
     internal val trackers: Collection<FakeTracker>
         get() = trackersByPlayer.values
 
+    private val listener = FakeListener()
+
+    private var isRunning = true
+
+    init {
+        Bukkit.getPluginManager().registerEvents(listener, plugin)
+    }
+
     override fun spawnEntity(location: Location, clazz: Class<out Entity>): FakeEntity {
+        checkState()
+
         val bukkitWorld = location.world
         val bukkitEntity = requireNotNull(clazz.createFakeEntity(bukkitWorld)) {
             "Cannot create entity $clazz"
@@ -56,6 +72,8 @@ class FakeServerImpl
     }
 
     override fun addPlayer(player: Player) {
+        checkState()
+
         trackersByPlayer.computeIfAbsent(player) {
             FakeTracker(this, it).apply { broadcastSelf() }
         }
@@ -66,16 +84,14 @@ class FakeServerImpl
     }
 
     override fun update() {
+        checkState()
+
         trackersByPlayer.entries.iterator().let { iterator ->
             while (iterator.hasNext()) {
                 val entry = iterator.next()
                 val tracker = entry.value
 
                 tracker.update()
-
-                if (!tracker.valid) {
-                    iterator.remove()
-                }
             }
         }
 
@@ -89,7 +105,6 @@ class FakeServerImpl
             }
 
             updateQueue.remove()
-
             entity.update()
 
             if (!entity.valid) {
@@ -122,7 +137,32 @@ class FakeServerImpl
         }
     }
 
+    fun checkState() {
+        require(isRunning) { "Invalid ${this.javaClass.simpleName}@${System.identityHashCode(this).toString(0x10)}" }
+    }
+
+    override fun shutdown() {
+        if (!isRunning) return
+
+        isRunning = false
+        clear()
+        HandlerList.unregisterAll(this.listener)
+    }
+
     internal fun enqueue(entity: FakeEntityImpl) {
         updateQueue.offer(entity)
     }
+
+    inner class FakeListener : Listener {
+        @EventHandler
+        fun onPlayerDeath(event: PlayerDeathEvent) {
+            trackersByPlayer[event.entity]?.clear()
+        }
+
+        @EventHandler
+        fun onPlayerQuit(event: PlayerQuitEvent) {
+            trackersByPlayer.remove(event.player)?.clear()
+        }
+    }
 }
+

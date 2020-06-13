@@ -20,11 +20,12 @@ import com.github.noonmaru.tap.fake.internal.FakeServerImpl
 import org.bukkit.Location
 import org.bukkit.entity.Entity
 import org.bukkit.entity.Player
+import org.bukkit.plugin.java.JavaPlugin
 
 interface FakeServer {
     companion object {
-        fun create(): FakeServer {
-            return FakeServerImpl()
+        fun create(plugin: JavaPlugin): FakeServer {
+            return FakeServerImpl(plugin)
         }
     }
 
@@ -39,4 +40,6 @@ interface FakeServer {
     fun update()
 
     fun clear()
+
+    fun shutdown()
 }
