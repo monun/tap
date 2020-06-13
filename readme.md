@@ -26,7 +26,7 @@
 >
 >...
 >dependencies {
->    implementation 'com.github.noonmaru:tap:2.3.3'
+>    implementation 'com.github.noonmaru:tap:Tag'
 >}
 >```
 >
