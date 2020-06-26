@@ -1,8 +1,8 @@
 # Tap
 
 [![Build Status](https://travis-ci.org/noonmaru/tap.svg?branch=master)](https://travis-ci.org/noonmaru/tap)
-[![](https://jitpack.io/v/noonmaru/tap.svg)](https://jitpack.io/#noonmaru/tap)
-![GitHub](https://img.shields.io/github/license/noonmaru/tap)
+[![JitPack](https://jitpack.io/v/noonmaru/tap.svg)](https://jitpack.io/#noonmaru/tap)
+[![GitHub](https://img.shields.io/github/license/noonmaru/tap)](https://github.com/noonmaru/tap/blob/master/LICENSE)
 
 > Kotlin으로 작성된 Paper 라이브러리
 
@@ -54,3 +54,4 @@
 > ##### 다음 버전의 net.minecraft.server API는 테스트되지 않았습니다.
 > * 1.13.2
 > * 1.14.4
+> * 1.16.1

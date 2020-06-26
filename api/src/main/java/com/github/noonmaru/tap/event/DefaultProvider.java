@@ -33,7 +33,7 @@ import org.bukkit.event.player.PlayerEvent;
 import org.bukkit.event.vehicle.VehicleEvent;
 import org.jetbrains.annotations.NotNull;
 
-
+@SuppressWarnings("rawtypes")
 public abstract class DefaultProvider<T> implements EntityProvider {
 
     private DefaultProvider() {
