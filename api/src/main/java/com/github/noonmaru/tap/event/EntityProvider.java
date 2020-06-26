@@ -29,7 +29,6 @@ import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.projectiles.ProjectileSource;
 import org.jetbrains.annotations.NotNull;
 
-@FunctionalInterface
 public interface EntityProvider<T extends Event> {
     Entity getFrom(@NotNull T event);
 
