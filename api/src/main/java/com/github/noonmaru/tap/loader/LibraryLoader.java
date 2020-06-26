@@ -53,7 +53,7 @@ public final class LibraryLoader {
         throw new ClassNotFoundException("Not found nms library class: " + candidates.toString());
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
+    @SuppressWarnings("unchecked")
     public static <T> T load(@NotNull final String packageName, @NotNull final String className, @NotNull final Class<T> type, @NotNull final Object... initargs) {
         Class[] parameterTypes = ClassUtils.toClass(initargs);
 
