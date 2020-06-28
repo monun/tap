@@ -126,41 +126,25 @@ class NMSFakeSupport : FakeSupport {
             }
             is EntityFishingHook -> {
                 val entityhuman: EntityHuman? = handle.i()
-                PacketPlayOutSpawnEntity(
-                    handle,
-                    90,
-                    entityhuman?.id ?: handle.getId()
-                )
+                PacketPlayOutSpawnEntity(handle, 90,entityhuman?.id ?: handle.getId())
             }
             else -> {
                 val shooter: Entity?
                 when (handle) {
                     is EntitySpectralArrow -> {
                         shooter = handle.getShooter()
-                        PacketPlayOutSpawnEntity(
-                            handle,
-                            91,
-                            1 + (shooter?.id ?: handle.getId())
-                        )
+                        PacketPlayOutSpawnEntity(handle, 91, 1 + (shooter?.id ?: handle.getId()))
                     }
                     is EntityTippedArrow -> {
                         shooter = (handle as EntityArrow).getShooter()
-                        PacketPlayOutSpawnEntity(
-                            handle,
-                            60,
-                            1 + (shooter?.id ?: handle.getId())
-                        )
+                        PacketPlayOutSpawnEntity(handle, 60, 1 + (shooter?.id ?: handle.getId()))
                     }
                     is EntitySnowball -> {
                         PacketPlayOutSpawnEntity(handle, 61)
                     }
                     is EntityThrownTrident -> {
                         shooter = (handle as EntityArrow).getShooter()
-                        PacketPlayOutSpawnEntity(
-                            handle,
-                            94,
-                            1 + (shooter?.id ?: handle.getId())
-                        )
+                        PacketPlayOutSpawnEntity(handle, 94, 1 + (shooter?.id ?: handle.getId()))
                     }
                     is EntityLlamaSpit -> {
                         PacketPlayOutSpawnEntity(handle, 68)
@@ -233,12 +217,7 @@ class NMSFakeSupport : FakeSupport {
                     }
                     is EntityItemFrame -> {
                         val entityitemframe: EntityItemFrame = handle
-                        PacketPlayOutSpawnEntity(
-                            handle,
-                            71,
-                            entityitemframe.direction!!.a(),
-                            entityitemframe.getBlockPosition()
-                        )
+                        PacketPlayOutSpawnEntity(handle, 71, entityitemframe.direction!!.a(), entityitemframe.getBlockPosition())
                     }
                     is EntityLeash -> {
                         val entityleash: EntityLeash = handle
