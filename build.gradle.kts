@@ -26,11 +26,11 @@ allprojects {
     apply(plugin = "org.jetbrains.kotlin.jvm")
 
     repositories {
-        jcenter()
-        mavenCentral()
-        maven(url = "https://oss.sonatype.org/content/groups/public/")
-        maven(url = "https://papermc.io/repo/repository/maven-public/") //paper
-        maven(url = "https://jitpack.io/") //github
+        maven("https://repo.maven.apache.org/maven2/") //Maven Central
+        maven("https://papermc.io/repo/repository/maven-public/") //Paper
+        if (project.name != "api") {
+            mavenLocal()
+        }
     }
 
     dependencies {
@@ -100,7 +100,7 @@ subprojects {
 
 project(":api") {
     repositories {
-        maven(url = "https://repo.dmulloy2.net/nexus/repository/public/") //ProtocolLib repo
+        maven(url = "https://repo.dmulloy2.net/nexus/repository/public/") //ProtocolLib
     }
 
     dependencies {

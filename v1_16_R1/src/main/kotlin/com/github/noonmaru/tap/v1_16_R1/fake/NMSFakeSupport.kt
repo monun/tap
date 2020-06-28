@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-package com.github.noonmaru.tap.v1_14_R1.fake
+package com.github.noonmaru.tap.v1_16_R1.fake
 
 import com.github.noonmaru.tap.fake.FakeSupport
-import net.minecraft.server.v1_14_R1.EntityFallingBlock
-import net.minecraft.server.v1_14_R1.IRegistry
+import net.minecraft.server.v1_16_R1.EntityFallingBlock
+import net.minecraft.server.v1_16_R1.IRegistry
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.World
 import org.bukkit.block.data.BlockData
-import org.bukkit.craftbukkit.v1_14_R1.CraftWorld
-import org.bukkit.craftbukkit.v1_14_R1.block.data.CraftBlockData
-import org.bukkit.craftbukkit.v1_14_R1.entity.CraftEntity
+import org.bukkit.craftbukkit.v1_16_R1.CraftWorld
+import org.bukkit.craftbukkit.v1_16_R1.block.data.CraftBlockData
+import org.bukkit.craftbukkit.v1_16_R1.entity.CraftEntity
 import org.bukkit.entity.Entity
 import org.bukkit.entity.FallingBlock
 
@@ -75,29 +75,22 @@ class NMSFakeSupport : FakeSupport {
         }
     }
 
-//    Entity.class 1825
-//    public void k(Entity entity) {
-//        if (this.w(entity)) {
-//            entity.setPosition(this.locX, this.locY + this.aP() + entity.aO(), this.locZ);
-//        }
-//    }
-
     override fun getMountedYOffset(entity: Entity): Double {
         entity as CraftEntity
 
-        return entity.handle.aP()
+        return entity.handle.aY()
     }
 
     override fun getYOffset(entity: Entity): Double {
         entity as CraftEntity
 
-        return entity.handle.aO()
+        return entity.handle.aX()
     }
 
     override fun createSpawnPacket(entity: Entity): Any {
         entity as CraftEntity
 
-        return entity.handle.N()
+        return entity.handle.O()
     }
 
     override fun createFallingBlock(blockData: BlockData): FallingBlock {
