@@ -167,7 +167,7 @@ class EntityPacketSupport {
         return PacketContainer(PacketType.Play.Server.REL_ENTITY_MOVE).apply {
             integers
                 .write(0, entityId)
-            if (isLegacyProtocolVersion) {
+            if (nmsVersion < 14) {
                 integers
                     .write(0, deltaX.toInt())
                     .write(1, deltaY.toInt())
@@ -218,7 +218,7 @@ class EntityPacketSupport {
         return PacketContainer(PacketType.Play.Server.REL_ENTITY_MOVE_LOOK).apply {
             integers
                 .write(0, entityId)
-            if (isLegacyProtocolVersion) {
+            if (nmsVersion < 14) {
                 integers
                     .write(0, deltaX.toInt())
                     .write(1, deltaY.toInt())
@@ -307,5 +307,5 @@ class EffectPacketSupport {
     }
 }
 
-private val isLegacyProtocolVersion: Boolean
-    get() = LibraryLoader.getBukkitVersion().split("_")[1].toInt() < 14
+private val nmsVersion: Int
+    get() = LibraryLoader.getBukkitVersion().split("_")[1].toInt()
