@@ -45,12 +45,11 @@
 >```groovy
 >dependencies {
 >    implementation 'com.github.noonmaru:tap:Tag'
->    implementation 'com.github.noonmaru:tap-v1_15_R1:Tag'
+>    implementation 'com.github.noonmaru:tap-1_16_R1:Tag'
 >}
 >```
 ---
 > ##### 다음 버전의 net.minecraft.server API는 테스트되지 않았습니다.
-> * v1_13_R1 (1.13)
 > * v1_13_R2 (1.13.x)
 > * v1_14_R1 (1.14, 1.14.x)
 > * v1_16_R1 (1.16, 1.16.1)
