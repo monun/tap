@@ -37,7 +37,7 @@ allprojects {
         compileOnly(kotlin("stdlib-jdk8"))
     }
 
-    group = requireNotNull(properties["pluginName"]) { "Group is undefined in properties" }
+    group = requireNotNull(properties["pluginGroup"]) { "Group is undefined in properties" }
     version = requireNotNull(properties["pluginVersion"]) { "Version is undefined in properties" }
 
     tasks {
