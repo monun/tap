@@ -21,6 +21,7 @@ import com.comphenix.protocol.events.PacketContainer
 import com.comphenix.protocol.wrappers.EnumWrappers
 import com.comphenix.protocol.wrappers.WrappedDataWatcher
 import com.github.noonmaru.tap.fake.createFakeEntity
+import com.github.noonmaru.tap.loader.LibraryLoader
 import org.bukkit.FireworkEffect
 import org.bukkit.Location
 import org.bukkit.entity.*
@@ -166,10 +167,17 @@ class EntityPacketSupport {
         return PacketContainer(PacketType.Play.Server.REL_ENTITY_MOVE).apply {
             integers
                 .write(0, entityId)
-            shorts
-                .write(0, deltaX)
-                .write(1, deltaY)
-                .write(2, deltaZ)
+            if (nmsVersion < 14) {
+                integers
+                    .write(0, deltaX.toInt())
+                    .write(1, deltaY.toInt())
+                    .write(2, deltaZ.toInt())
+            } else {
+                shorts
+                    .write(0, deltaX)
+                    .write(1, deltaY)
+                    .write(2, deltaZ)
+            }
             booleans
                 .write(0, onGround)
         }
@@ -210,10 +218,17 @@ class EntityPacketSupport {
         return PacketContainer(PacketType.Play.Server.REL_ENTITY_MOVE_LOOK).apply {
             integers
                 .write(0, entityId)
-            shorts
-                .write(0, deltaX)
-                .write(1, deltaY)
-                .write(2, deltaZ)
+            if (nmsVersion < 14) {
+                integers
+                    .write(0, deltaX.toInt())
+                    .write(1, deltaY.toInt())
+                    .write(2, deltaZ.toInt())
+            } else {
+                shorts
+                    .write(0, deltaX)
+                    .write(1, deltaY)
+                    .write(2, deltaZ)
+            }
             bytes
                 .write(0, (yaw * 256.0 / 360.0).toByte())
                 .write(1, (pitch * 256.0 / 360.0).toByte())
@@ -291,3 +306,6 @@ class EffectPacketSupport {
         }
     }
 }
+
+private val nmsVersion: Int
+    get() = LibraryLoader.getBukkitVersion().split("_")[1].toInt()
