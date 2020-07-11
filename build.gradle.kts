@@ -28,13 +28,15 @@ allprojects {
     repositories {
         maven("https://repo.maven.apache.org/maven2/") //Maven Central
         maven("https://papermc.io/repo/repository/maven-public/") //Paper
-        if (project.name != "api") {
+        maven(url = "https://repo.dmulloy2.net/nexus/repository/public/") //ProtocolLib
+        if (project.name != "api") { // craftbukkit
             mavenLocal()
         }
     }
 
     dependencies {
         compileOnly(kotlin("stdlib-jdk8"))
+        compileOnly("com.comphenix.protocol:ProtocolLib:4.6.0-SNAPSHOT")
     }
 
     group = requireNotNull(properties["pluginGroup"]) { "Group is undefined in properties" }
@@ -99,14 +101,9 @@ subprojects {
 }
 
 project(":api") {
-    repositories {
-        maven(url = "https://repo.dmulloy2.net/nexus/repository/public/") //ProtocolLib
-    }
-
     dependencies {
         compileOnly(files(Jvm.current().toolsJar))
         compileOnly("com.destroystokyo.paper:paper-api:1.13.2-R0.1-SNAPSHOT")
-        compileOnly("com.comphenix.protocol:ProtocolLib:4.5.1")
         implementation("it.unimi.dsi:fastutil:8.3.1")
     }
 
@@ -131,7 +128,7 @@ tasks {
     }
     create<Copy>("distJar") {
         from(shadowJar)
-        into("W:\\Servers\\tap\\plugins")
+        into("W:\\Servers\\tap-1.16.1\\plugins")
     }
 }
 
