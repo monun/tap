@@ -16,114 +16,50 @@
 
 package com.github.noonmaru.tap.protocol
 
-import com.comphenix.protocol.PacketType
 import com.comphenix.protocol.events.PacketContainer
-import com.comphenix.protocol.wrappers.EnumWrappers
 import com.comphenix.protocol.wrappers.WrappedDataWatcher
-import com.github.noonmaru.tap.fake.createFakeEntity
-import com.github.noonmaru.tap.loader.LibraryLoader
 import org.bukkit.FireworkEffect
 import org.bukkit.Location
-import org.bukkit.entity.*
+import org.bukkit.entity.Entity
+import org.bukkit.entity.EntityType
+import org.bukkit.entity.LivingEntity
 import org.bukkit.inventory.EquipmentSlot
 import org.bukkit.inventory.ItemStack
 import org.bukkit.util.Vector
 import java.util.*
 
+interface PacketSupport {
+    fun spawnEntity(
+        entityId: Int,
+        uuid: UUID,
+        x: Double,
+        y: Double,
+        z: Double,
+        type: EntityType,
+        objectId: Int
 
-val EntityPacket = EntityPacketSupport()
+    ): PacketContainer
 
-val EffectPacket = EffectPacketSupport()
-
-class EntityPacketSupport {
-
-    fun spawnMob(
+    fun spawnEntityLiving(
         entityId: Int,
         uuid: UUID,
         typeId: Int,
         loc: Location,
         headPitch: Float,
         velocity: Vector
-    ): PacketContainer {
-        return PacketContainer(PacketType.Play.Server.SPAWN_ENTITY_LIVING).apply {
-            integers
-                .write(0, entityId)
-            uuiDs
-                .write(0, uuid)
-            integers
-                .write(1, typeId)
-            doubles
-                .write(0, loc.x)
-                .write(1, loc.y)
-                .write(2, loc.z)
-            integers
-                .write(2, (velocity.x.coerceIn(-3.9, 3.9) * 8000.0).toInt())
-                .write(3, (velocity.y.coerceIn(-3.9, 3.9) * 8000.0).toInt())
-                .write(4, (velocity.z.coerceIn(-3.9, 3.9) * 8000.0).toInt())
-            bytes
-                .write(0, (loc.yaw * 256.0F / 360.0F).toByte())
-                .write(0, (loc.pitch * 256.0F / 360.0F).toByte())
-                .write(0, (headPitch * 256.0F / 360.0F).toByte())
-        }
+    ): PacketContainer
+
+    fun entityMetadata(entityId: Int, dataWatcher: WrappedDataWatcher): PacketContainer
+
+    fun entityMetadata(entity: Entity): PacketContainer {
+        return entityMetadata(entity.entityId, WrappedDataWatcher.getEntityWatcher(entity))
     }
 
-    fun metadata(entityId: Int, dataWatcher: WrappedDataWatcher): PacketContainer {
-        return PacketContainer(PacketType.Play.Server.ENTITY_METADATA).apply {
-            integers
-                .write(0, entityId)
-            watchableCollectionModifier
-                .write(0, dataWatcher.deepClone().watchableObjects)
-        }
-    }
+    fun entityEquipment(entityId: Int, slot: EquipmentSlot, item: ItemStack): PacketContainer
 
-    fun metadata(entity: Entity): PacketContainer {
-        return entity.run {
-            metadata(entityId, WrappedDataWatcher.getEntityWatcher(entity))
-        }
-    }
+    fun entityEquipment(living: LivingEntity): List<PacketContainer>
 
-    fun equipment(entityId: Int, slot: EquipmentSlot, item: ItemStack): PacketContainer {
-        return PacketContainer(PacketType.Play.Server.ENTITY_EQUIPMENT).apply {
-            integers
-                .write(0, entityId)
-            itemSlots
-                .write(0, slot.convertToItemSlot())
-            itemModifier
-                .write(0, item)
-        }
-    }
-
-    fun equipment(living: LivingEntity): List<PacketContainer> {
-        return living.run {
-            val slots = EquipmentSlot.values()
-            val packets = ArrayList<PacketContainer>(slots.count())
-
-            if (this is ArmorStand) {
-                for (slot in slots) {
-                    packets += equipment(entityId, slot, getItem(slot))
-                }
-            } else {
-                living.equipment?.also { equipment ->
-                    for (slot in slots) {
-                        val item = when (slot) {
-                            EquipmentSlot.HAND -> equipment.itemInMainHand
-                            EquipmentSlot.OFF_HAND -> equipment.itemInOffHand
-                            EquipmentSlot.FEET -> equipment.boots
-                            EquipmentSlot.LEGS -> equipment.leggings
-                            EquipmentSlot.CHEST -> equipment.chestplate
-                            EquipmentSlot.HEAD -> equipment.helmet
-                        }
-
-                        if (item != null)
-                            packets += equipment(entityId, slot, item)
-                    }
-                }
-            }
-            packets
-        }
-    }
-
-    fun teleport(
+    fun entityTeleport(
         entityId: Int,
         x: Double,
         y: Double,
@@ -131,30 +67,18 @@ class EntityPacketSupport {
         yaw: Float,
         pitch: Float,
         onGround: Boolean
-    ): PacketContainer {
-        return PacketContainer(PacketType.Play.Server.ENTITY_TELEPORT).apply {
-            integers
-                .write(0, entityId)
-            doubles
-                .write(0, x)
-                .write(1, y)
-                .write(2, z)
-            bytes
-                .write(0, (yaw * 256.0F / 360.0F).toByte())
-                .write(1, (pitch * 256.0F / 360.0F).toByte())
-            booleans
-                .write(0, onGround)
-        }
-    }
+    ): PacketContainer
 
-    fun teleport(entity: Entity, loc: Location, onGround: Boolean = entity.isOnGround): PacketContainer {
+    fun entityTeleport(entity: Entity, loc: Location, onGround: Boolean = entity.isOnGround): PacketContainer {
         return entity.run {
-            teleport(entityId, loc.x, loc.y, loc.z, loc.yaw, loc.pitch, onGround)
+            entityTeleport(entityId, loc.x, loc.y, loc.z, loc.yaw, loc.pitch, onGround)
         }
     }
 
-    fun relativeMove(entityId: Int, move: Vector, onGround: Boolean): PacketContainer {
-        return relativeMove(
+    fun relEntityMove(entityId: Int, deltaX: Short, deltaY: Short, deltaZ: Short, onGround: Boolean): PacketContainer
+
+    fun relEntityMove(entityId: Int, move: Vector, onGround: Boolean): PacketContainer {
+        return relEntityMove(
             entityId,
             (move.x * 4096.0).toShort(),
             (move.y * 4096.0).toShort(),
@@ -163,50 +87,7 @@ class EntityPacketSupport {
         )
     }
 
-    fun relativeMove(entityId: Int, deltaX: Short, deltaY: Short, deltaZ: Short, onGround: Boolean): PacketContainer {
-        return PacketContainer(PacketType.Play.Server.REL_ENTITY_MOVE).apply {
-            integers
-                .write(0, entityId)
-            if (nmsVersion < 14) {
-                integers
-                    .write(0, deltaX.toInt())
-                    .write(1, deltaY.toInt())
-                    .write(2, deltaZ.toInt())
-            } else {
-                shorts
-                    .write(0, deltaX)
-                    .write(1, deltaY)
-                    .write(2, deltaZ)
-            }
-            booleans
-                .write(0, onGround)
-        }
-    }
-
-    fun relativeMove(entity: Entity) {
-        return entity.run {
-            relativeMove(entityId, velocity, isOnGround)
-        }
-    }
-
-    fun lookAndRelativeMove(
-        entityId: Int,
-        move: Vector,
-        yaw: Float, pitch: Float,
-        onGround: Boolean
-    ): PacketContainer {
-        return lookAndRelativeMove(
-            entityId,
-            (move.x * 4096.0).toShort(),
-            (move.y * 4096.0).toShort(),
-            (move.z * 4096.0).toShort(),
-            yaw,
-            pitch,
-            onGround
-        )
-    }
-
-    fun lookAndRelativeMove(
+    fun relEntityMoveLook(
         entityId: Int,
         deltaX: Short,
         deltaY: Short,
@@ -214,98 +95,28 @@ class EntityPacketSupport {
         yaw: Float,
         pitch: Float,
         onGround: Boolean
+    ): PacketContainer
+
+    fun relEntityMoveLook(
+        entityId: Int,
+        delta: Vector,
+        yaw: Float, pitch: Float,
+        onGround: Boolean
     ): PacketContainer {
-        return PacketContainer(PacketType.Play.Server.REL_ENTITY_MOVE_LOOK).apply {
-            integers
-                .write(0, entityId)
-            if (nmsVersion < 14) {
-                integers
-                    .write(0, deltaX.toInt())
-                    .write(1, deltaY.toInt())
-                    .write(2, deltaZ.toInt())
-            } else {
-                shorts
-                    .write(0, deltaX)
-                    .write(1, deltaY)
-                    .write(2, deltaZ)
-            }
-            bytes
-                .write(0, (yaw * 256.0 / 360.0).toByte())
-                .write(1, (pitch * 256.0 / 360.0).toByte())
-            booleans
-                .write(0, onGround)
-        }
+        return relEntityMoveLook(
+            entityId,
+            (delta.x * 4096.0).toShort(),
+            (delta.y * 4096.0).toShort(),
+            (delta.z * 4096.0).toShort(),
+            yaw,
+            pitch,
+            onGround
+        )
     }
 
-    fun lookAndRelativeMove(entity: Entity) {
-        return entity.run {
-            val loc = entity.location
+    fun mount(entityId: Int, mountEntityIds: IntArray): PacketContainer
 
-            lookAndRelativeMove(entityId, velocity, loc.yaw, loc.pitch, isOnGround)
-        }
-    }
+    fun entityDestroy(entityIds: IntArray): PacketContainer
 
-    fun mount(entityId: Int, mountEntityIds: IntArray): PacketContainer {
-        return PacketContainer(PacketType.Play.Server.MOUNT).apply {
-            integers.write(0, entityId)
-            integerArrays.write(0, mountEntityIds)
-        }
-    }
-
-    fun destroy(entityIds: IntArray): PacketContainer {
-        return PacketContainer(PacketType.Play.Server.ENTITY_DESTROY).apply {
-            integerArrays
-                .write(0, entityIds)
-        }
-    }
-
-    fun destroy(entities: Array<out Entity>): PacketContainer {
-        return destroy(IntArray(entities.size) { entities[it].entityId })
-    }
+    fun spawnFireworkParticles(loc: Location, effect: FireworkEffect): List<PacketContainer>
 }
-
-private fun EquipmentSlot.convertToItemSlot(): EnumWrappers.ItemSlot {
-    return when (this) {
-        EquipmentSlot.HAND -> EnumWrappers.ItemSlot.MAINHAND
-        EquipmentSlot.OFF_HAND -> EnumWrappers.ItemSlot.OFFHAND
-        EquipmentSlot.FEET -> EnumWrappers.ItemSlot.FEET
-        EquipmentSlot.LEGS -> EnumWrappers.ItemSlot.LEGS
-        EquipmentSlot.CHEST -> EnumWrappers.ItemSlot.CHEST
-        EquipmentSlot.HEAD -> EnumWrappers.ItemSlot.HEAD
-    }
-}
-
-class EffectPacketSupport {
-    fun firework(loc: Location, effect: FireworkEffect): List<PacketContainer> {
-        return Firework::class.java.createFakeEntity(loc.world)!!.run {
-            fireworkMeta = fireworkMeta.apply { addEffect(effect) }
-            listOf(
-                PacketContainer(PacketType.Play.Server.SPAWN_ENTITY).apply {
-                    integers
-                        .write(0, entityId)
-                    uuiDs
-                        .write(0, uniqueId)
-                    doubles
-                        .write(0, loc.x)
-                        .write(1, loc.y)
-                        .write(2, loc.z)
-                    entityTypeModifier
-                        .write(0, EntityType.FIREWORK)
-                    integers
-                        .write(6, 76)
-                },
-                EntityPacket.metadata(this),
-                PacketContainer(PacketType.Play.Server.ENTITY_STATUS).apply {
-                    integers
-                        .write(0, entityId)
-                    bytes
-                        .write(0, 17.toByte())
-                },
-                EntityPacket.destroy(intArrayOf(entityId))
-            )
-        }
-    }
-}
-
-private val nmsVersion: Int
-    get() = LibraryLoader.getBukkitVersion().split("_")[1].toInt()
