@@ -17,8 +17,8 @@
 package com.github.noonmaru.tap.fake
 
 import org.bukkit.Location
-import org.bukkit.entity.ArmorStand
 import org.bukkit.entity.Entity
+import org.bukkit.inventory.EntityEquipment
 
 interface FakeEntity {
     val server: FakeServer
@@ -39,9 +39,9 @@ interface FakeEntity {
 
     fun moveAndRotation(x: Double, y: Double, z: Double, yaw: Float, pitch: Float)
 
-    fun <T : Entity> metadata(test: T.() -> Boolean)
+    fun <T : Entity> metadata(applier: T.() -> Boolean)
 
-    fun armorStandItem(test: ArmorStand.() -> Boolean)
+    fun equipment(applier: EntityEquipment.() -> Boolean)
 
     fun remove()
 }
