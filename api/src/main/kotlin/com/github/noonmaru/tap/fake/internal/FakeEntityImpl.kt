@@ -20,7 +20,7 @@ import com.github.noonmaru.tap.fake.FakeEntity
 import com.github.noonmaru.tap.fake.createSpawnPacket
 import com.github.noonmaru.tap.fake.mountedYOffset
 import com.github.noonmaru.tap.fake.setLocation
-import com.github.noonmaru.tap.protocol.EntityPacket
+import com.github.noonmaru.tap.protocol.Packet
 import com.github.noonmaru.tap.protocol.sendServerPacket
 import com.github.noonmaru.tap.ref.UpstreamReference
 import com.google.common.collect.ImmutableList
@@ -28,7 +28,9 @@ import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.entity.ArmorStand
 import org.bukkit.entity.Entity
+import org.bukkit.entity.LivingEntity
 import org.bukkit.entity.Player
+import org.bukkit.inventory.EntityEquipment
 import org.bukkit.inventory.EquipmentSlot
 import org.bukkit.inventory.ItemStack
 import org.bukkit.util.Vector
@@ -66,13 +68,13 @@ class FakeEntityImpl internal constructor(
     private var updateTeleport = false
     private var updatePassengers = false
     private var updateMeta = false
-    private var updateArmorStandItem = false
+    private var updateEquipment = false
     private var enqueued = false
 
     internal var valid = true
         private set
 
-    private lateinit var armorStandItemData: ItemData
+    private lateinit var equipmentData: ItemData
 
     private var moveTicks = 0
 
@@ -92,7 +94,7 @@ class FakeEntityImpl internal constructor(
                 if ((old == null && current.type != Material.AIR)
                     || !current.isSimilar(old)
                 ) {
-                    trackers.sendServerPacketAll(EntityPacket.equipment(armorStand.entityId, slot, current))
+                    trackers.sendServerPacketAll(Packet.entityEquipment(armorStand.entityId, slot, current))
                 }
             }
         }
@@ -100,7 +102,7 @@ class FakeEntityImpl internal constructor(
 
     init {
         if (bukkitEntity is ArmorStand) {
-            armorStandItemData = ItemData()
+            equipmentData = ItemData()
         }
     }
 
@@ -235,20 +237,20 @@ class FakeEntityImpl internal constructor(
         if (updateMeta) {
             updateMeta = false
 
-            trackers.sendServerPacketAll(EntityPacket.metadata(bukkitEntity))
+            trackers.sendServerPacketAll(Packet.entityMetadata(bukkitEntity))
         }
 
-        if (updateArmorStandItem) {
-            updateArmorStandItem = false
+        if (updateEquipment) {
+            updateEquipment = false
 
-            armorStandItemData.update()
+            equipmentData.update()
         }
 
         if (updatePassengers) {
             updatePassengers = false
 
             trackers.sendServerPacketAll(
-                EntityPacket.mount(
+                Packet.mount(
                     bukkitEntity.entityId,
                     _passengers.toIntArray()
                 )
@@ -313,13 +315,13 @@ class FakeEntityImpl internal constructor(
                 updateTeleport = false
                 deltaLocation.set(to)
                 bukkitEntity.setLocation(to)
-                trackers.sendServerPacketAll(EntityPacket.teleport(bukkitEntity, to))
+                trackers.sendServerPacketAll(Packet.entityTeleport(bukkitEntity, to))
                 MoveResult.TELEPORT
             } else { //Relative move
                 val yaw = to.yaw
                 val pitch = to.pitch
 
-                val packet = EntityPacket.lookAndRelativeMove(
+                val packet = Packet.relEntityMoveLook(
                     bukkitEntity.entityId,
                     deltaX.toShort(),
                     deltaY.toShort(),
@@ -385,10 +387,10 @@ class FakeEntityImpl internal constructor(
         val bukkitEntity = bukkitEntity
 
         player.sendServerPacket(bukkitEntity.createSpawnPacket())
-        player.sendServerPacket(EntityPacket.metadata(bukkitEntity))
+        player.sendServerPacket(Packet.entityMetadata(bukkitEntity))
 
         if (bukkitEntity is ArmorStand) {
-            EntityPacket.equipment(bukkitEntity).forEach { packet ->
+            Packet.entityEquipment(bukkitEntity).forEach { packet ->
                 player.sendServerPacket(packet)
             }
         }
@@ -396,20 +398,20 @@ class FakeEntityImpl internal constructor(
         _passengers.let { passengers ->
             if (passengers.isNotEmpty()) {
                 player.sendServerPacket(
-                    EntityPacket.mount(bukkitEntity.entityId, passengers.toIntArray())
+                    Packet.mount(bukkitEntity.entityId, passengers.toIntArray())
                 )
             }
         }
 
         vehicle?.let { vehicle ->
             player.sendServerPacket(
-                EntityPacket.mount(vehicle.bukkitEntity.entityId, vehicle._passengers.toIntArray())
+                Packet.mount(vehicle.bukkitEntity.entityId, vehicle._passengers.toIntArray())
             )
         }
     }
 
     internal fun despawn() {
-        trackers.sendServerPacketAll(EntityPacket.destroy(intArrayOf(bukkitEntity.entityId)))
+        trackers.sendServerPacketAll(Packet.entityDestroy(intArrayOf(bukkitEntity.entityId)))
     }
 
     internal fun clearTrackers() {
@@ -417,25 +419,26 @@ class FakeEntityImpl internal constructor(
     }
 
     internal fun despawnTo(player: Player) {
-        player.sendServerPacket(EntityPacket.destroy(intArrayOf(bukkitEntity.entityId)))
+        player.sendServerPacket(Packet.entityDestroy(intArrayOf(bukkitEntity.entityId)))
     }
 
     @Suppress("UNCHECKED_CAST")
-    override fun <T : Entity> metadata(test: T.() -> Boolean) {
+    override fun <T : Entity> metadata(applier: T.() -> Boolean) {
         val entity = bukkitEntity as T
 
-        if (test.invoke(entity)) {
+        if (applier.invoke(entity)) {
             updateMeta = true
             enqueue()
         }
     }
 
-    override fun armorStandItem(test: ArmorStand.() -> Boolean) {
-        val entity = bukkitEntity as ArmorStand
-
-        if (test.invoke(entity)) {
-            updateArmorStandItem = true
-            enqueue()
+    override fun equipment(applier: EntityEquipment.() -> Boolean) {
+        val living = bukkitEntity as LivingEntity
+        living.equipment?.let { equipment ->
+            if (applier.invoke(equipment)) {
+                updateEquipment = true
+                enqueue()
+            }
         }
     }
 
