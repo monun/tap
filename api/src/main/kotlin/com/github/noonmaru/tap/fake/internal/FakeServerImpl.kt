@@ -16,13 +16,11 @@
 
 package com.github.noonmaru.tap.fake.internal
 
-import com.github.noonmaru.tap.fake.FakeEntity
-import com.github.noonmaru.tap.fake.FakeServer
-import com.github.noonmaru.tap.fake.createFakeEntity
-import com.github.noonmaru.tap.fake.setLocation
+import com.github.noonmaru.tap.fake.*
 import com.google.common.collect.ImmutableList
 import org.bukkit.Bukkit
 import org.bukkit.Location
+import org.bukkit.block.data.BlockData
 import org.bukkit.entity.Entity
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
@@ -65,6 +63,20 @@ class FakeServerImpl(plugin: JavaPlugin) : FakeServer {
         }
 
         val fakeEntity = FakeEntityImpl(this, bukkitEntity, location)
+        _entities += fakeEntity
+        enqueue(fakeEntity)
+
+        return fakeEntity
+    }
+
+    override fun spawnFallingBlock(location: Location, blockData: BlockData): FakeEntity {
+//        EntityFallingBlock entity = new EntityFallingBlock(this.world, location.getX(), location.getY(), location.getZ(), ((CraftBlockData)data).getState());
+//        entity.ticksLived = 1;
+//        this.world.addEntity(entity, SpawnReason.CUSTOM);
+//        return (FallingBlock)entity.getBukkitEntity();
+
+        val bukkitFallingBlock = createFallingBlock(blockData)
+        val fakeEntity = FakeEntityImpl(this, bukkitFallingBlock, location)
         _entities += fakeEntity
         enqueue(fakeEntity)
 
