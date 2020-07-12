@@ -1,38 +1,19 @@
-/*
- * Copyright (c) 2020 Noonmaru
- *
- *  Licensed under the General Public License, Version 3.0 (the "License");
- *  you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * https://opensource.org/licenses/gpl-3.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-package com.github.noonmaru.tap.v1_16_R1.protocol
+package com.github.noonmaru.tap.v1_14_R1.protocol
 
 import com.comphenix.protocol.PacketType
 import com.comphenix.protocol.events.PacketContainer
+import com.comphenix.protocol.wrappers.EnumWrappers
 import com.comphenix.protocol.wrappers.WrappedDataWatcher
 import com.github.noonmaru.tap.fake.createFakeEntity
 import com.github.noonmaru.tap.protocol.PacketSupport
-import com.mojang.datafixers.util.Pair
-import net.minecraft.server.v1_16_R1.EnumItemSlot
-import net.minecraft.server.v1_16_R1.ItemStack
-import net.minecraft.server.v1_16_R1.PacketPlayOutEntityEquipment
 import org.bukkit.FireworkEffect
 import org.bukkit.Location
-import org.bukkit.craftbukkit.v1_16_R1.entity.CraftLivingEntity
-import org.bukkit.craftbukkit.v1_16_R1.inventory.CraftItemStack
+import org.bukkit.Material
 import org.bukkit.entity.EntityType
 import org.bukkit.entity.Firework
 import org.bukkit.entity.LivingEntity
 import org.bukkit.inventory.EquipmentSlot
+import org.bukkit.inventory.ItemStack
 import org.bukkit.util.Vector
 import java.util.*
 
@@ -101,63 +82,41 @@ class NMSPacketSupport : PacketSupport {
         }
     }
 
-    override fun entityEquipment(
-        entityId: Int,
-        slot: EquipmentSlot,
-        item: org.bukkit.inventory.ItemStack
-    ): PacketContainer {
-//        Please use this after ProtocolLib 4.6.0 Update (The current dmulloy2 repo does not contain recent snapshots)
-//        return PacketContainer(PacketType.Play.Server.ENTITY_EQUIPMENT).apply {
-//            integers
-//                .write(0, entityId)
-//            slotStackPairLists
-//                .write(0, listOf(Pair(slot.convertToItemSlot(), item)))
-//        }
-        return PacketContainer.fromPacket(
-            PacketPlayOutEntityEquipment(
-                entityId,
-                Collections.singletonList(
-                    Pair(
-                        slot.convertToItemSlot(),
-                        CraftItemStack.asNMSCopy(item)
-                    )
-                )
-            )
-        )
+    override fun entityEquipment(entityId: Int, slot: EquipmentSlot, item: ItemStack): PacketContainer {
+        return PacketContainer(PacketType.Play.Server.ENTITY_EQUIPMENT).apply {
+            integers
+                .write(0, entityId)
+            itemSlots
+                .write(0, slot.convertToItemSlot())
+            itemModifier
+                .write(0, item)
+        }
     }
 
     override fun entityEquipment(living: LivingEntity): List<PacketContainer> {
-//        Please use this after ProtocolLib 4.6.0 Update (The current dmulloy2 repo does not contain recent snapshots)
-//        val list = arrayListOf<Pair<EnumWrappers.ItemSlot, ItemStack>>()
-//
-//        for (slot in EquipmentSlot.values()) {
-//            list += Pair(slot.convertToItemSlot(), living.equipment?.getItem(slot))
-//        }
-//
-//        return Collections.singletonList(
-//            PacketContainer(PacketType.Play.Server.ENTITY_EQUIPMENT).apply {
-//                integers
-//                    .write(0, entityId)
-//                slotStackPairLists
-//                    .write(0, list)
-//            }
-//        )
-        val nmsEntity = (living as CraftLivingEntity).handle
+        val list = arrayListOf<PacketContainer>()
 
-        val list = arrayListOf<Pair<EnumItemSlot, ItemStack>>()
-
-        for (slot in EnumItemSlot.values()) {
-            list += Pair(slot, nmsEntity.getEquipment(slot))
+        for (slot in EquipmentSlot.values()) {
+            living.equipment?.run {
+                list += PacketContainer(PacketType.Play.Server.ENTITY_EQUIPMENT).apply {
+                    integers
+                        .write(0, living.entityId)
+                    itemSlots
+                        .write(0, slot.convertToItemSlot())
+                    itemModifier
+                        .write(0, when (slot) {
+                            EquipmentSlot.HAND -> itemInMainHand
+                            EquipmentSlot.OFF_HAND -> itemInOffHand
+                            EquipmentSlot.FEET -> boots
+                            EquipmentSlot.LEGS -> leggings
+                            EquipmentSlot.CHEST -> chestplate
+                            EquipmentSlot.HEAD -> helmet
+                        }?: ItemStack(Material.AIR))
+                }
+            }
         }
 
-        return Collections.singletonList(
-            PacketContainer.fromPacket(
-                PacketPlayOutEntityEquipment(
-                    living.entityId,
-                    list
-                )
-            )
-        )
+        return list
     }
 
     override fun entityTeleport(
@@ -276,15 +235,15 @@ class NMSPacketSupport : PacketSupport {
             )
         }
     }
-}
 
-internal fun EquipmentSlot.convertToItemSlot(): EnumItemSlot {
-    return when (this) {
-        EquipmentSlot.HAND -> EnumItemSlot.MAINHAND
-        EquipmentSlot.OFF_HAND -> EnumItemSlot.OFFHAND
-        EquipmentSlot.FEET -> EnumItemSlot.FEET
-        EquipmentSlot.LEGS -> EnumItemSlot.LEGS
-        EquipmentSlot.CHEST -> EnumItemSlot.CHEST
-        EquipmentSlot.HEAD -> EnumItemSlot.HEAD
+    private fun EquipmentSlot.convertToItemSlot(): EnumWrappers.ItemSlot {
+        return when (this) {
+            EquipmentSlot.HAND -> EnumWrappers.ItemSlot.MAINHAND
+            EquipmentSlot.OFF_HAND -> EnumWrappers.ItemSlot.OFFHAND
+            EquipmentSlot.FEET -> EnumWrappers.ItemSlot.FEET
+            EquipmentSlot.LEGS -> EnumWrappers.ItemSlot.LEGS
+            EquipmentSlot.CHEST -> EnumWrappers.ItemSlot.CHEST
+            EquipmentSlot.HEAD -> EnumWrappers.ItemSlot.HEAD
+        }
     }
 }
