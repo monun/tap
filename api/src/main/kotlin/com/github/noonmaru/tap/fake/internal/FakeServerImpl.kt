@@ -27,7 +27,6 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.HandlerList
 import org.bukkit.event.Listener
 import org.bukkit.event.entity.PlayerDeathEvent
-import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.plugin.java.JavaPlugin
 import java.util.*
 import kotlin.collections.ArrayList
@@ -169,11 +168,6 @@ class FakeServerImpl(plugin: JavaPlugin) : FakeServer {
         @EventHandler
         fun onPlayerDeath(event: PlayerDeathEvent) {
             trackersByPlayer[event.entity]?.clear()
-        }
-
-        @EventHandler
-        fun onPlayerQuit(event: PlayerQuitEvent) {
-            trackersByPlayer.remove(event.player)?.clear()
         }
     }
 }
