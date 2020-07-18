@@ -32,9 +32,13 @@ interface FakeServer {
 
     val entities: List<FakeEntity>
 
+    val projectiles: List<FakeProjectile>
+
     fun spawnEntity(location: Location, clazz: Class<out Entity>): FakeEntity
 
     fun spawnFallingBlock(location: Location, blockData: BlockData): FakeEntity
+
+    fun launch(location: Location, projectile: FakeProjectile)
 
     fun addPlayer(player: Player)
 
