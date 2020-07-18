@@ -58,3 +58,19 @@ fun Iterable<Vector>.rotateAroundZ(angle: Double) {
         it.y = y
     }
 }
+
+fun Vector.divide(d: Double) {
+    x /= d
+    y /= d
+    z /= d
+}
+
+fun Vector.normalizeAndLength(): Double {
+    val length = length()
+
+    x /= length
+    y /= length
+    z /= length
+
+    return length
+}
