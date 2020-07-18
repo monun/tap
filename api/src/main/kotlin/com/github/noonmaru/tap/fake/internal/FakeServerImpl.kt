@@ -27,18 +27,25 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.HandlerList
 import org.bukkit.event.Listener
 import org.bukkit.event.entity.PlayerDeathEvent
+import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.plugin.java.JavaPlugin
 import java.util.*
 import kotlin.collections.ArrayList
 
 class FakeServerImpl(plugin: JavaPlugin) : FakeServer {
 
-    private val trackersByPlayer = WeakHashMap<Player, FakeTracker>()
     internal val _entities = ArrayList<FakeEntityImpl>()
     private val updateQueue = ArrayDeque<FakeEntityImpl>()
 
     override val entities: List<FakeEntity>
         get() = ImmutableList.copyOf(_entities)
+
+    private val _projectiles = ArrayList<FakeProjectile>()
+
+    override val projectiles: List<FakeProjectile>
+        get() = ImmutableList.copyOf(_projectiles)
+
+    private val trackersByPlayer = WeakHashMap<Player, FakeTracker>()
 
     internal val trackers: Collection<FakeTracker>
         get() = trackersByPlayer.values
@@ -69,17 +76,20 @@ class FakeServerImpl(plugin: JavaPlugin) : FakeServer {
     }
 
     override fun spawnFallingBlock(location: Location, blockData: BlockData): FakeEntity {
-//        EntityFallingBlock entity = new EntityFallingBlock(this.world, location.getX(), location.getY(), location.getZ(), ((CraftBlockData)data).getState());
-//        entity.ticksLived = 1;
-//        this.world.addEntity(entity, SpawnReason.CUSTOM);
-//        return (FallingBlock)entity.getBukkitEntity();
-
         val bukkitFallingBlock = createFallingBlock(blockData)
         val fakeEntity = FakeEntityImpl(this, bukkitFallingBlock, location)
         _entities += fakeEntity
         enqueue(fakeEntity)
 
         return fakeEntity
+    }
+
+    override fun launch(location: Location, projectile: FakeProjectile) {
+        projectile.checkState()
+        require(!projectile.launched) { "Already launched projectile" }
+
+        projectile.init(location)
+        _projectiles += projectile
     }
 
     override fun addPlayer(player: Player) {
@@ -97,6 +107,26 @@ class FakeServerImpl(plugin: JavaPlugin) : FakeServer {
     override fun update() {
         checkState()
 
+        updateProjectiles()
+        updateTrackers()
+        updateEntities()
+    }
+
+    private fun updateProjectiles() {
+        val projectiles = _projectiles
+        val iterator = projectiles.iterator()
+
+        while (iterator.hasNext()) {
+            val projectile = iterator.next()
+
+            projectile.update()
+
+            if (!projectile.isValid)
+                iterator.remove()
+        }
+    }
+
+    private fun updateTrackers() {
         trackersByPlayer.entries.iterator().let { iterator ->
             while (iterator.hasNext()) {
                 val entry = iterator.next()
@@ -105,7 +135,9 @@ class FakeServerImpl(plugin: JavaPlugin) : FakeServer {
                 tracker.update()
             }
         }
+    }
 
+    private fun updateEntities() {
         val updateQueue = updateQueue
         var nextTickEntity: FakeEntityImpl? = null
         while (updateQueue.isNotEmpty()) {
@@ -168,6 +200,11 @@ class FakeServerImpl(plugin: JavaPlugin) : FakeServer {
         @EventHandler
         fun onPlayerDeath(event: PlayerDeathEvent) {
             trackersByPlayer[event.entity]?.clear()
+        }
+
+        @EventHandler
+        fun onPlayerQuit(event: PlayerQuitEvent) {
+            trackersByPlayer.remove(event.player)?.clear()
         }
     }
 }
