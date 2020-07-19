@@ -16,29 +16,25 @@
 
 package com.github.noonmaru.tap.fake
 
-import com.github.noonmaru.tap.fake.internal.FakeServerImpl
+import com.github.noonmaru.tap.fake.internal.FakeEntityServerImpl
 import org.bukkit.Location
 import org.bukkit.block.data.BlockData
 import org.bukkit.entity.Entity
 import org.bukkit.entity.Player
 import org.bukkit.plugin.java.JavaPlugin
 
-interface FakeServer {
+interface FakeEntityServer {
     companion object {
-        fun create(plugin: JavaPlugin): FakeServer {
-            return FakeServerImpl(plugin)
+        fun create(plugin: JavaPlugin): FakeEntityServer {
+            return FakeEntityServerImpl(plugin)
         }
     }
 
     val entities: List<FakeEntity>
 
-    val projectiles: List<FakeProjectile>
-
     fun spawnEntity(location: Location, clazz: Class<out Entity>): FakeEntity
 
     fun spawnFallingBlock(location: Location, blockData: BlockData): FakeEntity
-
-    fun launch(location: Location, projectile: FakeProjectile)
 
     fun addPlayer(player: Player)
 
