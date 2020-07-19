@@ -48,9 +48,9 @@ interface FakeEntity {
         })
     }
 
-    fun <T : Entity> metadata(applier: T.() -> Boolean)
+    fun <T : Entity> updateMetadata(applier: T.() -> Unit)
 
-    fun equipment(applier: EntityEquipment.() -> Boolean)
+    fun updateEquipment(applier: EntityEquipment.() -> Unit)
 
     fun remove()
 }
