@@ -40,15 +40,23 @@ class TapPlugin : JavaPlugin() {
 }
 
 //class Debug(plugin: JavaPlugin) : Listener, Runnable {
-//    private val fakeServer = FakeServer.create(plugin)
+//    private val fakeEntityServer = FakeEntityServer.create(plugin)
+//    private val fakeProjectileManager = FakeProjectileManager()
+//
+//    init {
+//        for (player in Bukkit.getOnlinePlayers()) {
+//            fakeEntityServer.addPlayer(player)
+//        }
+//    }
 //
 //    override fun run() {
-//        fakeServer.update()
+//        fakeProjectileManager.update()
+//        fakeEntityServer.update()
 //    }
 //
 //    @EventHandler
 //    fun onPlayerJoin(event: PlayerJoinEvent) {
-//        fakeServer.addPlayer(event.player)
+//        fakeEntityServer.addPlayer(event.player)
 //    }
 //
 //    @EventHandler
@@ -56,24 +64,40 @@ class TapPlugin : JavaPlugin() {
 //        val location = event.player.eyeLocation
 //        val offset = Vector(-32.0, 0.0, 20.0).rotateAroundY(-Math.toRadians(location.yaw.toDouble()))
 //        location.add(offset)
-//        val v = Vector(5.0, 0.0, 0.0).rotateAroundY(-Math.toRadians(location.yaw.toDouble()))
+//        val v = Vector(2.0, 0.0, 0.0).rotateAroundY(-Math.toRadians(location.yaw.toDouble()))
 //
+//        val armorStand = fakeEntityServer.spawnEntity(location, ArmorStand::class.java).apply {
+//            updateMetadata<ArmorStand> {
+//                invisible = true
+//                isMarker = true
+//            }
+//            updateEquipment {
+//                helmet = ItemStack(Material.DIAMOND_SWORD)
+//            }
+//        }
 //        val projectile = TestProjectile().apply {
-//            mount(fakeServer.spawnEntity(location, ArmorStand::class.java), Vector(0.0, -1.62, 0.0))
+//            setPassenger(armorStand) { entity, location ->
+//                entity.moveTo(location.add(0.0, -2.0, 0.0).apply {
+//                    yaw += 90
+//                    entity.updateMetadata<ArmorStand> {
+//                        headPose = EulerAngle(0.0, 0.0, Math.toRadians(pitch + 45.0))
+//                    }
+//                })
+//            }
 //            velocity = v
 //        }
 //
-//        fakeServer.launch(location, projectile)
+//        fakeProjectileManager.launch(location, projectile)
 //    }
 //}
 //
 //class TestProjectile : FakeProjectile(100, 100.0) {
+//
 //    override fun onMove(movement: Movement) {
 //        val to = movement.to
-//
 //        to.world.spawnParticle(
 //            Particle.FLAME,
-//            to,
+//            to.clone().add(0.0, 0.2, 0.0),
 //            0,
 //            0.0,
 //            0.0,
@@ -84,7 +108,10 @@ class TapPlugin : JavaPlugin() {
 //        )
 //    }
 //
-//    override fun onTrail(from: Location, to: Location) {
+//    override fun onTrail(trail: Trail) {
+//        val from = trail.from
+//        val to = trail.to
+//
 //        to.world.spawnParticle(
 //            Particle.VILLAGER_HAPPY,
 //            to.add(0.0, 0.25, 0.0),
@@ -101,7 +128,7 @@ class TapPlugin : JavaPlugin() {
 //            val v = from.vector(to)
 //            val length = v.normalizeAndLength()
 //
-//            from.world.rayTrace(from, v, length, FluidCollisionMode.NEVER, true,  0.5) { entity ->
+//            from.world.rayTrace(from, v, length, FluidCollisionMode.NEVER, true, 0.5) { entity ->
 //                entity is LivingEntity
 //            }?.let { result ->
 //                val hit = result.hitPosition
