@@ -21,11 +21,13 @@ import org.bukkit.entity.Entity
 import org.bukkit.inventory.EntityEquipment
 
 interface FakeEntity {
-    val server: FakeServer
+    val server: FakeEntityServer
     val bukkitEntity: Entity
     val location: Location
     val vehicle: FakeEntity?
     val passengers: List<FakeEntity>
+    val valid: Boolean
+    val dead: Boolean
 
     fun addPassenger(passenger: FakeEntity): Boolean
 
@@ -35,9 +37,16 @@ interface FakeEntity {
 
     fun moveTo(target: Location)
 
-    fun move(x: Double, y: Double, z: Double)
+    fun move(x: Double, y: Double, z: Double) {
+        moveTo(location.clone().add(x, y, z))
+    }
 
-    fun moveAndRotation(x: Double, y: Double, z: Double, yaw: Float, pitch: Float)
+    fun moveAndRotation(x: Double, y: Double, z: Double, yaw: Float, pitch: Float) {
+        moveTo(location.clone().add(x, y, z).apply {
+            this.yaw = yaw
+            this.pitch = pitch
+        })
+    }
 
     fun <T : Entity> metadata(applier: T.() -> Boolean)
 
