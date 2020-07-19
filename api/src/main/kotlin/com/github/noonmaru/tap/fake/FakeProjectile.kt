@@ -17,6 +17,7 @@
 package com.github.noonmaru.tap.fake
 
 import com.github.noonmaru.tap.math.copy
+import com.github.noonmaru.tap.math.vector
 import org.bukkit.Location
 import org.bukkit.util.Vector
 import java.util.*
@@ -44,6 +45,13 @@ open class FakeProjectile(
         get() = _velocity.clone()
         set(value) {
             _velocity.copy(value)
+
+            if (this::_targetLocation.isInitialized) {
+                _targetLocation.apply {
+                    copy(_location)
+                    add(value)
+                }
+            }
         }
 
     var ticks: Int = 0
@@ -68,18 +76,18 @@ open class FakeProjectile(
     var passenger: Passenger? = null
         private set
 
-    private val trailQueue = ArrayDeque<Pair<Location, Location>>(2)
+    private val trailQueue = ArrayDeque<Trail>(2)
 
     internal fun init(location: Location) {
         _previousLocation = location.clone()
         _location = location.clone()
-        _targetLocation = location.clone()
+        _targetLocation = location.clone().add(_velocity)
     }
 
-    fun setPassenger(fakeEntity: FakeEntity, offset: Vector) {
+    fun setPassenger(fakeEntity: FakeEntity, applier: ((passenger: FakeEntity, to: Location) -> Unit)? = null) {
         checkState()
 
-        passenger = Passenger(fakeEntity, offset.clone())
+        passenger = Passenger(fakeEntity, applier)
     }
 
     fun removePassenger() {
@@ -96,23 +104,36 @@ open class FakeProjectile(
         val previous = _previousLocation
         val current = _location
         val target = _targetLocation
+        var vector: Vector? = null
 
-        onMove(Movement(current, target))
+        val movement = Movement(current.clone(), target.clone())
 
+        onMove(movement)
+        target.copy(movement.to)
         previous.copy(current)
         current.copy(target)
 
         if (previous.world === current.world) {
+            vector = previous vector current
+            current.direction = vector
+
             distanceFlown += previous.distance(current)
         }
 
         passenger?.let { passenger ->
             val entity = passenger.fakeEntity
 
-            if (entity.dead)
+            if (entity.dead) {
                 this.passenger = null
-            else
-                passenger.fakeEntity.moveTo(current.clone().add(passenger._offset))
+            } else {
+                val applier = passenger.applier
+
+                if (applier == null) {
+                    passenger.fakeEntity.moveTo(current)
+                } else {
+                    applier(entity, current.clone())
+                }
+            }
         }
 
         var mortal = false
@@ -142,12 +163,12 @@ open class FakeProjectile(
 
         val trailQueue = this.trailQueue
 
-        trailQueue += previous.clone() to current.clone()
+        trailQueue += Trail(previous.clone(), current.clone(), vector)
 
         while (trailQueue.count() > 3) {
             val trail = trailQueue.remove()
 
-            onTrail(trail.first, trail.second)
+            onTrail(trail)
         }
 
         if (mortal)
@@ -170,7 +191,7 @@ open class FakeProjectile(
     protected open fun onPreUpdate() {}
     protected open fun onPostUpdate() {}
     protected open fun onMove(movement: Movement) {}
-    protected open fun onTrail(from: Location, to: Location) {}
+    protected open fun onTrail(trail: Trail) {}
     protected open fun onRemove() {}
 
     fun checkState() {
@@ -180,21 +201,16 @@ open class FakeProjectile(
 
 class Passenger(
     val fakeEntity: FakeEntity,
-    internal val _offset: Vector
-) {
-    val offset: Vector
-        get() = _offset.clone()
-}
+    val applier: ((passenger: FakeEntity, to: Location) -> Unit)?
+)
 
 class Movement(
-    from: Location,
-    to: Location
-) {
-    val from: Location = from
-        get() = field.clone()
+    var from: Location,
+    var to: Location
+)
 
-    var to: Location = to
-        set(value) {
-            field.copy(value)
-        }
-}
+class Trail(
+    val from: Location,
+    val to: Location,
+    val velocity: Vector?
+)
