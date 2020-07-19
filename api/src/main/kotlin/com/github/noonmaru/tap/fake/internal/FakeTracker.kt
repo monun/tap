@@ -22,7 +22,7 @@ import com.github.noonmaru.tap.ref.UpstreamReference
 import org.bukkit.entity.Player
 
 internal class FakeTracker(
-    server: FakeServerImpl,
+    server: FakeEntityServerImpl,
     val player: Player
 ) {
     private val serverRef = UpstreamReference(server)
