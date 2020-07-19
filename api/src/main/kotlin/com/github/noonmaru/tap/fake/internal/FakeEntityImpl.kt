@@ -409,26 +409,23 @@ class FakeEntityImpl internal constructor(
     }
 
     @Suppress("UNCHECKED_CAST")
-    override fun <T : Entity> metadata(applier: T.() -> Boolean) {
+    override fun <T : Entity> updateMetadata(applier: T.() -> Unit) {
         if (dead) return
 
         val entity = bukkitEntity as T
-
-        if (applier.invoke(entity)) {
-            updateMeta = true
-            enqueue()
-        }
+        applier(entity)
+        updateMeta = true
+        enqueue()
     }
 
-    override fun equipment(applier: EntityEquipment.() -> Boolean) {
+    override fun updateEquipment(applier: EntityEquipment.() -> Unit) {
         if (dead) return
 
         val living = bukkitEntity as LivingEntity
         living.equipment?.let { equipment ->
-            if (applier.invoke(equipment)) {
-                updateEquipment = true
-                enqueue()
-            }
+            applier(equipment)
+            updateEquipment = true
+            enqueue()
         }
     }
 
