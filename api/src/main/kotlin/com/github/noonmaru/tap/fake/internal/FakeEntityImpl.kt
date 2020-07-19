@@ -37,13 +37,13 @@ import org.bukkit.util.Vector
 import java.util.*
 
 class FakeEntityImpl internal constructor(
-    server: FakeServerImpl,
+    server: FakeEntityServerImpl,
     override val bukkitEntity: Entity,
     location: Location
 ) : FakeEntity {
     private val serverRef = UpstreamReference(server)
 
-    override val server: FakeServerImpl
+    override val server: FakeEntityServerImpl
         get() = serverRef.get()
 
     override val location: Location
@@ -71,8 +71,11 @@ class FakeEntityImpl internal constructor(
     private var updateEquipment = false
     private var enqueued = false
 
-    internal var valid = true
+    override var valid: Boolean = true
         private set
+
+    override val dead: Boolean
+        get() = !valid
 
     private lateinit var equipmentData: ItemData
 
@@ -109,13 +112,16 @@ class FakeEntityImpl internal constructor(
     private fun check(passenger: FakeEntity): FakeEntityImpl {
         val impl = passenger as FakeEntityImpl
 
-        checkState()
         passenger.checkState()
+        require(impl.server === this.server)
 
         return impl
     }
 
     override fun addPassenger(passenger: FakeEntity): Boolean {
+        checkState()
+        val impl = check(passenger)
+
         passenger.let {
             var entity: FakeEntityImpl? = this
 
@@ -128,8 +134,6 @@ class FakeEntityImpl internal constructor(
 
             passenger.eject()
         }
-
-        val impl = check(passenger)
 
         impl.vehicle = this
         _passengers += impl
@@ -165,7 +169,7 @@ class FakeEntityImpl internal constructor(
     }
 
     override fun moveTo(target: Location) {
-        if (vehicle != null || previousLocation == target) {
+        if (dead || vehicle != null || previousLocation == target) {
             return
         }
 
@@ -181,24 +185,6 @@ class FakeEntityImpl internal constructor(
             passenger.updateTrackers = true
             passenger.enqueue()
         }
-    }
-
-    override fun move(x: Double, y: Double, z: Double) {
-        currentLocation.add(x, y, z)
-
-        updateLocation = true
-        enqueue()
-    }
-
-    override fun moveAndRotation(x: Double, y: Double, z: Double, yaw: Float, pitch: Float) {
-        currentLocation.apply {
-            add(x, y, z)
-            this.yaw = yaw
-            this.pitch = pitch
-        }
-
-        updateLocation = true
-        enqueue()
     }
 
     internal fun enqueue() {
@@ -424,6 +410,8 @@ class FakeEntityImpl internal constructor(
 
     @Suppress("UNCHECKED_CAST")
     override fun <T : Entity> metadata(applier: T.() -> Boolean) {
+        if (dead) return
+
         val entity = bukkitEntity as T
 
         if (applier.invoke(entity)) {
@@ -433,6 +421,8 @@ class FakeEntityImpl internal constructor(
     }
 
     override fun equipment(applier: EntityEquipment.() -> Boolean) {
+        if (dead) return
+
         val living = bukkitEntity as LivingEntity
         living.equipment?.let { equipment ->
             if (applier.invoke(equipment)) {
