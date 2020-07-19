@@ -76,10 +76,14 @@ open class FakeProjectile(
         _targetLocation = location.clone()
     }
 
-    fun mount(fakeEntity: FakeEntity, offset: Vector) {
+    fun setPassenger(fakeEntity: FakeEntity, offset: Vector) {
         checkState()
 
         passenger = Passenger(fakeEntity, offset.clone())
+    }
+
+    fun removePassenger() {
+        passenger = null
     }
 
     internal fun update() {
@@ -103,7 +107,12 @@ open class FakeProjectile(
         }
 
         passenger?.let { passenger ->
-            passenger.fakeEntity.moveTo(current.clone().add(passenger._offset))
+            val entity = passenger.fakeEntity
+
+            if (entity.dead)
+                this.passenger = null
+            else
+                passenger.fakeEntity.moveTo(current.clone().add(passenger._offset))
         }
 
         var mortal = false
@@ -150,7 +159,11 @@ open class FakeProjectile(
     fun remove() {
         if (isValid) {
             isValid = false
+            trailQueue.clear()
+
             runCatching { onRemove() }
+
+            passenger = null
         }
     }
 
