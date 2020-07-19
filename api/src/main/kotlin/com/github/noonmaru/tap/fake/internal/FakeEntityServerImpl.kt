@@ -32,18 +32,13 @@ import org.bukkit.plugin.java.JavaPlugin
 import java.util.*
 import kotlin.collections.ArrayList
 
-class FakeServerImpl(plugin: JavaPlugin) : FakeServer {
+class FakeEntityServerImpl(plugin: JavaPlugin) : FakeEntityServer {
 
     internal val _entities = ArrayList<FakeEntityImpl>()
     private val updateQueue = ArrayDeque<FakeEntityImpl>()
 
     override val entities: List<FakeEntity>
         get() = ImmutableList.copyOf(_entities)
-
-    private val _projectiles = ArrayList<FakeProjectile>()
-
-    override val projectiles: List<FakeProjectile>
-        get() = ImmutableList.copyOf(_projectiles)
 
     private val trackersByPlayer = WeakHashMap<Player, FakeTracker>()
 
@@ -84,14 +79,6 @@ class FakeServerImpl(plugin: JavaPlugin) : FakeServer {
         return fakeEntity
     }
 
-    override fun launch(location: Location, projectile: FakeProjectile) {
-        projectile.checkState()
-        require(!projectile.launched) { "Already launched projectile" }
-
-        projectile.init(location)
-        _projectiles += projectile
-    }
-
     override fun addPlayer(player: Player) {
         checkState()
 
@@ -107,23 +94,8 @@ class FakeServerImpl(plugin: JavaPlugin) : FakeServer {
     override fun update() {
         checkState()
 
-        updateProjectiles()
         updateTrackers()
         updateEntities()
-    }
-
-    private fun updateProjectiles() {
-        val projectiles = _projectiles
-        val iterator = projectiles.iterator()
-
-        while (iterator.hasNext()) {
-            val projectile = iterator.next()
-
-            projectile.update()
-
-            if (!projectile.isValid)
-                iterator.remove()
-        }
     }
 
     private fun updateTrackers() {
