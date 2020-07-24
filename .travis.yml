@@ -16,6 +16,9 @@ cache:
     - '$HOME/.m2'
     - '$HOME/.gradle'
 
+script:
+  - ./gradlew build
+
 after_success:
   - wget https://raw.githubusercontent.com/DiscordHooks/travis-ci-discord-webhook/master/send.sh
   - chmod +x send.sh
