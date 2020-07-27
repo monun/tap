@@ -21,7 +21,7 @@ import net.minecraft.server.v1_14_R1.NBTTagCompound
 import org.bukkit.craftbukkit.v1_14_R1.inventory.CraftItemStack
 import org.bukkit.inventory.ItemStack
 
-class NMSItemSupport : ItemSupport() {
+class NMSItemSupport : ItemSupport {
     override fun saveToJsonString(item: ItemStack): String {
         val nmsItem = CraftItemStack.asNMSCopy(item)
         return nmsItem.save(NBTTagCompound()).toString()
