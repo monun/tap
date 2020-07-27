@@ -22,14 +22,26 @@ import java.util.regex.Pattern
 import javax.script.ScriptEngine
 import javax.script.ScriptEngineManager
 
-fun String.processTemplates(config: ConfigurationSection): String {
+fun Collection<String>.processTemplatesAll(config: ConfigurationSection): List<String> {
+    val list = ArrayList<String>(count())
+
+    for (s in list) {
+        list += s.processTemplates(config)
+    }
+
+    return list
+}
+
+fun String.processTemplates(
+    config: ConfigurationSection
+): String {
     val builder = StringBuilder(this)
 
-    createTemplates(this).forEach {
-        val token = it.token
+    createTemplates(this).forEach { template ->
+        val token = template.token
 
         runCatching {
-            it.process(config).let { replace ->
+            template.process(config).let { replace ->
                 val index = builder.indexOf(token)
                 builder.replace(index, index + token.count(), replace ?: "null")
             }
@@ -53,7 +65,6 @@ private fun createTemplates(s: String): List<Template> {
 }
 
 internal abstract class Template {
-
     companion object {
         val js: ScriptEngine by lazy {
             ScriptEngineManager().getEngineByName("js")
