@@ -23,8 +23,8 @@ import org.bukkit.util.Vector
 import java.util.*
 
 open class FakeProjectile(
-    maxTicks: Int,
-    range: Double
+    var maxTicks: Int,
+    var range: Double
 ) {
     private lateinit var _previousLocation: Location
     private lateinit var _location: Location
@@ -56,10 +56,6 @@ open class FakeProjectile(
 
     var ticks: Int = 0
         private set
-
-    var maxTicks: Int = maxTicks
-
-    var range: Double = range
 
     var distanceFlown: Double = 0.0
         private set
