@@ -17,14 +17,34 @@
 package com.github.noonmaru.tap.item
 
 import com.github.noonmaru.tap.loader.LibraryLoader
+import org.bukkit.inventory.EquipmentSlot
 import org.bukkit.inventory.ItemStack
+import org.bukkit.inventory.PlayerInventory
 
-abstract class ItemSupport {
-    abstract fun saveToJsonString(item: ItemStack): String
+interface ItemSupport {
+    fun saveToJsonString(item: ItemStack): String {
+        error("Unsupported nms version")
+    }
+
+    fun damageArmor(playerInventory: PlayerInventory, attackDamage: Double) {
+        error("Unsupported nms version")
+    }
+
+    fun damageSlot(playerInventory: PlayerInventory, slot: EquipmentSlot, damage: Int) {
+        error("Unsupported nms version")
+    }
 }
 
 private val NMS = LibraryLoader.load(ItemSupport::class.java)
 
 fun ItemStack.saveToJsonString(): String {
     return NMS.saveToJsonString(this)
+}
+
+fun PlayerInventory.damageArmor(attackDamage: Double) {
+    NMS.damageArmor(this, attackDamage)
+}
+
+fun PlayerInventory.damageSlot(slot: EquipmentSlot, damage: Int = 1) {
+    NMS.damageSlot(this, slot, damage)
 }
