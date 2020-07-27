@@ -17,13 +17,45 @@
 package com.github.noonmaru.tap.v1_13_R2.item
 
 import com.github.noonmaru.tap.item.ItemSupport
+import net.minecraft.server.v1_13_R2.ItemStack
 import net.minecraft.server.v1_13_R2.NBTTagCompound
+import net.minecraft.server.v1_13_R2.PlayerInventory
+import org.bukkit.craftbukkit.v1_13_R2.entity.CraftPlayer
+import org.bukkit.craftbukkit.v1_13_R2.inventory.CraftInventoryPlayer
 import org.bukkit.craftbukkit.v1_13_R2.inventory.CraftItemStack
-import org.bukkit.inventory.ItemStack
+import org.bukkit.inventory.EquipmentSlot
+import org.bukkit.inventory.ItemStack as BukkitItemStack
+import org.bukkit.inventory.PlayerInventory as BukkitPlayerInventory
 
 class NMSItemSupport : ItemSupport {
-    override fun saveToJsonString(item: ItemStack): String {
+    override fun saveToJsonString(item: BukkitItemStack): String {
         val nmsItem = CraftItemStack.asNMSCopy(item)
         return nmsItem.save(NBTTagCompound()).toString()
+    }
+
+    override fun damageArmor(playerInventory: BukkitPlayerInventory, attackDamage: Double) {
+        val nmsInventory = (playerInventory as CraftInventoryPlayer).inventory
+
+        nmsInventory.a(attackDamage.toFloat())
+    }
+
+    override fun damageSlot(playerInventory: BukkitPlayerInventory, slot: EquipmentSlot, damage: Int) {
+        val nmsInventory = (playerInventory as CraftInventoryPlayer).inventory
+        val nmsItem = nmsInventory.getItem(slot)
+
+        if (!nmsItem.isEmpty) {
+            nmsItem.damage(damage, (playerInventory.holder as CraftPlayer).handle)
+        }
+    }
+}
+
+internal fun PlayerInventory.getItem(slot: EquipmentSlot): ItemStack {
+    return when (slot) {
+        EquipmentSlot.HAND -> itemInHand
+        EquipmentSlot.OFF_HAND -> extraSlots[0]
+        EquipmentSlot.FEET -> armorContents[0]
+        EquipmentSlot.LEGS -> armorContents[1]
+        EquipmentSlot.CHEST -> armorContents[2]
+        EquipmentSlot.HEAD -> armorContents[3]
     }
 }
