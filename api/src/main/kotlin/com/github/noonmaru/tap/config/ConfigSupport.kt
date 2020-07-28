@@ -18,6 +18,8 @@ package com.github.noonmaru.tap.config
 
 import org.bukkit.configuration.ConfigurationSection
 import org.bukkit.configuration.file.YamlConfiguration
+import org.bukkit.configuration.serialization.ConfigurationSerializable
+import org.bukkit.configuration.serialization.ConfigurationSerialization
 import java.io.File
 import java.lang.reflect.Field
 
@@ -112,7 +114,7 @@ private object PrimitiveSupport {
  * @see RangeFloat
  * @see RangeDouble
  */
-fun Any.applyConfig(config: ConfigurationSection, separateByClass: Boolean = false): Boolean {
+fun Any.computeConfig(config: ConfigurationSection, separateByClass: Boolean = false): Boolean {
     var absent = false
     val configurables = javaClass.getConfigurables()
 
@@ -127,23 +129,33 @@ fun Any.applyConfig(config: ConfigurationSection, separateByClass: Boolean = fal
 
             if (value != null) {
                 val type = field.type
-                if (type.isPrimitive) {
-                    value = PrimitiveSupport.findAdapter(type)?.invoke(field, value)
-                } else if (type.isEnum) {
-                    try {
-                        value = EnumSupport.valueOf(type, value.toString())
-                    } catch (e: IllegalArgumentException) {
-                        println("Not found Enum $type for $value")
-                        e.printStackTrace()
+                when {
+                    type.isPrimitive -> {
+                        value = PrimitiveSupport.findAdapter(type)?.invoke(field, value)
+                    }
+                    type.isEnum -> {
+                        try {
+                            value = EnumSupport.valueOf(type, value.toString())
+                        } catch (e: IllegalArgumentException) {
+                            error("Not found Enum $type for $value")
+                        }
+                    }
+                    value is ConfigurationSection -> {
+                        require(ConfigurationSerializable::class.java.isAssignableFrom(type))
+
+                        value = ConfigurationSerialization.deserializeObject(
+                            value.getValues(false), type.asSubclass(
+                                ConfigurationSerializable::class.java
+                            )
+                        )
                     }
                 }
 
-                value?.let {
+                value?.let { input ->
                     try {
-                        field.set(this, it)
+                        field.set(this, input)
                     } catch (e: Exception) {
-                        println("Type mismatch! ${type.name} != ${it.javaClass.name}")
-                        e.printStackTrace()
+                        error("Type mismatch! ${type.name} != ${input.javaClass.name}")
                     }
                 }
 
@@ -163,6 +175,10 @@ fun Any.applyConfig(config: ConfigurationSection, separateByClass: Boolean = fal
             absent = true
 
             if (section == null) section = config.createSection(sectionPath)
+
+            if (value is ConfigurationSerializable) {
+                value = value.serialize()
+            }
 
             section.set(key, value)
         }
@@ -203,10 +219,10 @@ private fun Number.isZero(): Boolean {
  * @see RangeFloat
  * @see RangeDouble
  */
-fun Any.applyConfig(configFile: File, separateByClass: Boolean = false): Boolean {
+fun Any.computeConfig(configFile: File, separateByClass: Boolean = false): Boolean {
     if (!configFile.exists()) {
         val config = YamlConfiguration()
-        applyConfig(config)
+        computeConfig(config)
         config.save(configFile)
 
         return true
@@ -214,7 +230,7 @@ fun Any.applyConfig(configFile: File, separateByClass: Boolean = false): Boolean
 
     val config = YamlConfiguration.loadConfiguration(configFile)
 
-    if (applyConfig(config, separateByClass)) {
+    if (computeConfig(config, separateByClass)) {
         config.save(configFile)
 
         return true
@@ -223,8 +239,23 @@ fun Any.applyConfig(configFile: File, separateByClass: Boolean = false): Boolean
     return false
 }
 
-private fun Class<*>.getConfigurables(): Map<Class<*>, List<Pair<Field, Config>>> {
+@Deprecated(
+    "This method will be removed in future versions.",
+    ReplaceWith("computeConfig(config, separateByClass)")
+)
+fun Any.applyConfig(config: ConfigurationSection, separateByClass: Boolean = false): Boolean {
+    return computeConfig(config, separateByClass)
+}
 
+@Deprecated(
+    "This method will be removed in future versions.",
+    ReplaceWith("computeConfig(configFile, separateByClass)")
+)
+fun Any.applyConfig(configFile: File, separateByClass: Boolean = false): Boolean {
+    return computeConfig(configFile, separateByClass)
+}
+
+private fun Class<*>.getConfigurables(): Map<Class<*>, List<Pair<Field, Config>>> {
     val superClasses = getSuperClasses(Any::class.java).reversed()
     val list: MutableMap<Class<*>, List<Pair<Field, Config>>> = LinkedHashMap()
 
