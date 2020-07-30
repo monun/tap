@@ -22,17 +22,17 @@ import java.util.regex.Pattern
 import javax.script.ScriptEngine
 import javax.script.ScriptEngineManager
 
-fun Collection<String>.processTemplatesAll(config: ConfigurationSection): List<String> {
+fun Collection<String>.renderTemplatesAll(config: ConfigurationSection): List<String> {
     val list = ArrayList<String>(count())
 
     for (s in list) {
-        list += s.processTemplates(config)
+        list += s.renderTemplates(config)
     }
 
     return list
 }
 
-fun String.processTemplates(
+fun String.renderTemplates(
     config: ConfigurationSection
 ): String {
     val builder = StringBuilder(this)
