@@ -25,7 +25,7 @@ import javax.script.ScriptEngineManager
 fun Collection<String>.renderTemplatesAll(config: ConfigurationSection): List<String> {
     val list = ArrayList<String>(count())
 
-    for (s in list) {
+    for (s in this) {
         list += s.renderTemplates(config)
     }
 
