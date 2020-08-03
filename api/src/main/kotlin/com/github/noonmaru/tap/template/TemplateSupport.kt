@@ -16,12 +16,14 @@
 
 package com.github.noonmaru.tap.template
 
-import com.google.common.base.Preconditions
 import org.bukkit.configuration.ConfigurationSection
 import java.util.regex.Pattern
 import javax.script.ScriptEngine
 import javax.script.ScriptEngineManager
 
+/**
+ * [renderTemplates]
+ */
 fun Collection<String>.renderTemplatesAll(config: ConfigurationSection): List<String> {
     val list = ArrayList<String>(count())
 
@@ -32,83 +34,128 @@ fun Collection<String>.renderTemplatesAll(config: ConfigurationSection): List<St
     return list
 }
 
+/**
+ * 문자열의 템플릿을 렌더합니다.
+ *
+ * 템플릿의 종류
+ * 1. variable - $name
+ * 2. expression - ${child.name}
+ *
+ * expression내에는 다음과 같이 식을 추가할 수 있습니다.
+ *
+ * ***${number * other-number / 100}***
+ *
+ * 섹션 접근 방법
+ *
+ * 1. ***parent.varname*** - 상위 섹션 접근
+ * 2. ***childname.varname*** - 하위 섹션 접근
+ *
+ * 템플릿의 작성 규칙은 다음과 같습니다.
+ *
+ * 1. 변수의 이름은 숫자, 영어, underline(_), dash(-)로만 구성하세요.
+ * 2. 변수의 이름은 공백을 허용하지 않습니다.
+ * 3. expression내에 연산자는 반드시 앞뒤로 공백을 넣어 구분해주세요.
+ *
+ * @return rendered text
+ */
 fun String.renderTemplates(
     config: ConfigurationSection
 ): String {
     val builder = StringBuilder(this)
+    val templates = Template.parse(this)
 
-    createTemplates(this).forEach { template ->
+    for (template in templates) {
         val token = template.token
 
-        runCatching {
-            template.process(config).let { replace ->
-                val index = builder.indexOf(token)
-                builder.replace(index, index + token.count(), replace ?: "null")
-            }
-        }.onFailure { t ->
-            throw IllegalArgumentException("Failed to process template for $token", t)
+        template.runCatching {
+            renderValue(config)
+        }.onSuccess { replace ->
+            val indexOfToken = builder.indexOf(token)
+
+            builder.replace(indexOfToken, indexOfToken + token.count(), replace ?: "null")
+        }.onFailure { throwable ->
+            throw IllegalArgumentException("Failed to render template token $token", throwable)
         }
     }
 
     return builder.toString()
 }
 
+internal abstract class Template(
+    val token: String
+) {
+    companion object {
+        private val variablePattern = Pattern.compile("\\$([\\w-])+")
 
-private fun createTemplates(s: String): List<Template> {
-    val list = ArrayList<Template>()
+        private val expressionRegex = Pattern.compile("\\$\\{(.+?)}")
 
-    s.findMatchGroups(Template.pattern).forEach {
-        list += Template.createTemplate(it)
+        internal fun parse(text: String): List<Template> {
+            val list = arrayListOf<Template>()
+
+            variablePattern.let { pattern ->
+                val matcher = pattern.matcher(text)
+
+                while (matcher.find()) {
+                    list += Variable(matcher.group())
+                }
+            }
+
+            expressionRegex.let { pattern ->
+                val matcher = pattern.matcher(text)
+
+                while (matcher.find()) {
+                    list += Expression(matcher.group())
+                }
+            }
+
+            return list
+        }
     }
 
-    return list
-}
+    abstract val name: String
 
-internal abstract class Template {
-    companion object {
-        val js: ScriptEngine by lazy {
-            ScriptEngineManager().getEngineByName("js")
+    abstract fun renderValue(config: ConfigurationSection): String?
+
+    private class Variable(token: String) : Template(token) {
+        override val name: String
+            get() = token.substring(1)
+
+        override fun renderValue(config: ConfigurationSection): String? {
+            val value = config[name]
+
+            if (value != null && value is Number) {
+                return value.toString().removeSuffix(".0")
+            }
+
+            return value.toString()
         }
+    }
 
-        internal val pattern = Pattern.compile("\\\$((\\{.+?})|(\\w+(-\\w*)*))")
+    private class Expression(token: String) : Template(token) {
+        companion object {
+            private val expressionVariablePattern = Pattern.compile("[\\w-]+(\\.[\\w-]+)*")
 
-        private val variablePattern = Pattern.compile("(\\w+(-\\w*)*)")
-
-        private val expressionRegex = Regex("\\\$(\\{.+?})")
-
-        fun createTemplate(s: String): Template {
-            return if (s.matches(expressionRegex)) {
-                Expression()
-            } else {
-                Variable()
-            }.apply {
-                token = s
+            val js: ScriptEngine by lazy {
+                ScriptEngineManager().getEngineByName("js")
             }
         }
-    }
 
-    lateinit var token: String
-        private set
+        override val name: String
+            get() = token.run { substring(2, length - 1) }
 
-    abstract fun process(config: ConfigurationSection): String?
-
-    private class Expression : Template() {
-
-        override fun process(config: ConfigurationSection): String? {
-            val groups = token.findMatchGroups(variablePattern)
+        override fun renderValue(config: ConfigurationSection): String? {
+            val groups = token.findMatchGroups(expressionVariablePattern)
 
             if (groups.isEmpty()) return null
             if (groups.count() == 1) return config.find(groups.first())?.toString()
 
-            val builder = StringBuilder(token)
-            builder.delete(0, 2)
-            builder.deleteCharAt(builder.lastIndex)
+            val builder = StringBuilder(name)
 
             for (path in groups) {
-                if (path.toDoubleOrNull() != null) continue
+                if (path.toDoubleOrNull() != null) continue //숫자 체크
 
                 config.find(path)?.let { value ->
-                    Preconditions.checkArgument(value is Number, "Value $path is not a number")
+                    require(value is Number) { "Value is not a number $path in $token" }
 
                     val index = builder.indexOf(path)
                     builder.replace(index, index + path.length, value.toString())
@@ -118,7 +165,7 @@ internal abstract class Template {
             val script = builder.toString()
 
             js.runCatching {
-                return eval(script).toString()
+                return eval(script).toString().removeSuffix(".0")
             }.onFailure {
                 throw IllegalArgumentException("Failed to evaluate $script")
             }
@@ -126,17 +173,22 @@ internal abstract class Template {
             return null
         }
     }
+}
 
-    private class Variable : Template() {
-        override fun process(config: ConfigurationSection): String? {
-            return config[token.substring(1)]?.toString()
-        }
+private fun String.findMatchGroups(pattern: Pattern): List<String> {
+    val list = arrayListOf<String>()
+    val matcher = pattern.matcher(this)
+
+    while (matcher.find()) {
+        list.add(matcher.group())
     }
+
+    return list
 }
 
 private fun ConfigurationSection.find(path: String): Any? {
     var config = this
-    val keys = path.split(".")
+    val keys = path.split('.')
 
     var value: Any? = null
 
@@ -153,15 +205,4 @@ private fun ConfigurationSection.find(path: String): Any? {
     }
 
     return value
-}
-
-private fun String.findMatchGroups(pattern: Pattern): List<String> {
-    val list = ArrayList<String>()
-    val matcher = pattern.matcher(this)
-
-    while (matcher.find()) {
-        list.add(matcher.group())
-    }
-
-    return list
 }
