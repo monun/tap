@@ -69,25 +69,12 @@ open class FakeProjectile(
     var isValid: Boolean = true
         private set
 
-    var passenger: Passenger? = null
-        private set
-
     private val trailQueue = ArrayDeque<Trail>(2)
 
     internal fun init(location: Location) {
         _previousLocation = location.clone()
         _location = location.clone()
         _targetLocation = location.clone().add(_velocity)
-    }
-
-    fun setPassenger(fakeEntity: FakeEntity, applier: ((passenger: FakeEntity, to: Location) -> Unit)? = null) {
-        checkState()
-
-        passenger = Passenger(fakeEntity, applier)
-    }
-
-    fun removePassenger() {
-        passenger = null
     }
 
     internal fun update() {
@@ -114,22 +101,6 @@ open class FakeProjectile(
             current.direction = vector
 
             distanceFlown += previous.distance(current)
-        }
-
-        passenger?.let { passenger ->
-            val entity = passenger.fakeEntity
-
-            if (entity.dead) {
-                this.passenger = null
-            } else {
-                val applier = passenger.applier
-
-                if (applier == null) {
-                    passenger.fakeEntity.moveTo(current)
-                } else {
-                    applier(entity, current.clone())
-                }
-            }
         }
 
         var mortal = false
@@ -179,8 +150,6 @@ open class FakeProjectile(
             trailQueue.clear()
 
             runCatching { onRemove() }
-
-            passenger = null
         }
     }
 
@@ -194,11 +163,6 @@ open class FakeProjectile(
         require(isValid) { "Invalid ${this.javaClass.simpleName}@${System.identityHashCode(this).toString(0x10)}" }
     }
 }
-
-class Passenger(
-    val fakeEntity: FakeEntity,
-    val applier: ((passenger: FakeEntity, to: Location) -> Unit)?
-)
 
 class Movement(
     var from: Location,
