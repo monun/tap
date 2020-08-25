@@ -18,6 +18,7 @@ package com.github.noonmaru.tap.fake
 
 import org.bukkit.Location
 import org.bukkit.entity.Entity
+import org.bukkit.entity.Player
 import org.bukkit.inventory.EntityEquipment
 
 interface FakeEntity {
@@ -28,6 +29,8 @@ interface FakeEntity {
     val passengers: List<FakeEntity>
     val valid: Boolean
     val dead: Boolean
+
+    var isVisible: Boolean
 
     fun addPassenger(passenger: FakeEntity): Boolean
 
@@ -51,6 +54,10 @@ interface FakeEntity {
     fun <T : Entity> updateMetadata(applier: T.() -> Unit)
 
     fun updateEquipment(applier: EntityEquipment.() -> Unit)
+
+    fun excludeTracker(player: Player)
+
+    fun includeTracker(player: Player)
 
     fun remove()
 }

@@ -79,15 +79,10 @@ class FakeEntityImpl internal constructor(
 
     private lateinit var equipmentData: ItemData
 
-    private var moveTicks = 0
-
-    val isDone: Boolean
-        get() = !updateLocation
-
     private inner class ItemData {
         private val itemsBySlot = EnumMap<EquipmentSlot, ItemStack>(EquipmentSlot::class.java)
 
-        internal fun update() {
+        fun update() {
             val armorStand = bukkitEntity as ArmorStand
 
             for (slot in EquipmentSlot.values()) {
@@ -102,6 +97,26 @@ class FakeEntityImpl internal constructor(
             }
         }
     }
+
+    private var moveTicks = 0
+
+    val isDone: Boolean
+        get() = !updateLocation
+
+    override var isVisible: Boolean = true
+        get() = field && valid
+        set(value) {
+            checkState()
+
+            if (field != value) {
+                field = value
+
+                updateTrackers = true
+                enqueue()
+            }
+        }
+
+    private val exclusion = Collections.newSetFromMap(WeakHashMap<Player, Boolean>())
 
     init {
         if (bukkitEntity is ArmorStand) {
@@ -180,10 +195,16 @@ class FakeEntityImpl internal constructor(
         moveTicks = 20
         enqueue()
 
+        updatePassengerLocation()
+    }
+
+    private fun updatePassengerLocation() {
         for (passenger in _passengers) {
             passenger.updateLocation = true
             passenger.updateTrackers = true
             passenger.enqueue()
+
+            passenger.updatePassengerLocation()
         }
     }
 
@@ -262,6 +283,10 @@ class FakeEntityImpl internal constructor(
             trackerComputeQueue.clear()
         }
 
+        if (!isVisible) {
+            trackerComputeQueue.clear()
+        }
+
         trackerComputeQueue.let { queue ->
             while (queue.isNotEmpty()) {
                 computeTracker(queue.remove())
@@ -284,6 +309,14 @@ class FakeEntityImpl internal constructor(
             previousLocation.mount(vehicle.previousLocation, yOffset)
             currentLocation.mount(vehicle.currentLocation, yOffset)
             bukkitEntity.setLocation(deltaLocation)
+
+            for (tracker in trackers) {
+                if (tracker !in vehicle.trackers) {
+                    tracker.player.sendServerPacket(
+                        Packet.entityTeleport(bukkitEntity, deltaLocation)
+                    )
+                }
+            }
 
             return MoveResult.VEHICLE
         }
@@ -341,21 +374,23 @@ class FakeEntityImpl internal constructor(
     private fun computeTracker(tracker: FakeTracker) {
         if (!tracker.valid) return
 
-        val spawnDistance = 240.0 * 240.0
-        val despawnDistance = 256.0 * 256.0
-        val entityLocation = currentLocation
-        val trackerLocation = tracker.location
+        if (isVisible && tracker.player !in exclusion) {
+            val spawnDistance = 240.0 * 240.0
+            val despawnDistance = 256.0 * 256.0
+            val entityLocation = currentLocation
+            val trackerLocation = tracker.location
 
-        if (entityLocation.world === trackerLocation.world) {
-            val distance = entityLocation.distance(trackerLocation)
+            if (entityLocation.world === trackerLocation.world) {
+                val distance = entityLocation.distance(trackerLocation)
 
-            if (distance < despawnDistance) {
-                if (distance < spawnDistance && trackers.add(tracker)) {
-                    tracker.addEntity(this)
-                    spawnTo(tracker.player)
+                if (distance < despawnDistance) {
+                    if (distance < spawnDistance && trackers.add(tracker)) {
+                        tracker.addEntity(this)
+                        spawnTo(tracker.player)
+                    }
+
+                    return
                 }
-
-                return
             }
         }
 
@@ -425,6 +460,20 @@ class FakeEntityImpl internal constructor(
         living.equipment?.let { equipment ->
             applier(equipment)
             updateEquipment = true
+            enqueue()
+        }
+    }
+
+    override fun excludeTracker(player: Player) {
+        if (exclusion.add(player)) {
+            updateTrackers = true
+            enqueue()
+        }
+    }
+
+    override fun includeTracker(player: Player) {
+        if (exclusion.remove(player)) {
+            updateTrackers = true
             enqueue()
         }
     }
