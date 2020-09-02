@@ -86,9 +86,9 @@ class NMSPacketSupport : PacketSupport {
                 .write(3, (velocity.y.coerceIn(-3.9, 3.9) * 8000.0).toInt())
                 .write(4, (velocity.z.coerceIn(-3.9, 3.9) * 8000.0).toInt())
             bytes
-                .write(0, (loc.yaw * 256.0F / 360.0F).toByte())
-                .write(0, (loc.pitch * 256.0F / 360.0F).toByte())
-                .write(0, (headPitch * 256.0F / 360.0F).toByte())
+                .write(0, (loc.yaw * 256.0F / 360.0F).toInt().toByte())
+                .write(0, (loc.pitch * 256.0F / 360.0F).toInt().toByte())
+                .write(0, (headPitch * 256.0F / 360.0F).toInt().toByte())
         }
     }
 
@@ -177,8 +177,8 @@ class NMSPacketSupport : PacketSupport {
                 .write(1, y)
                 .write(2, z)
             bytes
-                .write(0, (yaw * 256.0F / 360.0F).toByte())
-                .write(0, (pitch * 256.0F / 360.0F).toByte())
+                .write(0, (yaw * 256.0F / 360.0F).toInt().toByte())
+                .write(0, (pitch * 256.0F / 360.0F).toInt().toByte())
             booleans
                 .write(0, onGround)
         }
@@ -220,8 +220,8 @@ class NMSPacketSupport : PacketSupport {
                 .write(1, deltaY)
                 .write(2, deltaZ)
             bytes
-                .write(0, (yaw * 256.0F / 360.0F).toByte())
-                .write(1, (pitch * 256.0F / 360.0F).toByte())
+                .write(0, (yaw * 256.0F / 360.0F).toInt().toByte())
+                .write(1, (pitch * 256.0F / 360.0F).toInt().toByte())
             booleans
                 .write(0, onGround)
         }

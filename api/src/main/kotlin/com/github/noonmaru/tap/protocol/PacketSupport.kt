@@ -80,9 +80,9 @@ interface PacketSupport {
     fun relEntityMove(entityId: Int, move: Vector, onGround: Boolean): PacketContainer {
         return relEntityMove(
             entityId,
-            (move.x * 4096.0).toShort(),
-            (move.y * 4096.0).toShort(),
-            (move.z * 4096.0).toShort(),
+            (move.x * 4096.0).toInt().toShort(),
+            (move.y * 4096.0).toInt().toShort(),
+            (move.z * 4096.0).toInt().toShort(),
             onGround
         )
     }
@@ -105,9 +105,9 @@ interface PacketSupport {
     ): PacketContainer {
         return relEntityMoveLook(
             entityId,
-            (delta.x * 4096.0).toShort(),
-            (delta.y * 4096.0).toShort(),
-            (delta.z * 4096.0).toShort(),
+            (delta.x * 4096.0).toInt().toShort(),
+            (delta.y * 4096.0).toInt().toShort(),
+            (delta.z * 4096.0).toInt().toShort(),
             yaw,
             pitch,
             onGround
