@@ -55,7 +55,7 @@ public final class ListenerStatement {
 
             ArrayList<HandlerStatement> handlerStatements = new ArrayList<>();
             Method[] methods = listenerClass.getMethods();
-            Set<? extends Class<?>> supers = TypeToken.of(listenerClass).getTypes().rawTypes();
+            @SuppressWarnings("UnstableApiUsage") Set<? extends Class<?>> supers = TypeToken.of(listenerClass).getTypes().rawTypes();
 
             for (Method method : methods) {
                 for (Class<?> superClass : supers) {
