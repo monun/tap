@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2020 Noonmaru
+ *
+ *  Licensed under the General Public License, Version 3.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * https://opensource.org/licenses/gpl-3.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.github.noonmaru.tap.v1_15_R1.protocol
 
 import com.comphenix.protocol.PacketType
@@ -67,9 +83,9 @@ class NMSPacketSupport : PacketSupport {
                 .write(3, (velocity.y.coerceIn(-3.9, 3.9) * 8000.0).toInt())
                 .write(4, (velocity.z.coerceIn(-3.9, 3.9) * 8000.0).toInt())
             bytes
-                .write(0, (loc.yaw * 256.0F / 360.0F).toByte())
-                .write(0, (loc.pitch * 256.0F / 360.0F).toByte())
-                .write(0, (headPitch * 256.0F / 360.0F).toByte())
+                .write(0, (loc.yaw * 256.0F / 360.0F).toInt().toByte())
+                .write(0, (loc.pitch * 256.0F / 360.0F).toInt().toByte())
+                .write(0, (headPitch * 256.0F / 360.0F).toInt().toByte())
         }
     }
 
@@ -136,8 +152,8 @@ class NMSPacketSupport : PacketSupport {
                 .write(1, y)
                 .write(2, z)
             bytes
-                .write(0, (yaw * 256.0F / 360.0F).toByte())
-                .write(0, (pitch * 256.0F / 360.0F).toByte())
+                .write(0, (yaw * 256.0F / 360.0F).toInt().toByte())
+                .write(0, (pitch * 256.0F / 360.0F).toInt().toByte())
             booleans
                 .write(0, onGround)
         }
@@ -179,8 +195,8 @@ class NMSPacketSupport : PacketSupport {
                 .write(1, deltaY)
                 .write(2, deltaZ)
             bytes
-                .write(0, (yaw * 256.0F / 360.0F).toByte())
-                .write(1, (pitch * 256.0F / 360.0F).toByte())
+                .write(0, (yaw * 256.0F / 360.0F).toInt().toByte())
+                .write(1, (pitch * 256.0F / 360.0F).toInt().toByte())
             booleans
                 .write(0, onGround)
         }
