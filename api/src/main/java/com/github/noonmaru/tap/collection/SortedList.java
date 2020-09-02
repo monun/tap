@@ -16,6 +16,8 @@
 
 package com.github.noonmaru.tap.collection;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.*;
 
 public class SortedList<E> extends AbstractList<E> implements RandomAccess, Cloneable {
@@ -124,7 +126,7 @@ public class SortedList<E> extends AbstractList<E> implements RandomAccess, Clon
     }
 
     @Override
-    public boolean containsAll(Collection<?> c) {
+    public boolean containsAll(@NotNull Collection<?> c) {
         return this.list.containsAll(c);
     }
 
@@ -163,6 +165,7 @@ public class SortedList<E> extends AbstractList<E> implements RandomAccess, Clon
         return this.list.lastIndexOf(o);
     }
 
+    @NotNull
     @Override
     public ListIterator<E> listIterator(final int index) {
         return new ListIterator<E>() {
@@ -227,12 +230,12 @@ public class SortedList<E> extends AbstractList<E> implements RandomAccess, Clon
     }
 
     @Override
-    public boolean removeAll(Collection<?> c) {
+    public boolean removeAll(@NotNull Collection<?> c) {
         return this.list.removeAll(c);
     }
 
     @Override
-    public boolean retainAll(Collection<?> c) {
+    public boolean retainAll(@NotNull Collection<?> c) {
         return this.list.retainAll(c);
     }
 
@@ -241,18 +244,21 @@ public class SortedList<E> extends AbstractList<E> implements RandomAccess, Clon
         return this.list.size();
     }
 
+    @NotNull
     @Override
     public List<E> subList(int fromIndex, int toIndex) {
         return Collections.unmodifiableList(super.subList(fromIndex, toIndex));
     }
 
+    @NotNull
     @Override
     public Object[] toArray() {
         return this.list.toArray();
     }
 
+    @NotNull
     @Override
-    public <T> T[] toArray(T[] a) {
+    public <T> T[] toArray(@NotNull T[] a) {
         return this.list.toArray(a);
     }
 
