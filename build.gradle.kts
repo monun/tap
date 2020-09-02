@@ -1,5 +1,5 @@
 /*
- * Copyright (c) $date.year Noonmaru
+ * Copyright (c) 2020 Noonmaru
  *
  *  Licensed under the General Public License, Version 3.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ import org.gradle.internal.jvm.Jvm
 
 plugins {
     id("com.github.johnrengelman.shadow") version "5.2.0"
-    kotlin("jvm") version "1.3.72"
+    kotlin("jvm") version "1.4.0"
     `maven-publish`
 }
 
@@ -26,9 +26,9 @@ allprojects {
     apply(plugin = "org.jetbrains.kotlin.jvm")
 
     repositories {
-        maven("https://repo.maven.apache.org/maven2/") //Maven Central
-        maven("https://papermc.io/repo/repository/maven-public/") //Paper
-        maven(url = "https://repo.dmulloy2.net/nexus/repository/public/") //ProtocolLib
+        maven("https://repo.maven.apache.org/maven2/")
+        maven("https://papermc.io/repo/repository/maven-public/")
+        maven(url = "https://repo.dmulloy2.net/nexus/repository/public/")
         if (project.name != "api") { // craftbukkit
             mavenLocal()
         }
@@ -56,7 +56,7 @@ subprojects {
     apply(plugin = "maven-publish")
 
     dependencies {
-        testImplementation(group = "junit", name = "junit", version = "4.12")
+        testImplementation(group = "junit", name = "junit", version = "4.13")
 
         if (project.name != "api") {
             implementation(project(":api"))
@@ -128,14 +128,14 @@ tasks {
     }
     create<Copy>("distJar") {
         from(shadowJar)
-        into("W:\\Servers\\tap-1.16.1\\plugins")
+        into("W:\\Servers\\tap-1.16.2\\plugins")
     }
 }
 
 if (!hasProperty("debug")) {
     tasks {
         shadowJar {
-            relocate("it.unimi.dsi", "com.github.noonmaru.tap.internal.it.unimi.dsi")
+            relocate("it.unimi.dsi", "com.github.noonmaru.tap.shaded.it.unimi.dsi")
         }
     }
 }
