@@ -9,6 +9,7 @@ branches:
     - develop
 
 before_install:
+  - wget https://hub.spigotmc.org/jenkins/job/BuildTools/lastSuccessfulBuild/artifact/target/BuildTools.jar -O BuildTools.jar && java -jar BuildTools.jar
   - chmod +x ./gradlew
 
 cache:
@@ -18,13 +19,3 @@ cache:
 
 script:
   - ./gradlew shadowJar
-
-after_success:
-  - wget https://raw.githubusercontent.com/DiscordHooks/travis-ci-discord-webhook/master/send.sh
-  - chmod +x send.sh
-  - ./send.sh success $WEBHOOK_URL
-  - ./gradlew jacocoTestReport coveralls
-after_failure:
-  - wget https://raw.githubusercontent.com/DiscordHooks/travis-ci-discord-webhook/master/send.sh
-  - chmod +x send.sh
-  - ./send.sh failure $WEBHOOK_URL
