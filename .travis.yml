@@ -1,5 +1,4 @@
 language: java
-sudo: true
 jdk:
   - openjdk8
 
@@ -9,7 +8,9 @@ branches:
     - develop
 
 before_install:
-  - wget https://hub.spigotmc.org/jenkins/job/BuildTools/lastSuccessfulBuild/artifact/target/BuildTools.jar -O BuildTools.jar && java -jar BuildTools.jar
+  - wget https://raw.githubusercontent.com/noonmaru/travis-ci-buildtools/master/buildtools.sh
+  - chmod +x buildtools.sh
+  - ./buildtools.sh 1.16.2 1.16.1 1.15.2 1.14.4 1.13.2
   - chmod +x ./gradlew
 
 cache:
@@ -18,4 +19,4 @@ cache:
     - '$HOME/.gradle'
 
 script:
-  - ./gradlew shadowJar
+  - ./gradlew clean test
