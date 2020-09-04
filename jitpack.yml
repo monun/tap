@@ -4,3 +4,8 @@ before_install:
   - wget https://raw.githubusercontent.com/noonmaru/travis-ci-buildtools/master/buildtools.sh
   - chmod +x buildtools.sh
   - ./buildtools.sh 1.16.2 1.16.1 1.15.2 1.14.4 1.13.2
+install:
+  - ./gradlew clean build publishToMavenLocal
+  - rm -rf $HOME/org/bukkit
+  - rm -rf $HOME/org/craftbukkit
+  - rm -rf $HOME/org/spigotmc
