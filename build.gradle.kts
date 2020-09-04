@@ -14,10 +14,7 @@
  * limitations under the License.
  */
 
-import org.gradle.internal.jvm.Jvm
-
 plugins {
-    id("com.github.johnrengelman.shadow") version "5.2.0"
     kotlin("jvm") version "1.4.0"
     `maven-publish`
 }
@@ -26,17 +23,23 @@ allprojects {
     apply(plugin = "org.jetbrains.kotlin.jvm")
 
     repositories {
-        maven("https://repo.maven.apache.org/maven2/")
+        mavenLocal()
+        mavenCentral()
         maven("https://papermc.io/repo/repository/maven-public/")
         maven(url = "https://repo.dmulloy2.net/nexus/repository/public/")
-        if (project.name != "api") { // craftbukkit
-            mavenLocal()
-        }
     }
 
     dependencies {
         compileOnly(kotlin("stdlib-jdk8"))
         compileOnly("com.comphenix.protocol:ProtocolLib:4.6.0-SNAPSHOT")
+
+        testImplementation("junit:junit:4.13")
+        testImplementation("org.mockito:mockito-core:3.3.3")
+        testImplementation("org.powermock:powermock-module-junit4:2.0.7")
+        testImplementation("org.powermock:powermock-api-mockito2:2.0.7")
+        testImplementation("org.slf4j:slf4j-api:1.7.25")
+        testImplementation("org.apache.logging.log4j:log4j-core:2.8.2")
+        testImplementation("org.apache.logging.log4j:log4j-slf4j-impl:2.8.2")
     }
 
     group = requireNotNull(properties["pluginGroup"]) { "Group is undefined in properties" }
@@ -53,58 +56,18 @@ allprojects {
 }
 
 subprojects {
-    apply(plugin = "maven-publish")
-
     dependencies {
-        testImplementation(group = "junit", name = "junit", version = "4.13")
-
         if (project.name != "api") {
             implementation(project(":api"))
-        }
-    }
-
-    tasks {
-        create<Jar>("sourcesJar") {
-            archiveClassifier.set("sources")
-            from(sourceSets["main"].allSource)
-        }
-
-        if (project.name == "api") {
-            processResources {
-                filesMatching("**/*.yml") {
-                    expand(project.properties)
-                }
-            }
-        }
-    }
-
-    publishing {
-        publications {
-            create<MavenPublication>("Tap") {
-                val parent = parent!!
-                artifactId = project.name.let { if (it == "api") parent.name else "${parent.name}-${project.name}" }
-                from(components["java"])
-                artifact(tasks["sourcesJar"])
-            }
-        }
-    }
-
-    if (project.name != "api") {
-        tasks.forEach { task ->
-            if (task.name != "clean") {
-                task.onlyIf {
-                    gradle.taskGraph.hasTask(":shadowJar") || parent!!.hasProperty("withNMS")
-                }
-            }
         }
     }
 }
 
 project(":api") {
     dependencies {
-        compileOnly(files(Jvm.current().toolsJar))
         compileOnly("com.destroystokyo.paper:paper-api:1.13.2-R0.1-SNAPSHOT")
-        implementation("it.unimi.dsi:fastutil:8.3.1")
+
+        testImplementation("org.spigotmc:spigot:1.13.2-R0.1-SNAPSHOT")
     }
 
     tasks {
@@ -116,26 +79,25 @@ project(":api") {
     }
 }
 
-dependencies {
-    subprojects {
-        implementation(this)
-    }
-}
-
 tasks {
-    shadowJar {
-        archiveClassifier.set("dist")
+    jar {
+        for (subproject in subprojects) {
+            from(subproject.sourceSets["main"].output)
+        }
     }
-    create<Copy>("distJar") {
-        from(shadowJar)
-        into("W:\\Servers\\tap-1.16.2\\plugins")
+    create<Jar>("sourcesJar") {
+        archiveClassifier.set("sources")
+        for (subproject in subprojects) {
+            from(subproject.sourceSets["main"].allSource)
+        }
     }
 }
 
-if (!hasProperty("debug")) {
-    tasks {
-        shadowJar {
-            relocate("it.unimi.dsi", "com.github.noonmaru.tap.shaded.it.unimi.dsi")
+publishing {
+    publications {
+        create<MavenPublication>("Tap") {
+            from(components["java"])
+            artifact(tasks["sourcesJar"])
         }
     }
 }
