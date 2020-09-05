@@ -16,6 +16,7 @@
 
 plugins {
     kotlin("jvm") version "1.4.0"
+    id("com.github.johnrengelman.shadow") version "6.0.0"
     `maven-publish`
 }
 
@@ -25,7 +26,7 @@ allprojects {
     repositories {
         mavenLocal()
         mavenCentral()
-        maven("https://papermc.io/repo/repository/maven-public/")
+        maven(url = "https://papermc.io/repo/repository/maven-public/")
         maven(url = "https://repo.dmulloy2.net/nexus/repository/public/")
     }
 
@@ -55,14 +56,6 @@ allprojects {
     }
 }
 
-subprojects {
-    dependencies {
-        if (project.name != "api") {
-            implementation(project(":api"))
-        }
-    }
-}
-
 project(":api") {
     dependencies {
         compileOnly("com.destroystokyo.paper:paper-api:1.13.2-R0.1-SNAPSHOT")
@@ -74,6 +67,26 @@ project(":api") {
         processResources {
             filesMatching("**.*.yml") {
                 expand(project.properties)
+            }
+        }
+    }
+}
+
+val jitpackPath = "jitpack"
+val jitpackFileTree = fileTree(mapOf("dir" to "jitpack", "include" to listOf("*.jar")))
+
+subprojects {
+    if (project.name != "api") {
+        dependencies {
+            implementation(project(":api"))
+        }
+
+        tasks {
+            // Move net.minecraft.server artifacts to $rootDir/jitpack for jitpack.io
+            create<Copy>("jitpack") {
+                from(jar)
+                rename { it.replace("-$version", "") }
+                into(File(rootDir, jitpackPath))
             }
         }
     }
@@ -91,12 +104,28 @@ tasks {
             from(subproject.sourceSets["main"].allSource)
         }
     }
+    // jitpack.io
+    shadowJar {
+        // remove classifier for maven repo
+        gradle.taskGraph.whenReady {
+            if (hasTask(":publishTapPublicationToMavenLocal"))
+                archiveClassifier.set("")
+        }
+    }
+    create<Delete>("cleanJitpack") {
+        delete(jitpackFileTree)
+    }
+}
+
+dependencies {
+    implementation(project(":api"))
+    implementation(jitpackFileTree)
 }
 
 publishing {
     publications {
         create<MavenPublication>("Tap") {
-            from(components["java"])
+            project.shadow.component(this)
             artifact(tasks["sourcesJar"])
         }
     }
