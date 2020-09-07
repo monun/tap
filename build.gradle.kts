@@ -43,9 +43,6 @@ allprojects {
         testImplementation("org.apache.logging.log4j:log4j-slf4j-impl:2.8.2")
     }
 
-    group = requireNotNull(properties["pluginGroup"]) { "Group is undefined in properties" }
-    version = requireNotNull(properties["pluginVersion"]) { "Version is undefined in properties" }
-
     tasks {
         compileJava {
             options.encoding = "UTF-8"
