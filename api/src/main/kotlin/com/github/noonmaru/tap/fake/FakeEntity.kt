@@ -41,11 +41,11 @@ interface FakeEntity {
     fun moveTo(target: Location)
 
     fun move(x: Double, y: Double, z: Double) {
-        moveTo(location.clone().add(x, y, z))
+        moveTo(location.add(x, y, z))
     }
 
     fun moveAndRotation(x: Double, y: Double, z: Double, yaw: Float, pitch: Float) {
-        moveTo(location.clone().add(x, y, z).apply {
+        moveTo(location.add(x, y, z).apply {
             this.yaw = yaw
             this.pitch = pitch
         })
