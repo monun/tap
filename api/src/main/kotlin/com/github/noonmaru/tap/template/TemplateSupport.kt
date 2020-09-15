@@ -147,7 +147,11 @@ internal abstract class Template(
             val groups = token.findMatchGroups(expressionVariablePattern)
 
             if (groups.isEmpty()) return null
-            if (groups.count() == 1) return config.find(groups.first())?.toString()
+            if (groups.count() == 1) {
+                val value = config.find(groups.first())
+
+                return if (value is Number) value.toString().removeSuffix(".0") else value.toString()
+            }
 
             val builder = StringBuilder(name)
 
