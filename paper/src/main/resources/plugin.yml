@@ -1,0 +1,5 @@
+name: $pluginName
+main: $pluginMain
+depend: [ Kotlin, ProtocolLib ]
+api-version: '1.13'
+version: $version
