@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
-dependencies {
-    compileOnly("org.spigotmc:spigot:1.15.2-R0.1-SNAPSHOT")
+tasks {
+    processResources {
+        filesMatching("*.yml") {
+            expand(project.properties)
+        }
+    }
 }
