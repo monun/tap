@@ -33,6 +33,7 @@ allprojects {
     dependencies {
         compileOnly(kotlin("stdlib-jdk8"))
         compileOnly("com.comphenix.protocol:ProtocolLib:4.6.0-SNAPSHOT")
+        compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.9")
 
         testImplementation("junit:junit:4.13")
         testImplementation("org.mockito:mockito-core:3.3.3")
@@ -53,36 +54,35 @@ allprojects {
     }
 }
 
-project(":api") {
+project(":paper") {
     dependencies {
-        compileOnly("com.destroystokyo.paper:paper-api:1.13.2-R0.1-SNAPSHOT")
-
-        testImplementation("org.spigotmc:spigot:1.13.2-R0.1-SNAPSHOT")
-    }
-
-    tasks {
-        processResources {
-            filesMatching("**.*.yml") {
-                expand(project.properties)
-            }
+        implementation(project(":api"))
+        subprojects.filter { it.name != path }.forEach { subproject ->
+            implementation(subproject)
         }
     }
 }
 
 val jitpackPath = "jitpack"
-val jitpackFileTree = fileTree(mapOf("dir" to "jitpack", "include" to listOf("*.jar")))
+val jitpackFileTree = fileTree(mapOf("dir" to "jitpack", "include" to listOf("*-$version.jar")))
 
 subprojects {
-    if (project.name != "api") {
+    if (path in setOf(":api", ":paper")) {
+        // setup api & test plugin
+        dependencies {
+            compileOnly("com.destroystokyo.paper:paper-api:1.13.2-R0.1-SNAPSHOT")
+
+            testImplementation("com.destroystokyo.paper:paper-api:1.13.2-R0.1-SNAPSHOT")
+        }
+    } else {
+        //setup nms
         dependencies {
             implementation(project(":api"))
         }
-
         tasks {
             // Move net.minecraft.server artifacts to $rootDir/jitpack for jitpack.io
             create<Copy>("jitpack") {
                 from(jar)
-                rename { it.replace("-$version", "") }
                 into(File(rootDir, jitpackPath))
             }
         }
@@ -91,8 +91,28 @@ subprojects {
 
 tasks {
     jar {
-        for (subproject in subprojects) {
+        subprojects.filter { it.name != ":paper" }.forEach { subproject ->
             from(subproject.sourceSets["main"].output)
+        }
+    }
+    // Build JavaPlugin
+    create<Jar>("paperJar") {
+        subprojects.forEach { subproject ->
+            from(subproject.sourceSets["main"].output)
+        }
+        dependsOn(classes)
+    }
+    create<Copy>("copyPaperJarToDocker") {
+        from(named("paperJar"))
+
+        var dest = File(".docker/plugins")
+        // Copy bukkit plugin update folder
+        if (File(dest, jar.get().archiveFileName.get()).exists()) dest = File(dest, "update")
+
+        into(dest)
+
+        doLast {
+            println("Copy to ${dest.path}")
         }
     }
     create<Jar>("sourcesJar") {
@@ -107,6 +127,11 @@ tasks {
         gradle.taskGraph.whenReady {
             if (hasTask(":publishTapPublicationToMavenLocal"))
                 archiveClassifier.set("")
+            else {
+                archiveBaseName.set("Tap")
+                archiveVersion.set("") // For bukkit plugin update
+                archiveClassifier.set("") // Remove 'all'
+            }
         }
     }
     create<Delete>("cleanJitpack") {
