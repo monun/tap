@@ -100,6 +100,9 @@ tasks {
         subprojects.forEach { subproject ->
             from(subproject.sourceSets["main"].output)
         }
+        archiveBaseName.set("Tap")
+        archiveVersion.set("") // For bukkit plugin update
+        archiveClassifier.set("") // Remove 'all'
         dependsOn(classes)
     }
     create<Copy>("copyPaperJarToDocker") {
@@ -127,11 +130,6 @@ tasks {
         gradle.taskGraph.whenReady {
             if (hasTask(":publishTapPublicationToMavenLocal"))
                 archiveClassifier.set("")
-            else {
-                archiveBaseName.set("Tap")
-                archiveVersion.set("") // For bukkit plugin update
-                archiveClassifier.set("") // Remove 'all'
-            }
         }
     }
     create<Delete>("cleanJitpack") {
