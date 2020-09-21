@@ -65,8 +65,8 @@ object GitHubSupport {
                 return@httpRequest inputStream.bufferedReader().use { JsonParser().parse(it) as JsonObject }
             }
             val version = json[KEY_TAG_NAME].asString
-            //현재 버전이 더 높다면
-            if (currentVersion.compareVersion(version) > 0) {
+            //현재 버전이 같거나 더 높다면
+            if (currentVersion.compareVersion(version) >= 0) {
                 throw UpToDateException("Up to date")
             }
             //다운로드
