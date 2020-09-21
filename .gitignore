@@ -12,4 +12,6 @@ build/
 # Avoid ignoring Gradle wrapper jar file (.jar files are usually ignored)
 !gradle-wrapper.jar
 !gradle-wrapper.properties
-!jitpack/
+
+# Avoid ignoring Jitpack jar file (.jar files are usually ignored)
+!jitpack/*.jar
