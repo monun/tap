@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+import java.net.HttpURLConnection
+import java.net.URL
+
 plugins {
     kotlin("jvm") version "1.4.10"
     id("com.github.johnrengelman.shadow") version "6.0.0"
@@ -32,7 +35,7 @@ allprojects {
 
     dependencies {
         compileOnly(kotlin("stdlib-jdk8"))
-        compileOnly("com.comphenix.protocol:ProtocolLib:4.6.0-SNAPSHOT")
+        compileOnly("https://ci.dmulloy2.net/job/ProtocolLib/lastSuccessfulBuild/artifact/target/ProtocolLib.jar", "ProtocolLib.jar")
         compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.9")
 
         testImplementation("junit:junit:4.13")
@@ -132,6 +135,7 @@ tasks {
                 archiveClassifier.set("")
         }
     }
+
     create<Delete>("cleanJitpack") {
         delete(jitpackFileTree)
     }
@@ -149,4 +153,23 @@ publishing {
             artifact(tasks["sourcesJar"])
         }
     }
+}
+
+fun DependencyHandlerScope.compileOnly(url: String, name: String): Dependency? {
+    File("libs").mkdir()
+    val jar = File("libs", name)
+    val log = File("libs", "$name.log")
+    if (!log.exists()) {
+        log.createNewFile()
+    }
+    (URL(url).openConnection() as HttpURLConnection).run {
+        val lastModified = getHeaderField("Last-Modified")
+        if (lastModified != String(log.readBytes())) {
+            inputStream.use { stream ->
+                jar.writeBytes(stream.readBytes())
+                log.writeText(lastModified)
+            }
+        }
+    }
+    return compileOnly(files(jar.toURI()))
 }
