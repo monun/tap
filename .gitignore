@@ -3,7 +3,7 @@
 out/
 
 # Gradle
-.gradle
+.gradle/
 build/
 
 # Docker
@@ -15,3 +15,6 @@ build/
 
 # Avoid ignoring Jitpack jar file (.jar files are usually ignored)
 !jitpack/*.jar
+
+# External Library
+libs/
