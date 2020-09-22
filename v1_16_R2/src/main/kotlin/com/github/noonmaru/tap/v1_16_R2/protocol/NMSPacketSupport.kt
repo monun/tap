@@ -18,21 +18,19 @@ package com.github.noonmaru.tap.v1_16_R2.protocol
 
 import com.comphenix.protocol.PacketType
 import com.comphenix.protocol.events.PacketContainer
+import com.comphenix.protocol.wrappers.EnumWrappers
+import com.comphenix.protocol.wrappers.Pair
 import com.comphenix.protocol.wrappers.WrappedDataWatcher
 import com.github.noonmaru.tap.fake.createFakeEntity
 import com.github.noonmaru.tap.protocol.PacketSupport
-import com.mojang.datafixers.util.Pair
-import net.minecraft.server.v1_16_R2.EnumItemSlot
-import net.minecraft.server.v1_16_R2.ItemStack
-import net.minecraft.server.v1_16_R2.PacketPlayOutEntityEquipment
 import org.bukkit.FireworkEffect
 import org.bukkit.Location
-import org.bukkit.craftbukkit.v1_16_R2.entity.CraftLivingEntity
-import org.bukkit.craftbukkit.v1_16_R2.inventory.CraftItemStack
+import org.bukkit.Material
 import org.bukkit.entity.EntityType
 import org.bukkit.entity.Firework
 import org.bukkit.entity.LivingEntity
 import org.bukkit.inventory.EquipmentSlot
+import org.bukkit.inventory.ItemStack
 import org.bukkit.util.Vector
 import java.util.*
 
@@ -104,59 +102,30 @@ class NMSPacketSupport : PacketSupport {
     override fun entityEquipment(
         entityId: Int,
         slot: EquipmentSlot,
-        item: org.bukkit.inventory.ItemStack
+        item: ItemStack
     ): PacketContainer {
-//        Please use this after ProtocolLib 4.6.0 Update (The current dmulloy2 repo does not contain recent snapshots)
-//        return PacketContainer(PacketType.Play.Server.ENTITY_EQUIPMENT).apply {
-//            integers
-//                .write(0, entityId)
-//            slotStackPairLists
-//                .write(0, listOf(Pair(slot.convertToItemSlot(), item)))
-//        }
-        return PacketContainer.fromPacket(
-            PacketPlayOutEntityEquipment(
-                entityId,
-                Collections.singletonList(
-                    Pair(
-                        slot.convertToItemSlot(),
-                        CraftItemStack.asNMSCopy(item)
-                    )
-                )
-            )
-        )
+        return PacketContainer(PacketType.Play.Server.ENTITY_EQUIPMENT).apply {
+            integers
+                .write(0, entityId)
+            slotStackPairLists
+                .write(0, Collections.singletonList(Pair(slot.convertToItemSlot(), item)))
+        }
     }
 
     override fun entityEquipment(living: LivingEntity): List<PacketContainer> {
-//        Please use this after ProtocolLib 4.6.0 Update (The current dmulloy2 repo does not contain recent snapshots)
-//        val list = arrayListOf<Pair<EnumWrappers.ItemSlot, ItemStack>>()
-//
-//        for (slot in EquipmentSlot.values()) {
-//            list += Pair(slot.convertToItemSlot(), living.equipment?.getItem(slot))
-//        }
-//
-//        return Collections.singletonList(
-//            PacketContainer(PacketType.Play.Server.ENTITY_EQUIPMENT).apply {
-//                integers
-//                    .write(0, entityId)
-//                slotStackPairLists
-//                    .write(0, list)
-//            }
-//        )
-        val nmsEntity = (living as CraftLivingEntity).handle
+        val list = arrayListOf<Pair<EnumWrappers.ItemSlot, ItemStack>>()
 
-        val list = arrayListOf<Pair<EnumItemSlot, ItemStack>>()
-
-        for (slot in EnumItemSlot.values()) {
-            list += Pair(slot, nmsEntity.getEquipment(slot))
+        for (slot in EquipmentSlot.values()) {
+            list.add(Pair(slot.convertToItemSlot(), living.equipment?.getItem(slot)?: ItemStack(Material.AIR)))
         }
 
         return Collections.singletonList(
-            PacketContainer.fromPacket(
-                PacketPlayOutEntityEquipment(
-                    living.entityId,
-                    list
-                )
-            )
+            PacketContainer(PacketType.Play.Server.ENTITY_EQUIPMENT).apply {
+                integers
+                    .write(0, living.entityId)
+                slotStackPairLists
+                    .write(0, list)
+            }
         )
     }
 
@@ -276,15 +245,15 @@ class NMSPacketSupport : PacketSupport {
             )
         }
     }
-}
 
-internal fun EquipmentSlot.convertToItemSlot(): EnumItemSlot {
-    return when (this) {
-        EquipmentSlot.HAND -> EnumItemSlot.MAINHAND
-        EquipmentSlot.OFF_HAND -> EnumItemSlot.OFFHAND
-        EquipmentSlot.FEET -> EnumItemSlot.FEET
-        EquipmentSlot.LEGS -> EnumItemSlot.LEGS
-        EquipmentSlot.CHEST -> EnumItemSlot.CHEST
-        EquipmentSlot.HEAD -> EnumItemSlot.HEAD
+    private fun EquipmentSlot.convertToItemSlot(): EnumWrappers.ItemSlot {
+        return when (this) {
+            EquipmentSlot.HAND -> EnumWrappers.ItemSlot.MAINHAND
+            EquipmentSlot.OFF_HAND -> EnumWrappers.ItemSlot.OFFHAND
+            EquipmentSlot.FEET -> EnumWrappers.ItemSlot.FEET
+            EquipmentSlot.LEGS -> EnumWrappers.ItemSlot.LEGS
+            EquipmentSlot.CHEST -> EnumWrappers.ItemSlot.CHEST
+            EquipmentSlot.HEAD -> EnumWrappers.ItemSlot.HEAD
+        }
     }
 }
