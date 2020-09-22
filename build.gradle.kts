@@ -34,7 +34,11 @@ allprojects {
 
     dependencies {
         compileOnly(kotlin("stdlib-jdk8"))
-        compileOnly("https://ci.dmulloy2.net/job/ProtocolLib/lastSuccessfulBuild/artifact/target/ProtocolLib.jar", "ProtocolLib.jar")
+        // Custom dependency builder
+        compileOnly(
+            "https://ci.dmulloy2.net/job/ProtocolLib/lastSuccessfulBuild/artifact/target/ProtocolLib.jar",
+            "ProtocolLib.jar"
+        )
         compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.9")
 
         testImplementation("junit:junit:4.13")
@@ -163,6 +167,7 @@ fun DependencyHandlerScope.compileOnly(url: String, name: String): Dependency? {
     }
     (URL(url).openConnection() as HttpURLConnection).run {
         val lastModified = getHeaderField("Last-Modified")
+        // (lib.jar).log 파일로 최신버전 관리
         if (lastModified != String(log.readBytes())) {
             inputStream.use { stream ->
                 jar.writeBytes(stream.readBytes())
