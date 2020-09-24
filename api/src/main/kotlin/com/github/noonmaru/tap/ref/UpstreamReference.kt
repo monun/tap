@@ -16,9 +16,9 @@
 
 package com.github.noonmaru.tap.ref
 
+import org.jetbrains.annotations.NotNull
 import java.lang.ref.ReferenceQueue
 import java.lang.ref.WeakReference
-import javax.annotation.Nonnull
 
 class UpstreamReference<T> : WeakReference<T> {
     constructor(referent: T) : super(referent)
@@ -26,7 +26,7 @@ class UpstreamReference<T> : WeakReference<T> {
         referent: T, q: ReferenceQueue<in T>?
     ) : super(referent, q)
 
-    @Nonnull
+    @NotNull
     override fun get(): T {
         return super.get()
             ?: throw IllegalStateException("Cannot get reference as it has already been Garbage Collected")
