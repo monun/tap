@@ -114,6 +114,18 @@ fun URL.downloadTo(file: File) {
     }
 }
 
+/**
+ * https://github.com/로부터 latest release의 asset을 다운로드합니다.
+ *
+ * 현재 플러그인 버전보다 낮다면 다운로드하지 않고 [UpToDateException]을 발생시킵니다.
+ *
+ * 다운로드가 성공하면 callback에 url을 전달합니다.
+ *
+ * @see[String.compareVersion]
+ *
+ * @exception UpToDateException 최신버전일 경우 발생합니다.
+ *
+ */
 fun JavaPlugin.updateFromGitHub(
     owner: String,
     project: String,
@@ -132,12 +144,27 @@ private val JavaPlugin.updateFile: File
         return File(file.parentFile, "update/${file.name}")
     }
 
+/**
+ * https://github.com/로부터 latest release의 asset을 ***비동기***로 다운로드합니다.
+ *
+ * 현재 플러그인 버전보다 낮다면 다운로드하지 않습니다.
+ *
+ * 다음처럼 사용 할 수 있습니다.
+ *
+ * `JavaPlugin.updateFromGitHubMagically(sender::sendMessage)`
+ *
+ * @param reciever 메시지 수신 함수
+ *
+ * @see[String.compareVersion]
+ *
+ */
 fun JavaPlugin.updateFromGitHubMagically(
     owner: String,
     project: String,
     asset: String,
     reciever: ((String) -> Unit)? = null
 ) {
+    reciever?.invoke("Attempt to update.")
     GlobalScope.launch {
         GitHubSupport.downloadLatestRelease(updateFile, owner, project, description.version, asset) {
             onSuccess { url ->
