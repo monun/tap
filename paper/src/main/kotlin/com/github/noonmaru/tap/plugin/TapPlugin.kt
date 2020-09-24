@@ -25,8 +25,10 @@ class TapPlugin : JavaPlugin() {
             classLoader.loadClass("com.comphenix.protocol.wrappers.Pair")
         } catch (exception: ClassNotFoundException) {
             if (MinecraftVersion.getCurrentVersion().minor > 15) {
-                logger.warning("If you are using 1.16 or later, please use the latest" +
-                        " ProtocolLib snapshot build from: https://ci.dmulloy2.net/job/ProtocolLib/lastSuccessfulBuild/")
+                logger.warning(
+                    "If you are using 1.16 or later, please use the latest" +
+                            " ProtocolLib snapshot build from: https://ci.dmulloy2.net/job/ProtocolLib/lastSuccessfulBuild/"
+                )
             }
         }
     }
