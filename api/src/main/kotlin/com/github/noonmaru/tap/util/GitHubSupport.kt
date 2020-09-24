@@ -174,7 +174,7 @@ fun JavaPlugin.updateFromGitHubMagically(
                 }
             }
             onFailure { t ->
-                if (t is UpToDateException) reciever?.invoke("Up to date!")
+                if (t is UpToDateException) reciever?.invoke("UP TO DATE")
                 else {
                     reciever?.invoke("Update failed. Check the stacktrace.")
                     t.printStackTrace()
