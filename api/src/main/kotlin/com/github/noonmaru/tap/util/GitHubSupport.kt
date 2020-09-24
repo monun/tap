@@ -71,7 +71,7 @@ object GitHubSupport {
                 addRequestProperty("Accept", REQUEST_ACCEPT)
                 inputStream.bufferedReader().use { JsonParser().parse(it) as JsonObject }
             }
-            val latestVersion = releaseInfo[KEY_TAG_NAME].asString.also {
+            releaseInfo[KEY_TAG_NAME].asString.also {
                 if (version.compareVersion(it) >= 0) throw UpToDateException("UP TO DATE")
             }
             val foundAsset = releaseInfo.getAsJsonArray(KEY_ASSETS)
