@@ -112,16 +112,18 @@ open class FakeProjectile(
             // 다음 틱 이동 준비
             var velocity = _velocity
             var speed = velocity.length()
-            val availableRange = availableRange
-
-            //남은 사거리가 현재 속력보다 작을경우 최대 사거리를 넘지 않기 위해 속력을 남은 사거리로 보정
-            if (availableRange < speed) {
-                speed = availableRange
-                velocity = velocity.clone().apply {
-                    x /= speed
-                    y /= speed
-                    z /= speed
-                    multiply(availableRange)
+            // 0 속도 피하기, normalize할때 무한됨
+            if (speed != 0.0) {
+                val availableRange = availableRange
+                // 남은 사거리가 현재 속력보다 작을경우 최대 사거리를 넘지 않기 위해 속력을 남은 사거리로 보정
+                if (availableRange < speed) {
+                    speed = availableRange
+                    velocity = velocity.clone().apply {
+                        x /= speed
+                        y /= speed
+                        z /= speed
+                        multiply(availableRange)
+                    }
                 }
             }
 
