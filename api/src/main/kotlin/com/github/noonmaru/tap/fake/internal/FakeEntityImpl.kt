@@ -216,6 +216,10 @@ class FakeEntityImpl internal constructor(
     }
 
     internal fun offerComputeQueue(tracker: FakeTracker) {
+        if (tracker in trackers) {
+            computeTracker(tracker)
+        }
+
         if (updateTrackers)
             return
 
@@ -375,16 +379,16 @@ class FakeEntityImpl internal constructor(
         if (!tracker.valid) return
 
         if (isVisible && tracker.player !in exclusion) {
-            val spawnDistance = 240.0 * 240.0
-            val despawnDistance = 256.0 * 256.0
-            val entityLocation = currentLocation
+            val spawnDistanceSquared = 240.0 * 240.0
+            val despawnDistanceSquared = 256.0 * 256.0
+            val entityLocation = deltaLocation
             val trackerLocation = tracker.location
 
             if (entityLocation.world === trackerLocation.world) {
-                val distance = entityLocation.distance(trackerLocation)
+                val distanceSquared = entityLocation.distanceSquared(trackerLocation)
 
-                if (distance < despawnDistance) {
-                    if (distance < spawnDistance && trackers.add(tracker)) {
+                if (distanceSquared < despawnDistanceSquared) {
+                    if (distanceSquared < spawnDistanceSquared && trackers.add(tracker)) {
                         tracker.addEntity(this)
                         spawnTo(tracker.player)
                     }
