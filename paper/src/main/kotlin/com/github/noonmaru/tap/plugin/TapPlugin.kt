@@ -31,5 +31,60 @@ class TapPlugin : JavaPlugin() {
                 )
             }
         }
+
+//        val server = FakeEntityServer.create(this)
+//        val test = Test(server)
+//        this.server.pluginManager.registerEvents(test, this)
+//        this.server.scheduler.runTaskTimer(this, test, 0L, 1L)
     }
 }
+
+//class Test(
+//    private val server: FakeEntityServer
+//): Runnable, Listener {
+//
+//    private val map = HashMap<Player, FakeEntity>()
+//
+//    init {
+//        Bukkit.getOnlinePlayers().forEach { register(it)}
+//    }
+//
+//    private fun register(player: Player) {
+//        val loc = player.location
+//        val armorStand = server.spawnEntity(loc, ArmorStand::class.java).apply {
+//            updateMetadata<ArmorStand> {
+//                isMarker = true
+//            }
+//        }
+//        val item = server.spawnEntity(loc, Item::class.java).apply {
+//            updateMetadata<Item> {
+//                setItemStack(ItemStack(Material.STONE))
+//            }
+//        }
+//        armorStand.addPassenger(item)
+//
+//        map[player]  = armorStand
+//        server.addPlayer(player)
+//    }
+//
+//    @EventHandler
+//    fun onJoin(event: PlayerJoinEvent) {
+//        register(event.player)
+//    }
+//
+//    @EventHandler
+//    fun onQuit(event: PlayerQuitEvent) {
+//        map.remove(event.player)?.let { it ->
+//            it.passengers.forEach { it.remove() }
+//            it.remove()
+//        }
+//    }
+//
+//    override fun run() {
+//        for ((player, entity) in map) {
+//            entity.moveTo(player.eyeLocation.add(0.0, 1.0, 0.0))
+//        }
+//
+//        server.update()
+//    }
+//}
