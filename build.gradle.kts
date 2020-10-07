@@ -20,6 +20,7 @@ import java.net.URL
 plugins {
     kotlin("jvm") version "1.4.10"
     id("com.github.johnrengelman.shadow") version "6.0.0"
+    id("de.undercouch.download") version "4.1.1"
     `maven-publish`
 }
 
@@ -138,9 +139,30 @@ tasks {
                 archiveClassifier.set("")
         }
     }
-
     create<Delete>("cleanJitpack") {
         delete(jitpackFileTree)
+    }
+    create<de.undercouch.gradle.tasks.download.Download>("downloadBuildTools") {
+        src("https://hub.spigotmc.org/jenkins/job/BuildTools/lastSuccessfulBuild/artifact/target/BuildTools.jar")
+        dest(".buildtools/BuildTools.jar")
+    }
+    create<DefaultTask>("setupWorkpsace") {
+        doLast {
+            for (v in listOf("1.16.3", "1.16.1", "1.15.2", "1.14.4", "1.13.2")) {
+                javaexec {
+                    workingDir(".buildtools/")
+                    main = "-jar"
+                    args = listOf(
+                        "./BuildTools.jar",
+                        "--rev",
+                        v
+                    )
+                }
+            }
+            File(".builtools/").deleteRecursively()
+        }
+
+        dependsOn(named("downloadBuildTools"))
     }
 }
 
