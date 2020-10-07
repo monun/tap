@@ -14,7 +14,10 @@ build/
 !gradle-wrapper.properties
 
 # Avoid ignoring Jitpack jar file (.jar files are usually ignored)
-!jitpack/
+!jitpack/**.jar
 
 # External Library
 libs/
+
+# Buildtools
+.buildtools/
