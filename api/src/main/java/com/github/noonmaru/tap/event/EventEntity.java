@@ -41,6 +41,13 @@ public final class EventEntity {
     public void unregister(@NotNull final RegisteredEntityListener registeredListener) {
         for (RegisteredEntityHandler handler : registeredListener.getHandlers()) {
             handler.remove();
+
+            EntityHandlerList handlerList = slots.get(handler.getStatement().getRegistrationClass());
+
+            if (handlerList != null) {
+                handlerList.unregister(handler);
+            }
+
             slots.get(handler.getStatement().getRegistrationClass()).unregister(handler);
         }
     }
