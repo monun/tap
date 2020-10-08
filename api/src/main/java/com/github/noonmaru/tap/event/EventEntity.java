@@ -60,5 +60,12 @@ public final class EventEntity {
         return slots.get(eventClass);
     }
 
+    void unregisterAll() {
+        for (EntityHandlerList handlerList : slots.values()) {
+            handlerList.unregisterAll();
+        }
+
+        slots.clear();
+    }
 
 }

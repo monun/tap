@@ -72,4 +72,12 @@ public final class EntityHandlerList {
         }
     }
 
+    void unregisterAll() {
+        for (RegisteredEntityHandler registeredEntityHandler : handlerList) {
+            registeredEntityHandler.remove();
+        }
+        handlerList.clear();
+        handlers = null;
+    }
+
 }
