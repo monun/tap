@@ -7,7 +7,7 @@
  * 개체 패킷
  * 가상 개체
  * 가상 발사체
- * 모장 프로필
+ * ~~모장 프로필~~ Bukkit#createProfile
  * 개체별 이벤트 리스너
  * YamlConfiguration을 이용한 문자열 템플릿
  * 추가적인 인벤토리 함수
