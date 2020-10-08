@@ -21,6 +21,7 @@ import com.google.common.collect.MapMaker;
 import org.bukkit.entity.Entity;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventPriority;
+import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.EventExecutor;
 import org.bukkit.plugin.Plugin;
@@ -58,7 +59,6 @@ public final class EntityEventManager {
 
     @NotNull
     public RegisteredEntityListener registerEvents(@NotNull final Entity entity, @NotNull final Listener listener) {
-
         Preconditions.checkArgument(entity.isValid(), "Invalid entity: " + entity);
 
         ListenerStatement listenerStatement = createRegisteredListenerStatement(listener.getClass());
@@ -106,6 +106,20 @@ public final class EntityEventManager {
                 eventEntity.unregister(statement, listener);
             }
         }
+    }
+
+    public void unregisterAll() {
+        for (EventEntity eventEntity : entities.values()) {
+            eventEntity.unregisterAll();
+        }
+
+        for (EventListener listener : listeners.values()) {
+            HandlerList.unregisterAll(listener);
+        }
+
+        entities.clear();
+        listeners.clear();
+        statements.clear();
     }
 
     private class EventListener implements Listener {

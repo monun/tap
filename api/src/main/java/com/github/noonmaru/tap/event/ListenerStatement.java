@@ -27,22 +27,22 @@ import org.jetbrains.annotations.NotNull;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
+import java.util.WeakHashMap;
 
 /**
  * @author Nemo
  */
 public final class ListenerStatement {
 
-    private static final HashMap<Class<?>, ListenerStatement> STATEMENTS = new HashMap<>();
+    private static final Map<Class<?>, ListenerStatement> STATEMENTS = new WeakHashMap<>();
     private final Class<?> listenerClass;
-    private final ImmutableList<HandlerStatement> handlerSta;
-
+    private final ImmutableList<HandlerStatement> handlerStatements;
 
     public ListenerStatement(Class<?> listenerClass, ArrayList<HandlerStatement> handlerStatements) {
         this.listenerClass = listenerClass;
-        this.handlerSta = ImmutableList.copyOf(handlerStatements);
+        this.handlerStatements = ImmutableList.copyOf(handlerStatements);
     }
 
     @NotNull
@@ -112,6 +112,6 @@ public final class ListenerStatement {
 
     @NotNull
     public ImmutableList<HandlerStatement> getHandlerStatements() {
-        return handlerSta;
+        return handlerStatements;
     }
 }

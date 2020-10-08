@@ -146,7 +146,7 @@ tasks {
         src("https://hub.spigotmc.org/jenkins/job/BuildTools/lastSuccessfulBuild/artifact/target/BuildTools.jar")
         dest(".buildtools/BuildTools.jar")
     }
-    create<DefaultTask>("setupWorkpsace") {
+    create<DefaultTask>("setupWorkspace") {
         doLast {
             for (v in listOf("1.16.3", "1.16.1", "1.15.2", "1.14.4", "1.13.2")) {
                 javaexec {
@@ -159,7 +159,7 @@ tasks {
                     )
                 }
             }
-            File(".builtools/").deleteRecursively()
+            File(".buildtools/").deleteRecursively()
         }
 
         dependsOn(named("downloadBuildTools"))
