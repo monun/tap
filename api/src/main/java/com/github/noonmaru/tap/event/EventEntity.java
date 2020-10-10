@@ -47,8 +47,6 @@ public final class EventEntity {
             if (handlerList != null) {
                 handlerList.unregister(handler);
             }
-
-            slots.get(handler.getStatement().getRegistrationClass()).unregister(handler);
         }
     }
 
