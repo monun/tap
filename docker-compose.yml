@@ -3,7 +3,7 @@ version: '3.7'
 services:
   paper:
     build: .
-    container_name: debug_tap
+    container_name: tap
     stdin_open: true
     tty: true
     ports:

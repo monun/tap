@@ -98,7 +98,7 @@ public final class ListenerStatement {
         Class<?> registrationClass = EventTools.getRegistrationClass(eventClass);
 
         TargetEntity targetEntity = method.getAnnotation(TargetEntity.class);
-        EventEntityProvider provider = targetEntity == null ? EventTools.findDefaultProvider(eventClass) : EventTools.findDefaultProvider(eventClass);
+        EventEntityProvider provider = targetEntity == null ? EventTools.findDefaultProvider(eventClass) : EventTools.getOrCreateCustomProvide(targetEntity.value());
 
         EventExecutor executor = EventExecutor.create(method, eventClass.asSubclass(Event.class));
 
