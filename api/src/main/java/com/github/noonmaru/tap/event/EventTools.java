@@ -23,16 +23,13 @@ import org.jetbrains.annotations.NotNull;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.WeakHashMap;
 
 
 public final class EventTools {
-
-    private static final Map<Class<?>, Class<?>> REG_CLASSES = new HashMap<>();
-
-    private static final Map<Class<?>, EventEntityProvider> CUSTOM_PROVIDERS = new HashMap<>();
+    private static final Map<Class<?>, EventEntityProvider> CUSTOM_PROVIDERS = new WeakHashMap<>();
 
     private static final EventEntityProvider[] DEFAULT_PROVIDERS;
 
