@@ -134,7 +134,7 @@ tasks {
     }
     // jitpack.io
     shadowJar {
-        // remove classifier for maven repo
+        // remove classifier 'all' for maven repo
         gradle.taskGraph.whenReady {
             if (hasTask(":publishTapPublicationToMavenLocal"))
                 archiveClassifier.set("")
@@ -173,11 +173,6 @@ tasks {
         dependsOn(named("downloadBuildTools"))
     }
 
-    compileKotlin {
-        dependsOn(named("setupWorkspace"))
-    }
-
-    // add shadowJar
     build {
         dependsOn(named("paperJar"))
     }
