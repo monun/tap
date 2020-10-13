@@ -165,7 +165,7 @@ tasks {
 
         dependsOn(named("downloadBuildTools"))
     }
-
+    // add shadowJar
     build {
         dependsOn(named("paperJar"))
     }
