@@ -32,6 +32,7 @@ class TapPlugin : JavaPlugin() {
             }
         }
 
-        println("Jenkins test")
+        for (i in 0 until 10)
+            println("Jenkins test")
     }
 }
