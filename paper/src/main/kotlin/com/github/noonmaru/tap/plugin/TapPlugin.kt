@@ -31,5 +31,7 @@ class TapPlugin : JavaPlugin() {
                 )
             }
         }
+
+        println("Jenkins test")
     }
 }
