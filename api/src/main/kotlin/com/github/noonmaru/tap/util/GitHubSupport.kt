@@ -87,6 +87,8 @@ object GitHubSupport {
             callback?.invoke(Result.failure(it))
         }
     }
+
+    // https://github.com/<user>/<repo>/releases/latest/download/<artifact>
 }
 
 class UpToDateException(message: String) : RuntimeException(message)
