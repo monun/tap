@@ -26,7 +26,7 @@ PLUGINS_DIR="/data/plugins"
 
 for PLUGIN_URL in "$@"; do
   log "Download plugin from $PLUGIN_URL"
-  wget -Nq "$PLUGIN_URL" -P $PLUGINS_DIR
+  wget -Nq --timestamping "$PLUGIN_URL" -P $PLUGINS_DIR
 done
 
 exec /start
