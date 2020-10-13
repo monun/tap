@@ -146,10 +146,18 @@ tasks {
     create<de.undercouch.gradle.tasks.download.Download>("downloadBuildTools") {
         src("https://hub.spigotmc.org/jenkins/job/BuildTools/lastSuccessfulBuild/artifact/target/BuildTools.jar")
         dest(".buildtools/BuildTools.jar")
+        onlyIfModified(true)
     }
     create<DefaultTask>("setupWorkspace") {
         doLast {
+            val repos = File(
+                System.getProperty("user.home"),
+                "/.m2/repository/org/spigotmc/spigot/"
+            ).listFiles { file: File -> file.isDirectory }
+
             for (v in listOf("1.16.3", "1.16.1", "1.15.2", "1.14.4", "1.13.2")) {
+                if (repos.find { it.name.startsWith(v) } != null) continue
+
                 javaexec {
                     workingDir(".buildtools/")
                     main = "-jar"
@@ -160,11 +168,15 @@ tasks {
                     )
                 }
             }
-            File(".buildtools/").deleteRecursively()
         }
 
         dependsOn(named("downloadBuildTools"))
     }
+
+    compileKotlin {
+        dependsOn(named("setupWorkspace"))
+    }
+
     // add shadowJar
     build {
         dependsOn(named("paperJar"))
