@@ -110,6 +110,7 @@ tasks {
         archiveBaseName.set("Tap")
         archiveVersion.set("") // For bukkit plugin update
         archiveClassifier.set("") // Remove 'all'
+
         dependsOn(classes)
     }
     create<Copy>("copyPaperJarToDocker") {
@@ -163,6 +164,9 @@ tasks {
         }
 
         dependsOn(named("downloadBuildTools"))
+    }
+    build {
+        dependsOn(named("paperJar"))
     }
 }
 
