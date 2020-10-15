@@ -150,31 +150,27 @@ tasks {
     }
     create<DefaultTask>("setupWorkspace") {
         doLast {
-            println(System.getProperty("user.home"))
-            println(
-                File(
+            runCatching {
+                val repos = File(
                     System.getProperty("user.home"),
                     "/.m2/repository/org/spigotmc/spigot/"
-                )
-            )
+                ).listFiles { file: File -> file.isDirectory }
 
-            val repos = File(
-                System.getProperty("user.home"),
-                "/.m2/repository/org/spigotmc/spigot/"
-            ).listFiles { file: File -> file.isDirectory }
+                for (v in listOf("1.16.3", "1.16.1", "1.15.2", "1.14.4", "1.13.2")) {
+                    if (repos.find { it.name.startsWith(v) } != null) continue
 
-            for (v in listOf("1.16.3", "1.16.1", "1.15.2", "1.14.4", "1.13.2")) {
-                if (repos.find { it.name.startsWith(v) } != null) continue
-
-                javaexec {
-                    workingDir(".buildtools/")
-                    main = "-jar"
-                    args = listOf(
-                        "./BuildTools.jar",
-                        "--rev",
-                        v
-                    )
+                    javaexec {
+                        workingDir(".buildtools/")
+                        main = "-jar"
+                        args = listOf(
+                            "./BuildTools.jar",
+                            "--rev",
+                            v
+                        )
+                    }
                 }
+            }.onFailure {
+                it.printStackTrace()
             }
         }
 
