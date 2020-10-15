@@ -9,10 +9,11 @@ branches:
 
 before_install:
   - chmod +x ./gradlew
+  - ./gradlew setupWorkspace
 
 cache:
   directories:
     - '$HOME/.m2'
     - '$HOME/.gradle'
 
-script: './gradlew clean setupWorkspace build'
+script: './gradlew clean test'
