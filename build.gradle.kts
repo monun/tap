@@ -150,6 +150,14 @@ tasks {
     }
     create<DefaultTask>("setupWorkspace") {
         doLast {
+            println(System.getProperty("user.home"))
+            println(
+                File(
+                    System.getProperty("user.home"),
+                    "/.m2/repository/org/spigotmc/spigot/"
+                )
+            )
+
             val repos = File(
                 System.getProperty("user.home"),
                 "/.m2/repository/org/spigotmc/spigot/"
