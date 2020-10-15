@@ -15,5 +15,4 @@ cache:
     - '$HOME/.m2'
     - '$HOME/.gradle'
 
-script:
-  - ./gradlew clean setupWorkspace build
+script: './gradlew clean setupWorkspace build'
