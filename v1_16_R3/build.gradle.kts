@@ -14,15 +14,6 @@
  * limitations under the License.
  */
 
-rootProject.name = "tap"
-
-include(
-    "api",
-    "paper",
-    "v1_13_R2",
-    "v1_14_R1",
-    "v1_15_R1",
-    "v1_16_R1",
-    "v1_16_R2",
-    "v1_16_R3"
-)
+dependencies {
+    compileOnly("org.spigotmc:spigot:1.16.4-R0.1-SNAPSHOT")
+}
