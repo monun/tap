@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.noonmaru.tap.v1_16_R2.protocol
+package com.github.noonmaru.tap.v1_16_R3.protocol
 
 import com.comphenix.protocol.PacketType
 import com.comphenix.protocol.events.PacketContainer
