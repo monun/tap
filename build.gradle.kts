@@ -156,7 +156,7 @@ tasks {
                     "/.m2/repository/org/spigotmc/spigot/"
                 ).listFiles { file: File -> file.isDirectory } ?: emptyArray()
 
-                for (v in arrayOf("1.16.3", "1.16.1", "1.15.2", "1.14.4", "1.13.2")) {
+                for (v in arrayOf("1.16.4", "1.16.3", "1.16.1", "1.15.2", "1.14.4", "1.13.2")) {
                     if (repos.find { it.name.startsWith(v) } != null) {
                         println("Skip download spigot-$v")
                         continue
