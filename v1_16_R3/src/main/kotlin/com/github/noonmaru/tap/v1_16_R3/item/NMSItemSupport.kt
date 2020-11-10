@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.noonmaru.tap.v1_16_R2.item
+package com.github.noonmaru.tap.v1_16_R3.item
 
 import com.github.noonmaru.tap.item.ItemSupport
 import net.minecraft.server.v1_16_R3.DamageSource
