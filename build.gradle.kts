@@ -58,6 +58,9 @@ allprojects {
         javadoc {
             options.encoding = "UTF-8"
         }
+        compileKotlin {
+            kotlinOptions.jvmTarget = "1.8"
+        }
     }
 }
 
