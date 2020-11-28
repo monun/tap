@@ -51,7 +51,7 @@ object EventTools {
     fun getOrCreateCustomProvide(providerClass: Class<*>): EventEntityProvider {
         return CUSTOM_PROVIDERS.computeIfAbsent(providerClass) { clazz: Class<*> ->
             try {
-                return@computeIfAbsent EventEntityProvider(clazz.asSubclass(EntityProvider::class.java).newInstance())
+                return@computeIfAbsent EventEntityProvider(clazz.asSubclass(EntityProvider::class.java).newInstance() as EntityProvider<Event>)
             } catch (e: InstantiationException) {
                 throw AssertionError(e)
             } catch (e: IllegalAccessException) {
@@ -85,7 +85,8 @@ object EventTools {
         for (clazz in classes) {
             if (EntityProvider::class.java.isAssignableFrom(clazz)) {
                 try {
-                    defaultProviders.add(EventEntityProvider(clazz.newInstance() as EntityProvider<*>))
+                    @Suppress("UNCHECKED_CAST")
+                    defaultProviders.add(EventEntityProvider(clazz.newInstance() as EntityProvider<Event>))
                 } catch (e: Exception) {
                     throw AssertionError(e)
                 }
