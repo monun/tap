@@ -39,8 +39,7 @@ class SortedList<E> : AbstractList<E>, RandomAccess, Cloneable {
         Collections.sort(list, comparator)
     }
 
-    fun binaryAdd(element: E?): Int {
-        if (element == null) throw NullPointerException()
+    fun binaryAdd(element: E): Int {
         modCount++
         val size = list.size
         if (size == 0) {
@@ -53,8 +52,8 @@ class SortedList<E> : AbstractList<E>, RandomAccess, Cloneable {
         return index
     }
 
-    fun binaryRemove(o: E): Boolean {
-        val index = binarySearch(o)
+    fun binaryRemove(element: E): Boolean {
+        val index = binarySearch(element)
         if (index >= 0) {
             list.removeAt(index)
             return true
@@ -64,7 +63,7 @@ class SortedList<E> : AbstractList<E>, RandomAccess, Cloneable {
 
     override fun addAll(elements: Collection<E>): Boolean {
         list.ensureCapacity(elements.size)
-        for (e in elements) add(e)
+        for (element in elements) add(element)
         return true
     }
 
