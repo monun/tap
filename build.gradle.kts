@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import java.net.HttpURLConnection
-import java.net.URL
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     kotlin("jvm") version "1.4.10"
@@ -35,12 +34,12 @@ allprojects {
 
     dependencies {
         compileOnly(kotlin("stdlib-jdk8"))
+        compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.9")
         // Custom dependency builder
         compileOnly(
             "https://ci.dmulloy2.net/job/ProtocolLib/lastSuccessfulBuild/artifact/target/ProtocolLib.jar",
             "ProtocolLib.jar"
         )
-        compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.9")
 
         testImplementation("junit:junit:4.13")
         testImplementation("org.mockito:mockito-core:3.3.3")
@@ -52,11 +51,8 @@ allprojects {
     }
 
     tasks {
-        compileJava {
-            options.encoding = "UTF-8"
-        }
-        javadoc {
-            options.encoding = "UTF-8"
+        withType<KotlinCompile> {
+            kotlinOptions.jvmTarget = "1.8"
         }
     }
 }
@@ -64,6 +60,7 @@ allprojects {
 project(":paper") {
     dependencies {
         implementation(project(":api"))
+
         subprojects.filter { it.name != path }.forEach { subproject ->
             implementation(subproject)
         }
@@ -202,16 +199,20 @@ publishing {
 }
 
 fun DependencyHandlerScope.compileOnly(url: String, name: String): Dependency? {
-    File("libs").mkdir()
-    val jar = File("libs", name)
-    val log = File("libs", "$name.log")
+    val parent = File("libs").also {
+        it.mkdirs()
+    }
+
+    val jar = File(parent, name)
+    val log = File(parent, "$name.log")
     if (!log.exists()) {
         log.createNewFile()
     }
-    (URL(url).openConnection() as HttpURLConnection).run {
+
+    uri(url).toURL().openConnection().run {
         val lastModified = getHeaderField("Last-Modified")
         // (lib.jar).log 파일로 최신버전 관리
-        if (lastModified != String(log.readBytes())) {
+        if (lastModified != log.readText()) {
             inputStream.use { stream ->
                 jar.writeBytes(stream.readBytes())
                 log.writeText(lastModified)
