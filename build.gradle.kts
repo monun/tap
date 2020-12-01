@@ -17,9 +17,8 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "1.4.10"
-    id("com.github.johnrengelman.shadow") version "6.0.0"
-    id("de.undercouch.download") version "4.1.1"
+    kotlin("jvm") version "1.4.20"
+    id("com.github.johnrengelman.shadow") version "5.2.0"
     `maven-publish`
 }
 
@@ -34,7 +33,7 @@ allprojects {
 
     dependencies {
         compileOnly(kotlin("stdlib-jdk8"))
-        compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.9")
+        compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.1")
         // Custom dependency builder
         compileOnly(
             "https://ci.dmulloy2.net/job/ProtocolLib/lastSuccessfulBuild/artifact/target/ProtocolLib.jar",
