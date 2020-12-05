@@ -34,8 +34,8 @@ abstract class DefaultProvider<T : Event> private constructor() : EntityProvider
     }
 
     internal class BlockIgniteEntityProvider : EntityProvider<BlockIgniteEvent> {
-        override fun getFrom(event: BlockIgniteEvent): Entity {
-            return requireNotNull(event.ignitingEntity)
+        override fun getFrom(event: BlockIgniteEvent): Entity? {
+            return event.ignitingEntity
         }
     }
 
@@ -70,14 +70,14 @@ abstract class DefaultProvider<T : Event> private constructor() : EntityProvider
     }
 
     internal class HangingBreakByEntityEntityProvider : EntityProvider<HangingBreakByEntityEvent> {
-        override fun getFrom(event: HangingBreakByEntityEvent): Entity {
-            return requireNotNull(event.remover)
+        override fun getFrom(event: HangingBreakByEntityEvent): Entity? {
+            return event.remover
         }
     }
 
     internal class HangingPlaceEntityProvider : EntityProvider<HangingPlaceEvent> {
-        override fun getFrom(event: HangingPlaceEvent): Entity {
-            return requireNotNull(event.player)
+        override fun getFrom(event: HangingPlaceEvent): Entity? {
+            return event.player
         }
     }
 
