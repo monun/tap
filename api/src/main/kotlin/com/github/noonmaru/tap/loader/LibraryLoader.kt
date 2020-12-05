@@ -15,14 +15,12 @@ object LibraryLoader {
 
         val candidates = ArrayList<String>(2)
         candidates.add("$packageName.$bukkitVersion.$className")
-        println("$packageName.$bukkitVersion.$className")
 
         val lastDot = packageName.lastIndexOf('.')
         if (lastDot > 0) {
             val superPackageName = packageName.substring(0, lastDot)
             val subPackageName = packageName.substring(lastDot + 1)
             candidates.add("$superPackageName.$bukkitVersion.$subPackageName.$className")
-            println("$superPackageName.$bukkitVersion.$subPackageName.$className")
         }
 
         return try {

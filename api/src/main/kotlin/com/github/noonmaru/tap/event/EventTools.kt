@@ -7,7 +7,7 @@ import java.util.ArrayList
 import java.util.WeakHashMap
 
 object EventTools {
-    private val CUSTOM_PROVIDERS: MutableMap<Class<*>, EventEntityProvider> = WeakHashMap()
+    private val CUSTOM_PROVIDERS = WeakHashMap<Class<*>, EventEntityProvider>()
     private val DEFAULT_PROVIDERS: Array<EventEntityProvider>
 
     /**
@@ -46,12 +46,12 @@ object EventTools {
         throw IllegalArgumentException("Not found DefaultProvider for $eventClass")
     }
 
-    @Suppress("UNCHECKED_CAST")
     @JvmStatic
     fun getOrCreateCustomProvide(providerClass: Class<*>): EventEntityProvider {
         return CUSTOM_PROVIDERS.computeIfAbsent(providerClass) { clazz: Class<*> ->
-            try {
-                return@computeIfAbsent EventEntityProvider(clazz.asSubclass(EntityProvider::class.java).newInstance() as EntityProvider<Event>)
+            return@computeIfAbsent try {
+                @Suppress("UNCHECKED_CAST")
+                EventEntityProvider(clazz.asSubclass(EntityProvider::class.java).newInstance() as EntityProvider<Event>)
             } catch (e: InstantiationException) {
                 throw AssertionError(e)
             } catch (e: IllegalAccessException) {
@@ -80,7 +80,7 @@ object EventTools {
     init {
         // 기본 개체 제공자 초기화
         val classes = DefaultProvider::class.java.declaredClasses
-        val defaultProviders: MutableList<EventEntityProvider> = ArrayList(classes.size)
+        val defaultProviders = ArrayList<EventEntityProvider>(classes.size)
 
         for (clazz in classes) {
             if (EntityProvider::class.java.isAssignableFrom(clazz)) {

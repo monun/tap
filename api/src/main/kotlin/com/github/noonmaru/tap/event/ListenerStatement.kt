@@ -18,7 +18,6 @@ class ListenerStatement(val listenerClass: Class<*>, handlerStatements: ArrayLis
     companion object {
         private val STATEMENTS: MutableMap<Class<*>, ListenerStatement> = WeakHashMap()
 
-        @Suppress("UnstableApiUsage")
         @JvmStatic
         fun getOrCreate(listenerClass: Class<*>): ListenerStatement {
             return STATEMENTS.computeIfAbsent(listenerClass) {
@@ -28,6 +27,8 @@ class ListenerStatement(val listenerClass: Class<*>, handlerStatements: ArrayLis
 
                 val handlerStatements = ArrayList<HandlerStatement>()
                 val methods = listenerClass.methods
+
+                @Suppress("UnstableApiUsage")
                 val supers = TypeToken.of(listenerClass).types.rawTypes()
 
                 for (method in methods) {
@@ -63,7 +64,7 @@ class ListenerStatement(val listenerClass: Class<*>, handlerStatements: ArrayLis
 
             val eventClass = parameterTypes[0]
 
-            require(Event::class.java.isAssignableFrom(eventClass)) { "'" + eventClass.name + "' is not event class : " + method }
+            require(Event::class.java.isAssignableFrom(eventClass)) { "'${eventClass.name}' is not event class: $method" }
 
             val handler = method.getAnnotation(EventHandler::class.java)
             val registrationClass = EventTools.getRegistrationClass(eventClass)
