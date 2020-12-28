@@ -15,6 +15,7 @@
  */
 
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import java.io.OutputStream
 
 
 plugins {
@@ -187,6 +188,9 @@ tasks {
                         workingDir(buildtoolsDir)
                         main = "-jar"
                         args = listOf("./BuildTools.jar", "--rev", v)
+                        standardOutput = object : OutputStream() {
+                            override fun write(b: Int) {}
+                        }
                     }
                 }
             }.onFailure {
