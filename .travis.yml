@@ -11,12 +11,12 @@ before_install:
   - chmod +x ./gradlew
 
 install:
-  - './gradlew setupWorkspace'
+  - ./gradlew setupWorkspace
 
 cache:
   directories:
-    - '$HOME/.m2'
-    - '$HOME/.gradle'
+    - $HOME/.m2
+    - $HOME/.gradle
 
 script:
-  - './gradlew clean test'
+  - ./gradlew clean test
