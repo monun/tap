@@ -21,3 +21,6 @@ libs/
 
 # Buildtools
 .buildtools/
+
+# Paper
+.paper/
