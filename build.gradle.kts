@@ -16,11 +16,37 @@
 
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
+
 plugins {
     kotlin("jvm") version "1.4.21"
     id("com.github.johnrengelman.shadow") version "5.2.0"
     `maven-publish`
 }
+
+downloadLibrary(
+    "https://ci.dmulloy2.net/job/ProtocolLib/lastSuccessfulBuild/artifact/target/ProtocolLib.jar",
+    "ProtocolLib.jar"
+)
+
+fun downloadLibrary(url: String, fileName: String) {
+    val parent = File(projectDir, "libs").also {
+        it.mkdirs()
+    }
+    val jar = File(parent, fileName)
+
+    uri(url).toURL().openConnection().run {
+        val lastModified = lastModified
+
+        if (lastModified != jar.lastModified()) {
+            inputStream.use { stream ->
+                jar.writeBytes(stream.readBytes())
+                jar.setLastModified(lastModified)
+            }
+        }
+    }
+}
+
+val libsTree = fileTree("dir" to "libs", "include" to "*.jar")
 
 allprojects {
     apply(plugin = "org.jetbrains.kotlin.jvm")
@@ -32,14 +58,9 @@ allprojects {
     }
 
     dependencies {
-        compileOnly(kotlin("stdlib-jdk8"))
+        compileOnly(kotlin("stdlib"))
         compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.1")
-        // Custom dependency builder
-        compileOnly(
-            "https://ci.dmulloy2.net/job/ProtocolLib/lastSuccessfulBuild/artifact/target/ProtocolLib.jar",
-            "ProtocolLib.jar"
-        )
-
+        compileOnly(libsTree)
         testImplementation("junit:junit:4.13")
         testImplementation("org.mockito:mockito-core:3.3.3")
         testImplementation("org.powermock:powermock-module-junit4:2.0.7")
@@ -67,7 +88,7 @@ project(":paper") {
 }
 
 val jitpackPath = "jitpack"
-val jitpackFileTree = fileTree(mapOf("dir" to "jitpack", "include" to listOf("*-$version.jar")))
+val jitpackFileTree = fileTree(mapOf("dir" to "jitpack", "include" to "*-$version.jar"))
 
 subprojects {
     if (path in setOf(":api", ":paper")) {
@@ -109,18 +130,9 @@ tasks {
 
         dependsOn(classes)
     }
-    create<Copy>("copyPaperJarToDocker") {
-        val paperJar = named("paperJar").get() as Jar
-        from(paperJar)
-        var dest = File(".docker/plugins")
-        // Copy bukkit plugin update folder
-        if (File(dest, paperJar.archiveFileName.get()).exists()) dest = File(dest, "update")
-
-        into(dest)
-
-        doLast {
-            println("Copy to ${dest.path}")
-        }
+    create<Copy>("paper") {
+        from(named("paperJar"))
+        into(".paper/plugins")
     }
     create<Jar>("sourcesJar") {
         archiveClassifier.set("sources")
@@ -139,43 +151,50 @@ tasks {
     create<Delete>("cleanJitpack") {
         delete(jitpackFileTree)
     }
-    create<de.undercouch.gradle.tasks.download.Download>("downloadBuildTools") {
-        src("https://hub.spigotmc.org/jenkins/job/BuildTools/lastSuccessfulBuild/artifact/target/BuildTools.jar")
-        dest(".buildtools/BuildTools.jar")
-        onlyIfModified(true)
-    }
     create<DefaultTask>("setupWorkspace") {
+        // gradlew build --refresh-dependencies
         doLast {
+            val versions = arrayOf(
+                "1.16.4",
+                "1.16.3",
+                "1.16.1",
+                "1.15.2",
+                "1.14.4",
+                "1.13.2"
+            )
+            val buildtoolsDir = File(".buildtools")
+            val buildtools = File(buildtoolsDir, "BuildTools.jar")
+
+            val maven = File(System.getProperty("user.home"), ".m2/repository/org/spigotmc/spigot/")
+            val repos = maven.listFiles { file: File -> file.isDirectory } ?: emptyArray()
+            val missingVersions = versions.filter { version ->
+                repos.find { it.name.startsWith(version) } == null
+            }
+
+            if (missingVersions.isEmpty()) return@doLast
+
+            val download by registering(de.undercouch.gradle.tasks.download.Download::class) {
+                src("https://hub.spigotmc.org/jenkins/job/BuildTools/lastSuccessfulBuild/artifact/target/BuildTools.jar")
+                dest(buildtools)
+            }
+            download.get().download()
+
             runCatching {
-                val repos = File(
-                    System.getProperty("user.home"),
-                    "/.m2/repository/org/spigotmc/spigot/"
-                ).listFiles { file: File -> file.isDirectory } ?: emptyArray()
-
-                for (v in arrayOf("1.16.4", "1.16.3", "1.16.1", "1.15.2", "1.14.4", "1.13.2")) {
-                    if (repos.find { it.name.startsWith(v) } != null) {
-                        println("Skip download spigot-$v")
-                        continue
-                    }
-
+                for (v in versions) {
                     println("Downloading spigot-$v...")
 
                     javaexec {
-                        workingDir(".buildtools/")
+                        workingDir(buildtoolsDir)
                         main = "-jar"
-                        args = listOf(
-                            "./BuildTools.jar",
-                            "--rev",
-                            v
-                        )
+                        args = listOf("./BuildTools.jar", "--rev", v)
                     }
                 }
             }.onFailure {
                 it.printStackTrace()
             }
-        }
 
-        dependsOn(named("downloadBuildTools"))
+            buildtoolsDir.deleteRecursively()
+        }
     }
 
     build {
@@ -195,28 +214,4 @@ publishing {
             artifact(tasks["sourcesJar"])
         }
     }
-}
-
-fun DependencyHandlerScope.compileOnly(url: String, name: String): Dependency? {
-    val parent = File("libs").also {
-        it.mkdirs()
-    }
-
-    val jar = File(parent, name)
-    val log = File(parent, "$name.log")
-    if (!log.exists()) {
-        log.createNewFile()
-    }
-
-    uri(url).toURL().openConnection().run {
-        val lastModified = getHeaderField("Last-Modified")
-        // (lib.jar).log 파일로 최신버전 관리
-        if (lastModified != log.readText()) {
-            inputStream.use { stream ->
-                jar.writeBytes(stream.readBytes())
-                log.writeText(lastModified)
-            }
-        }
-    }
-    return compileOnly(files(jar.toURI()))
 }
