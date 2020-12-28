@@ -6,15 +6,12 @@ out/
 .gradle/
 build/
 
-# Docker
-.docker/
-
 # Avoid ignoring Gradle wrapper jar file (.jar files are usually ignored)
 !gradle-wrapper.jar
 !gradle-wrapper.properties
 
 # Avoid ignoring Jitpack jar file (.jar files are usually ignored)
-!jitpack/**.jar
+!jitpack.jar
 
 # External Library
 libs/
