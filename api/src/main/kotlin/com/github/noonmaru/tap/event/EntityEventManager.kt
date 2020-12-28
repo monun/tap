@@ -32,7 +32,7 @@ class EntityEventManager @JvmOverloads constructor(private val plugin: Plugin, p
 
     private val listeners = HashMap<Class<*>, EventListener>()
 
-    private val entities: MutableMap<Entity, EventEntity> = MapMaker().weakKeys().makeMap()
+    private val entities = MapMaker().weakKeys().makeMap<Entity, EventEntity>()
 
     private val eventExecutor = EventExecutor { listener: Listener, event: Event ->
         (listener as EventListener).onEvent(event)
