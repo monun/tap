@@ -188,9 +188,8 @@ tasks {
                         workingDir(buildtoolsDir)
                         main = "-jar"
                         args = listOf("./BuildTools.jar", "--rev", v)
-                        standardOutput = object : OutputStream() {
-                            override fun write(b: Int) {}
-                        }
+                        standardOutput = OutputStream.nullOutputStream()
+                        errorOutput = OutputStream.nullOutputStream()
                     }
                 }
             }.onFailure {
