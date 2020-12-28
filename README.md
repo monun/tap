@@ -33,8 +33,5 @@ dependencies {
     * 플러그인 구현체가 필요하신분은 ./gradlew paperJar 태스크를 이용해 빌드하세요.
     * 하지만 가능하다면 [ShadowJar](https://github.com/johnrengelman/shadow) 플러그인을 사용해 FatJar로 빌드하세요.
 
-* Tap의 개발환경 구축을 위해선 spigot 1.13.2-1.16.3 이 필요합니다. [BuildTools](https://www.spigotmc.org/wiki/buildtools/) 를 이용해 로컬 메이븐 저장소에 spigot을 배포하세요.
+* Tap의 개발환경 구축을 위해선 spigot 1.13.2-1.16.4 이 필요합니다. [BuildTools](https://www.spigotmc.org/wiki/buildtools/) 를 이용해 로컬 메이븐 저장소에 spigot을 배포하세요.
   * `./gradlew setupWorkspace` 명령으로 간단하게 배포할수있습니다.
-* 터미널에서 docker-compose up --build \[-d] 명령으로 docker를 구성 할 수 있습니다.
-    * 컨테이너의 볼륨은 `./docker/`에 위치합니다.
-    * 컨테이너 생성 후 플러그인을 ./gradlew copyPaperJarToDocker 태스크로 볼륨에 복사할 수 있습니다.
