@@ -88,9 +88,6 @@ project(":paper") {
     }
 }
 
-val jitpackPath = "jitpack"
-val jitpackFileTree = fileTree(mapOf("dir" to "jitpack", "include" to "*-$version.jar"))
-
 subprojects {
     if (path in setOf(":api", ":paper")) {
         // setup api & test plugin
@@ -103,13 +100,6 @@ subprojects {
         //setup nms
         dependencies {
             implementation(project(":api"))
-        }
-        tasks {
-            // Move net.minecraft.server artifacts to $rootDir/jitpack for jitpack.io
-            create<Copy>("jitpack") {
-                from(jar)
-                into(File(rootDir, jitpackPath))
-            }
         }
     }
 }
@@ -148,9 +138,6 @@ tasks {
             if (hasTask(":publishTapPublicationToMavenLocal"))
                 archiveClassifier.set("")
         }
-    }
-    create<Delete>("cleanJitpack") {
-        delete(jitpackFileTree)
     }
     create<DefaultTask>("setupWorkspace") {
         doLast {
@@ -194,15 +181,21 @@ tasks {
             buildtoolsDir.deleteRecursively()
         }
     }
-
     build {
         dependsOn(named("paperJar"))
+    }
+    create<Jar>("jitpack") {
+        dependsOn(subprojects.map { it.tasks.getByName("classes") })
+        from(subprojects.filter { it.name.startsWith("v") }.map { it.sourceSets["main"].output })
+        destinationDirectory.set(file(".jitpack"))
+        archiveVersion.set("")
+        archiveBaseName.set("jitpack")
     }
 }
 
 dependencies {
     implementation(project(":api"))
-    implementation(jitpackFileTree)
+    implementation(fileTree("dir" to ".jitpack", "include" to "*.jar"))
 }
 
 publishing {
