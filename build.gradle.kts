@@ -37,7 +37,6 @@ fun downloadLibrary(url: String, fileName: String) {
 
     uri(url).toURL().openConnection().run {
         val lastModified = lastModified
-
         if (lastModified != jar.lastModified()) {
             inputStream.use { stream ->
                 jar.writeBytes(stream.readBytes())
@@ -46,8 +45,6 @@ fun downloadLibrary(url: String, fileName: String) {
         }
     }
 }
-
-val libsTree = fileTree("dir" to "libs", "include" to "*.jar")
 
 allprojects {
     apply(plugin = "org.jetbrains.kotlin.jvm")
@@ -61,7 +58,7 @@ allprojects {
     dependencies {
         compileOnly(kotlin("stdlib"))
         compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.1")
-        compileOnly(libsTree)
+        compileOnly(rootProject.fileTree("dir" to "libs", "include" to "*.jar"))
         testImplementation("junit:junit:4.13")
         testImplementation("org.mockito:mockito-core:3.3.3")
         testImplementation("org.powermock:powermock-module-junit4:2.0.7")
@@ -171,6 +168,7 @@ tasks {
                         workingDir(buildtoolsDir)
                         main = "-jar"
                         args = listOf("./${buildtools.name}", "--rev", v)
+                        // Silent
                         standardOutput = OutputStream.nullOutputStream()
                         errorOutput = OutputStream.nullOutputStream()
                     }
