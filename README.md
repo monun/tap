@@ -1,5 +1,5 @@
 # Tap
-[![Build Status](https://travis-ci.org/noonmaru/tap.svg?branch=master)](https://travis-ci.org/noonmaru/tap)
+[![Build Status](https://travis-ci.com/noonmaru/tap.svg?branch=master)](https://travis-ci.com/noonmaru/tap)
 [![JitPack](https://jitpack.io/v/noonmaru/tap.svg)](https://jitpack.io/#noonmaru/tap)
 
 ## Kotlin으로 작성된 Paper 라이브러리
