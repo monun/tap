@@ -153,7 +153,6 @@ tasks {
         delete(jitpackFileTree)
     }
     create<DefaultTask>("setupWorkspace") {
-        // gradlew build --refresh-dependencies
         doLast {
             val versions = arrayOf(
                 "1.16.4",
@@ -169,16 +168,15 @@ tasks {
             val maven = File(System.getProperty("user.home"), ".m2/repository/org/spigotmc/spigot/")
             val repos = maven.listFiles { file: File -> file.isDirectory } ?: emptyArray()
             val missingVersions = versions.filter { version ->
-                repos.find { it.name.startsWith(version) } == null
+                repos.find { it.name.startsWith(version) }?.also { println("Skip downloading spigot-$version") } == null
             }
-
             if (missingVersions.isEmpty()) return@doLast
 
-            val download by registering(de.undercouch.gradle.tasks.download.Download::class) {
+            registering(de.undercouch.gradle.tasks.download.Download::class) {
                 src("https://hub.spigotmc.org/jenkins/job/BuildTools/lastSuccessfulBuild/artifact/target/BuildTools.jar")
                 dest(buildtools)
+                download()
             }
-            download.get().download()
 
             runCatching {
                 for (v in versions) {
