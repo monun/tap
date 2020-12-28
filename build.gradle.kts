@@ -169,23 +169,21 @@ tasks {
             val repos = maven.listFiles { file: File -> file.isDirectory } ?: emptyArray()
             val missingVersions = versions.filter { version ->
                 repos.find { it.name.startsWith(version) }?.also { println("Skip downloading spigot-$version") } == null
-            }
-            if (missingVersions.isEmpty()) return@doLast
+            }.also { if (it.isEmpty()) return@doLast }
 
             registering(de.undercouch.gradle.tasks.download.Download::class) {
                 src("https://hub.spigotmc.org/jenkins/job/BuildTools/lastSuccessfulBuild/artifact/target/BuildTools.jar")
                 dest(buildtools)
                 download()
             }
-
             runCatching {
-                for (v in versions) {
+                for (v in missingVersions) {
                     println("Downloading spigot-$v...")
 
                     javaexec {
                         workingDir(buildtoolsDir)
                         main = "-jar"
-                        args = listOf("./BuildTools.jar", "--rev", v)
+                        args = listOf("./${buildtools.name}", "--rev", v)
                         standardOutput = OutputStream.nullOutputStream()
                         errorOutput = OutputStream.nullOutputStream()
                     }
@@ -193,7 +191,6 @@ tasks {
             }.onFailure {
                 it.printStackTrace()
             }
-
             buildtoolsDir.deleteRecursively()
         }
     }
