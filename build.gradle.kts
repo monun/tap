@@ -186,15 +186,15 @@ tasks {
             buildtoolsDir.deleteRecursively()
         }
     }
-    build {
-        dependsOn(named("paperJar"))
-    }
     create<Jar>("jitpack") {
         dependsOn(subprojects.map { it.tasks.getByName("classes") })
         from(subprojects.filter { it.name.startsWith("v") }.map { it.sourceSets["main"].output })
         destinationDirectory.set(file(".jitpack"))
         archiveVersion.set("")
         archiveBaseName.set("jitpack")
+    }
+    build {
+        finalizedBy(named("jitpack"))
     }
 }
 
