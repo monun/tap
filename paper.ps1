@@ -1,14 +1,26 @@
+# Gradle
+$Build = $true
+
+# JVM
 $Xms = "1G"
 $Xmx = "2G"
 $Debug = $true
-$Version = "1.16.4"
 $Jar = "paper.jar"
-$plugins = (
-    "https://github.com/noonmaru/kotlin-plugin/releases/latest/download/Kotlin.jar",
-    "https://ci.dmulloy2.net/job/ProtocolLib/lastSuccessfulBuild/artifact/target/ProtocolLib.jar"
+
+# Spigot
+$Version = "1.16.4"
+
+# Plugins
+$Plugins = @(
+"https://github.com/noonmaru/kotlin-plugin/releases/latest/download/Kotlin.jar",
+"https://ci.dmulloy2.net/job/ProtocolLib/lastSuccessfulBuild/artifact/target/ProtocolLib.jar"
 )
 
-Function Download-File {
+# Backup
+$AskBackup = $false
+
+Function Download-File
+{
     [CmdletBinding()]
     Param (
         [string]$Url,
@@ -21,17 +33,22 @@ Function Download-File {
     $Location = (Get-Location).Path
     $Destfolder = Resolve-Path("$Location/$Folder")
 
-    try {
+    try
+    {
         $WebRequest = [System.Net.HttpWebRequest]::Create($Url);
         $WebRequest.Method = "GET"
         $WebResponse = $WebRequest.GetResponse()
 
-        if ([string]::IsNullOrEmpty($Filename)) {
+        if ( [string]::IsNullOrEmpty($Filename))
+        {
             $Disposition = $WebResponse.Headers['Content-Disposition']
 
-            if ([string]::IsNullOrEmpty($Disposition)) {
+            if ( [string]::IsNullOrEmpty($Disposition))
+            {
                 $Filename = [System.IO.Path]::GetFileName($Url)
-            } else {
+            }
+            else
+            {
                 $Filename = [System.Net.Mime.ContentDisposition]::new($Disposition).FileName
             }
         }
@@ -39,24 +56,29 @@ Function Download-File {
         $Dest = "$Destfolder/$Filename"
         $FileInfo = [System.IO.FileInfo]$Dest
 
-        if (Test-Path $Dest) {
+        if (Test-Path $Dest)
+        {
             $RemoteLastModified = $WebResponse.LastModified
             $LocalLastModified = $FileInfo.LastWriteTime
-            
-            if ([datetime]::Compare($RemoteLastModified, $LocalLastModified) -eq 0) {
+
+            if ([datetime]::Compare($RemoteLastModified, $LocalLastModified) -eq 0)
+            {
                 Write-Host "UP-TO-DATE $Filename($Url)"
                 $WebResponse.Dispose()
                 return
             }
             Write-Host "Updating $Filename from $url"
-        } else {
+        }
+        else
+        {
             Write-Host "Downloading $Filename from $url"
         }
         $ResponseStream = $WebResponse.GetResponseStream()
         $FileWriter = New-Object System.IO.FileStream ($Dest, [System.IO.FileMode]::Create)
         [byte[]]$buffer = New-Object byte[] 4096
 
-        do {
+        do
+        {
             $length = $ResponseStream.Read($buffer, 0, 4096)
             $FileWriter.Write($buffer, 0, $length)
         } while ($length -ne 0)
@@ -65,27 +87,35 @@ Function Download-File {
         $FileWriter.Close()
         $FileInfo.LastWriteTime = $WebResponse.LastModified
     }
-    catch [System.Net.WebException] {
+    catch [System.Net.WebException]
+    {
         $Status = $_.Exception.Response.StatusCode
         $Msg = $_.Exception
         Write-Host "  Failed to dowloading $Dest, Status code: $Status - $Msg" -ForegroundColor Red
     }
-    
+
 }
 
-Function Create-Directory([string]$PathName) {
-    if (!(Test-Path $PathName)) { New-Item $PathName -Type Directory | Out-Null }
+Function Create-Directory([string]$PathName)
+{
+    if (!(Test-Path $PathName))
+    {
+        New-Item $PathName -Type Directory | Out-Null
+    }
 }
 
-Function Agree-EULA {
+Function Agree-EULA
+{
     $Eula = "eula.txt"
-    if (!(Test-Path $Eula)) {
+    if (!(Test-Path $Eula))
+    {
         New-Item $Eula -ItemType "file" | Out-Null
         Add-Content $Eula "eula=true"
     }
 }
 
-function Choice {
+function Choice
+{
     Param(
         [string]$Prompt,
         [string]$Choice,
@@ -101,12 +131,15 @@ function Choice {
 
     $Choose = $Default
 
-    while ($CurrentTime -lt $StartTime + $TimeOut) {
-        if ($host.UI.RawUI.KeyAvailable) {
+    while ($CurrentTime -lt $StartTime + $TimeOut)
+    {
+        if ($host.UI.RawUI.KeyAvailable)
+        {
             [string]$Key = ($host.UI.RawUI.ReadKey("IncludeKeyDown,NoEcho")).character
             $Key = $Key.ToUpper().ToCharArray()[0]
 
-            if ($Choice.Contains($Key)) {
+            if ( $Choice.Contains($Key))
+            {
                 $Choose = $Key
                 Break
             }
@@ -120,7 +153,8 @@ function Choice {
     return $Choose
 }
 
-Function Backup {
+Function Backup
+{
     $Backup = "backup"
 
     Create-Directory $Backup
@@ -131,7 +165,14 @@ Function Backup {
     Write-Host "Backup completed $ArchiveName"
 }
 
-$Folder = ".$((Get-Item($MyInvocation.MyCommand.Name)).BaseName)"
+# Compile
+if ($Build)
+{
+    ./gradlew paper
+}
+
+$ProjectFolder = Get-Location
+$Folder = ".$( (Get-Item($MyInvocation.MyCommand.Name)).BaseName )"
 
 # Setup
 Create-Directory $Folder
@@ -143,17 +184,19 @@ Agree-EULA
 Download-File "https://papermc.io/api/v1/paper/$Version/latest/download" "." $Jar
 
 # Download plugins
-foreach ($Plugin in $Plugins) {
+foreach ($Plugin in $Plugins)
+{
     Download-File $Plugin "plugins"
 }
 
 # Build JVM args
 $JVMArgs = [System.Collections.ArrayList]@(
-    "-Xms$Xms",
-    "-Xmx$Xmx"
+"-Xms$Xms",
+"-Xmx$Xmx"
 )
 
-if ($Debug) {
+if ($Debug)
+{
     [void]$JVMArgs.Add("-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005")
 }
 
@@ -162,18 +205,31 @@ if ($Debug) {
 [void]$JVMArgs.Add("--nogui")
 
 # Run
-While ($true) {
+While ($true)
+{
+    if ($Build)
+    {
+        Set-Location $ProjectFolder
+        ./gradlew clean paper
+        Set-Location $Folder
+    }
+
     java $JVMArgs
 
-    $SkipBackup = Choice "Skip the backup? [Y]es, [N]o" @('Y', 'N') 'N' 3
+    if ($AskBackup)
+    {
+        $SkipBackup = Choice "Skip the backup? [Y]es, [N]o" @('Y', 'N') 'N' 3
 
-    if ($SkipBackup -eq 'N') {
-        Backup
+        if ($SkipBackup -eq 'N')
+        {
+            Backup
+        }
     }
 
     $Restart = Choice "Restart? [Y]es [N]o" @('Y', 'N') 'Y' 2
-    
-    if ($Restart -eq 'N') {
+
+    if ($Restart -eq 'N')
+    {
         Break
     }
 }

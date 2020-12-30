@@ -17,6 +17,8 @@
 package com.github.noonmaru.tap.plugin
 
 import com.comphenix.protocol.utility.MinecraftVersion
+import com.github.noonmaru.tap.template.renderTemplates
+import org.bukkit.configuration.file.YamlConfiguration
 import org.bukkit.plugin.java.JavaPlugin
 
 class TapPlugin : JavaPlugin() {
