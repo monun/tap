@@ -160,12 +160,13 @@ tasks {
             val missingVersions = versions.filter { version ->
                 repos.find { it.name.startsWith(version) }?.also { println("Skip downloading spigot-$version") } == null
             }.also { if (it.isEmpty()) return@doLast }
-
-            registering(de.undercouch.gradle.tasks.download.Download::class) {
+            
+            val download by registering(de.undercouch.gradle.tasks.download.Download::class) {
                 src("https://hub.spigotmc.org/jenkins/job/BuildTools/lastSuccessfulBuild/artifact/target/BuildTools.jar")
                 dest(buildtools)
-                download()
             }
+            download.get().download()
+
             runCatching {
                 for (v in missingVersions) {
                     println("Downloading spigot-$v...")
