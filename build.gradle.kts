@@ -15,7 +15,6 @@
  */
 
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-import org.jetbrains.kotlin.util.collectionUtils.filterIsInstanceMapTo
 import java.io.OutputStream
 
 
@@ -194,7 +193,8 @@ tasks {
         archiveBaseName.set("jitpack")
     }
     build {
-        finalizedBy(named("jitpack"))
+        dependsOn(named("jitpack"))
+        finalizedBy(shadowJar)
     }
 }
 
