@@ -15,6 +15,7 @@
  */
 
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.jetbrains.kotlin.util.collectionUtils.filterIsInstanceMapTo
 import java.io.OutputStream
 
 
@@ -59,6 +60,9 @@ allprojects {
         compileOnly(kotlin("stdlib"))
         compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.1")
         compileOnly(rootProject.fileTree("dir" to "libs", "include" to "*.jar"))
+
+        implementation("org.mozilla:rhino:1.7.13")
+
         testImplementation("junit:junit:4.13")
         testImplementation("org.mockito:mockito-core:3.3.3")
         testImplementation("org.powermock:powermock-module-junit4:2.0.7")
@@ -101,26 +105,17 @@ subprojects {
     }
 }
 
+dependencies {
+    implementation(project(":api"))
+    implementation(project(":paper"))
+    implementation(fileTree("dir" to ".jitpack", "include" to "*.jar"))
+}
+
 tasks {
     jar {
         subprojects.filter { it.name != ":paper" }.forEach { subproject ->
             from(subproject.sourceSets["main"].output)
         }
-    }
-    // Build JavaPlugin
-    create<Jar>("paperJar") {
-        subprojects.forEach { subproject ->
-            from(subproject.sourceSets["main"].output)
-        }
-        archiveBaseName.set("Tap")
-        archiveVersion.set("") // For bukkit plugin update
-        archiveClassifier.set("") // Remove 'all'
-
-        dependsOn(classes)
-    }
-    create<Copy>("paper") {
-        from(named("paperJar"))
-        into(".paper/plugins")
     }
     create<Jar>("sourcesJar") {
         archiveClassifier.set("sources")
@@ -128,12 +123,24 @@ tasks {
             from(subproject.sourceSets["main"].allSource)
         }
     }
-    // jitpack.io
+    create<Copy>("paper") {
+        from(shadowJar)
+        var dest = file(".paper/plugins")
+        if (File(dest, shadowJar.get().archiveFileName.get()).exists()) dest = File(dest, "update")
+        into(dest)
+    }
     shadowJar {
-        // remove classifier 'all' for maven repo
+        archiveClassifier.set("")
+        exclude("LICENSE.txt") // mpl
         gradle.taskGraph.whenReady {
-            if (hasTask(":publishTapPublicationToMavenLocal"))
-                archiveClassifier.set("")
+            if (hasTask(":publishTapPublicationToMavenLocal")) { // maven publish
+                dependencies {
+                    exclude(project(":paper"))
+                }
+            } else {
+                archiveVersion.set("")
+                archiveBaseName.set(project(":paper").property("pluginName").toString())
+            }
         }
     }
     create<DefaultTask>("setupWorkspace") {
@@ -189,11 +196,6 @@ tasks {
         archiveVersion.set("")
         archiveBaseName.set("jitpack")
     }
-}
-
-dependencies {
-    implementation(project(":api"))
-    implementation(fileTree("dir" to ".jitpack", "include" to "*.jar"))
 }
 
 publishing {

@@ -17,9 +17,8 @@
 package com.github.noonmaru.tap.template
 
 import org.bukkit.configuration.ConfigurationSection
+import org.mozilla.javascript.Context
 import java.util.regex.Pattern
-import javax.script.ScriptEngine
-import javax.script.ScriptEngineManager
 
 /**
  * [renderTemplates]
@@ -134,10 +133,6 @@ internal abstract class Template(
     private class Expression(token: String) : Template(token) {
         companion object {
             private val expressionVariablePattern = Pattern.compile("[\\w-]+(\\.[\\w-]+)*")
-
-            val js: ScriptEngine by lazy {
-                ScriptEngineManager().getEngineByName("js")
-            }
         }
 
         override val name: String
@@ -168,10 +163,15 @@ internal abstract class Template(
 
             val script = builder.toString()
 
-            js.runCatching {
-                return eval(script).toString().removeSuffix(".0")
+            val cx = Context.enter()
+            val scope = cx.initSafeStandardObjects()
+
+            cx.runCatching {
+                return evaluateString(scope, script, "EvaluationScript", 1, null).toString()
             }.onFailure {
-                throw IllegalArgumentException("Failed to evaluate $script")
+                throw IllegalArgumentException("Failed to evaluate $script", it)
+            }.also {
+                Context.exit()
             }
 
             return null
