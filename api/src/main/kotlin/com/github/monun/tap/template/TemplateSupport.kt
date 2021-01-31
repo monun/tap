@@ -17,7 +17,6 @@
 package com.github.monun.tap.template
 
 import org.bukkit.configuration.ConfigurationSection
-import org.mozilla.javascript.Context
 import java.util.regex.Pattern
 
 /**
@@ -148,7 +147,7 @@ internal abstract class Template(
                 return if (value is Number) value.toString().removeSuffix(".0") else value.toString()
             }
 
-            val builder = StringBuilder(name)
+            val expressionBuilder = StringBuilder(name)
 
             for (path in groups) {
                 if (path.toDoubleOrNull() != null) continue //숫자 체크
@@ -156,22 +155,18 @@ internal abstract class Template(
                 config.find(path)?.let { value ->
                     require(value is Number) { "Value is not a number $path in $token" }
 
-                    val index = builder.indexOf(path)
-                    builder.replace(index, index + path.length, value.toString())
+                    val index = expressionBuilder.indexOf(path)
+                    expressionBuilder.replace(index, index + path.length, value.toString())
                 } ?: throw IllegalArgumentException("Not found value for $path")
             }
 
-            val script = builder.toString()
+            val expressionString = expressionBuilder.toString()
+            val expression = org.mariuszgromada.math.mxparser.Expression(expressionString)
 
-            val cx = Context.enter()
-            val scope = cx.initSafeStandardObjects()
-
-            cx.runCatching {
-                return evaluateString(scope, script, "EvaluationScript", 1, null).toString()
+            expression.runCatching {
+                return expression.calculate().toString().removeSuffix(".0")
             }.onFailure {
-                throw IllegalArgumentException("Failed to evaluate $script", it)
-            }.also {
-                Context.exit()
+                throw IllegalArgumentException("Failed to evaluate $expressionString", it)
             }
 
             return null

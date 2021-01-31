@@ -60,7 +60,7 @@ allprojects {
         compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.1")
         compileOnly(rootProject.fileTree("dir" to "libs", "include" to "*.jar"))
 
-        implementation("org.mozilla:rhino:1.7.13")
+        implementation("org.mariuszgromada.math:MathParser.org-mXparser:4.4.2")
 
         testImplementation("junit:junit:4.13")
         testImplementation("org.mockito:mockito-core:3.3.3")
