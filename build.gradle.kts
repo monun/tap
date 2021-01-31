@@ -146,7 +146,6 @@ tasks {
         doLast {
             val versions = arrayOf(
                 "1.16.5",
-                "1.16.4",
                 "1.16.3",
                 "1.16.1",
                 "1.15.2",

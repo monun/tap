@@ -8,7 +8,7 @@ $Debug = $true
 $Jar = "paper.jar"
 
 # Spigot
-$Version = "1.16.4"
+$Version = "1.16.5"
 
 # Plugins
 $Plugins = @(
@@ -230,6 +230,7 @@ While ($true)
 
     if ($Restart -eq 'N')
     {
+        Set-Location $ProjectFolder
         Break
     }
 }
