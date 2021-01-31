@@ -1,6 +1,6 @@
 # Tap
-[![Build Status](https://travis-ci.com/noonmaru/tap.svg?branch=master)](https://travis-ci.com/noonmaru/tap)
-[![JitPack](https://jitpack.io/v/noonmaru/tap.svg)](https://jitpack.io/#noonmaru/tap)
+[![Build Status](https://travis-ci.com/monun/tap.svg?branch=master)](https://travis-ci.com/monun/tap)
+[![JitPack](https://jitpack.io/v/monun/tap.svg)](https://jitpack.io/#monun/tap)
 
 ## Kotlin으로 작성된 Paper 라이브러리
 #### 지원 기능
@@ -23,7 +23,7 @@ allprojects {
 
 ...
 dependencies {
-    implementation 'com.github.noonmaru:tap:Tag'
+    implementation 'com.github.monun:tap:Tag'
 }
 ``` 
 

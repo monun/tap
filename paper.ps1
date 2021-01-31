@@ -12,7 +12,7 @@ $Version = "1.16.4"
 
 # Plugins
 $Plugins = @(
-"https://github.com/noonmaru/kotlin-plugin/releases/latest/download/Kotlin.jar",
+"https://github.com/monun/kotlin-plugin/releases/latest/download/Kotlin.jar",
 "https://ci.dmulloy2.net/job/ProtocolLib/lastSuccessfulBuild/artifact/target/ProtocolLib.jar"
 )
 
