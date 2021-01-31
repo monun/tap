@@ -141,6 +141,7 @@ tasks {
                 archiveBaseName.set(project(":paper").property("pluginName").toString())
             }
         }
+        relocate("org.mariuszgromada.math", "${rootProject.group}.${rootProject.name}.org.mariuszgromada.math")
     }
     create<DefaultTask>("setupWorkspace") {
         doLast {
