@@ -19,7 +19,7 @@ import java.io.OutputStream
 
 
 plugins {
-    kotlin("jvm") version "1.4.21"
+    kotlin("jvm") version "1.4.30"
     id("com.github.johnrengelman.shadow") version "5.2.0"
     `maven-publish`
 }
@@ -57,7 +57,7 @@ allprojects {
 
     dependencies {
         compileOnly(kotlin("stdlib"))
-        compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.1")
+        compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.2")
         compileOnly(rootProject.fileTree("dir" to "libs", "include" to "*.jar"))
 
         implementation("org.mariuszgromada.math:MathParser.org-mXparser:4.4.2")
