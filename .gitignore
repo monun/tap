@@ -19,5 +19,5 @@ libs/
 # Buildtools
 .buildtools/
 
-# Paper
-.paper/
+# Server
+.server/

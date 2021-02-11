@@ -122,9 +122,9 @@ tasks {
             from(subproject.sourceSets["main"].allSource)
         }
     }
-    create<Copy>("paper") {
+    create<Copy>("copyToServer") {
         from(shadowJar)
-        var dest = file(".paper/plugins")
+        var dest = file(".server/plugins")
         if (File(dest, shadowJar.get().archiveFileName.get()).exists()) dest = File(dest, "update")
         into(dest)
     }
@@ -161,7 +161,7 @@ tasks {
             val missingVersions = versions.filter { version ->
                 repos.find { it.name.startsWith(version) }?.also { println("Skip downloading spigot-$version") } == null
             }.also { if (it.isEmpty()) return@doLast }
-            
+
             val download by registering(de.undercouch.gradle.tasks.download.Download::class) {
                 src("https://hub.spigotmc.org/jenkins/job/BuildTools/lastSuccessfulBuild/artifact/target/BuildTools.jar")
                 dest(buildtools)
