@@ -19,10 +19,7 @@ package com.github.monun.tap.event
 import org.bukkit.entity.Entity
 import org.bukkit.entity.Projectile
 import org.bukkit.event.Event
-import org.bukkit.event.entity.EntityDamageByEntityEvent
-import org.bukkit.event.entity.EntityDeathEvent
-import org.bukkit.event.entity.EntityPickupItemEvent
-import org.bukkit.event.entity.ProjectileHitEvent
+import org.bukkit.event.entity.*
 import org.bukkit.event.player.PlayerInteractEntityEvent
 
 @Suppress("unused")
@@ -74,12 +71,18 @@ fun interface EntityProvider<T : Event> {
         }
     }
 
+    class ProjectileLaunch {
+        class Shooter : EntityProvider<ProjectileLaunchEvent> {
+            override fun getFrom(event: ProjectileLaunchEvent): Entity? {
+                return event.entity.shooter?.takeIf { it is Entity } as Entity?
+            }
+        }
+    }
+
     class ProjectileHit {
         class Shooter : EntityProvider<ProjectileHitEvent> {
             override fun getFrom(event: ProjectileHitEvent): Entity? {
-                val shooter = event.entity.shooter
-
-                return if (shooter is Entity) shooter else null
+                return event.entity.shooter?.takeIf { it is Entity } as Entity?
             }
         }
     }
