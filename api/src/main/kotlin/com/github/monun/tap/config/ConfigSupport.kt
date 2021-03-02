@@ -239,22 +239,6 @@ fun Any.computeConfig(configFile: File, separateByClass: Boolean = false): Boole
     return false
 }
 
-@Deprecated(
-    "This method will be removed in future versions.",
-    ReplaceWith("computeConfig(config, separateByClass)")
-)
-fun Any.applyConfig(config: ConfigurationSection, separateByClass: Boolean = false): Boolean {
-    return computeConfig(config, separateByClass)
-}
-
-@Deprecated(
-    "This method will be removed in future versions.",
-    ReplaceWith("computeConfig(configFile, separateByClass)")
-)
-fun Any.applyConfig(configFile: File, separateByClass: Boolean = false): Boolean {
-    return computeConfig(configFile, separateByClass)
-}
-
 private fun Class<*>.getConfigurables(): Map<Class<*>, List<Pair<Field, Config>>> {
     val superClasses = getSuperClasses(Any::class.java).reversed()
     val list: MutableMap<Class<*>, List<Pair<Field, Config>>> = LinkedHashMap()
