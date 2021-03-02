@@ -76,7 +76,7 @@ allprojects {
             sourceCompatibility = "11"
             targetCompatibility = "11"
         }
-        withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+        withType<KotlinCompile> {
             kotlinOptions.jvmTarget = "11"
         }
     }
