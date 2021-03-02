@@ -24,41 +24,44 @@ plugins {
     `maven-publish`
 }
 
-downloadLibrary(
-    "https://ci.dmulloy2.net/job/ProtocolLib/lastSuccessfulBuild/artifact/target/ProtocolLib.jar",
-    "ProtocolLib.jar"
-)
-
-fun downloadLibrary(url: String, fileName: String) {
-    val parent = File(projectDir, "libs").also {
-        it.mkdirs()
-    }
-    val jar = File(parent, fileName)
-
-    uri(url).toURL().openConnection().run {
-        val lastModified = lastModified
-        if (lastModified != jar.lastModified()) {
-            inputStream.use { stream ->
-                jar.writeBytes(stream.readBytes())
-                jar.setLastModified(lastModified)
-            }
-        }
-    }
-}
+// ProtocolLib 파일 다운로드 링크 (저장소 응답 없을시 사용)
+//downloadLibrary(
+//    "https://ci.dmulloy2.net/job/ProtocolLib/lastSuccessfulBuild/artifact/target/ProtocolLib.jar",
+//    "ProtocolLib.jar"
+//)
+//
+//fun downloadLibrary(url: String, fileName: String) {
+//    val parent = File(projectDir, "libs").also {
+//        it.mkdirs()
+//    }
+//    val jar = File(parent, fileName)
+//
+//    uri(url).toURL().openConnection().run {
+//        val lastModified = lastModified
+//        if (lastModified != jar.lastModified()) {
+//            inputStream.use { stream ->
+//                jar.writeBytes(stream.readBytes())
+//                jar.setLastModified(lastModified)
+//            }
+//        }
+//    }
+//}
 
 allprojects {
     apply(plugin = "org.jetbrains.kotlin.jvm")
 
     repositories {
-        mavenCentral()
-        maven("https://papermc.io/repo/repository/maven-public/")
         mavenLocal()
+        mavenCentral()
+        maven(url = "https://papermc.io/repo/repository/maven-public/")
+        maven(url = "https://repo.dmulloy2.net/repository/public/")
     }
 
     dependencies {
         compileOnly(kotlin("stdlib"))
         compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.2")
-        compileOnly(rootProject.fileTree("dir" to "libs", "include" to "*.jar"))
+        compileOnly("com.comphenix.protocol:ProtocolLib:4.6.0")
+//        compileOnly(rootProject.fileTree("dir" to "libs", "include" to "*.jar"))
 
         implementation("org.mariuszgromada.math:MathParser.org-mXparser:4.4.2")
 
