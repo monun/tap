@@ -19,6 +19,7 @@ package com.github.monun.tap.event
 import com.github.monun.tap.event.EventTools.getRegistrationClass
 import com.google.common.collect.MapMaker
 import org.bukkit.entity.Entity
+import org.bukkit.entity.Player
 import org.bukkit.event.Event
 import org.bukkit.event.EventPriority
 import org.bukkit.event.HandlerList
@@ -39,7 +40,7 @@ class EntityEventManager @JvmOverloads constructor(private val plugin: Plugin, p
     }
 
     fun registerEvents(entity: Entity, listener: Listener): RegisteredEntityListener {
-        require(entity.isValid) { "Invalid entity: $entity" }
+        require(entity.isValid || (entity is Player && entity.isOnline)) { "Invalid entity: $entity" }
 
         val listenerStatement = createRegisteredListenerStatement(listener.javaClass)
         val eventEntity = entities.computeIfAbsent(entity) { EventEntity() }
