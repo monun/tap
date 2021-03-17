@@ -71,6 +71,22 @@ fun interface EntityProvider<T : Event> {
         }
     }
 
+    class EntityTarget {
+        class Target : EntityProvider<EntityTargetEvent> {
+            override fun getFrom(event: EntityTargetEvent): Entity? {
+                return event.target
+            }
+        }
+    }
+
+    class EntityTame {
+        class Owner : EntityProvider<EntityTameEvent> {
+            override fun getFrom(event: EntityTameEvent): Entity? {
+                return event.owner.takeIf { it is Entity } as Entity?
+            }
+        }
+    }
+
     class ProjectileLaunch {
         class Shooter : EntityProvider<ProjectileLaunchEvent> {
             override fun getFrom(event: ProjectileLaunchEvent): Entity? {
