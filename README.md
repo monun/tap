@@ -11,6 +11,7 @@
  * YamlConfiguration을 이용한 문자열 템플릿
  * 추가적인 인벤토리 함수
  * GitHub를 통한 업데이트 (BETA)
+ * Tick 기반 태스크 스케쥴러 (Ticker)
  
 ### Gradle
 ```groovy
