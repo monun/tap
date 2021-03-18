@@ -65,13 +65,10 @@ allprojects {
 
         implementation("org.mariuszgromada.math:MathParser.org-mXparser:4.4.2")
 
-        testImplementation("junit:junit:4.13")
-        testImplementation("org.mockito:mockito-core:3.3.3")
-        testImplementation("org.powermock:powermock-module-junit4:2.0.7")
-        testImplementation("org.powermock:powermock-api-mockito2:2.0.7")
-        testImplementation("org.slf4j:slf4j-api:1.7.25")
-        testImplementation("org.apache.logging.log4j:log4j-core:2.8.2")
-        testImplementation("org.apache.logging.log4j:log4j-slf4j-impl:2.8.2")
+        testImplementation("org.junit.jupiter:junit-jupiter-api:5.7.0")
+        testImplementation("org.junit.jupiter:junit-jupiter-engine:5.7.0")
+        testImplementation("org.mockito:mockito-core:3.6.28")
+        testImplementation("org.spigotmc:spigot:1.16.5-R0.1-SNAPSHOT")
     }
 
     tasks {
