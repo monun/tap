@@ -41,7 +41,7 @@ abstract class Ticker : Runnable {
 
     protected open fun TickerTask.calculateNextRun() = nextRun + period
 
-    fun runTask(runnable: Runnable, delay: Long) = registerTask(runnable, delay, TickerTask.NO_REPEATING)
+    fun runTask(runnable: Runnable, delay: Long = 0L) = registerTask(runnable, delay, TickerTask.NO_REPEATING)
 
     fun runTaskTimer(runnable: Runnable, delay: Long, period: Long) = registerTask(runnable, delay, max(1L, period))
 
