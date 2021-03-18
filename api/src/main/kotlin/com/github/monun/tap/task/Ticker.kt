@@ -20,21 +20,42 @@ package com.github.monun.tap.task
 import java.util.*
 import kotlin.math.max
 
+/**
+ * Tick 기반의 태스크 스케쥴러 (Tick + Timer = Ticker)
+ *
+ * @see TickerTask
+ */
 abstract class Ticker : Runnable {
     companion object {
+        /**
+         * 호출 횟수에 따라 tick이 증가하는 Ticker를 생성합니다.
+         */
         fun plank(): Ticker {
             return Plank()
         }
 
+        /**
+         * 시간에 따라 tick이 변화하는 Ticker를 생성합니다.
+         *
+         * 태스크는 시간 지연 관계없이 tick과 동기화되어 실행됩니다.
+         */
         fun precision(tick: Pair<() -> Long, Long> = System::nanoTime to 50L * 1000L * 1000L): Ticker {
             return Precision(tick.first, tick.second)
         }
 
+        /**
+         * 시간에 따라 tick이 변화하는 Ticker를 생성합니다.
+         *
+         * 태스크는 시간 지연에 따라 한번만 호출됩니다.
+         */
         fun flex(tick: Pair<() -> Long, Long> = System::nanoTime to 50L * 1000L * 1000L): Ticker {
             return Flex(tick.first, tick.second)
         }
     }
 
+    /**
+     * Ticker 내부에서 사용하는 tick입니다.
+     */
     abstract val currentTicks: Long
 
     protected val queue = PriorityQueue<TickerTask>()
@@ -43,8 +64,18 @@ abstract class Ticker : Runnable {
 
     protected open fun TickerTask.calculateNextRun() = nextRun + period
 
+    /**
+     * 지연 실행할 태스크를 등록합니다.
+     *
+     * 태스크는 한번만 호출된 이후 [TickerTask.isDone] 상태가 됩니다.
+     */
     fun runTask(runnable: Runnable, delay: Long = 0L) = registerTask(runnable, delay, TickerTask.NO_REPEATING)
 
+    /**
+     * 반복 실행할 태스크를 등록합니다.
+     *
+     * 태스크는 지연 이후에 period tick 마다 호출됩니다.
+     */
     fun runTaskTimer(runnable: Runnable, delay: Long, period: Long) = registerTask(runnable, delay, max(1L, period))
 
     private fun registerTask(runnable: Runnable, delay: Long, period: Long) = TickerTask(this, runnable).apply {
@@ -52,6 +83,9 @@ abstract class Ticker : Runnable {
         this.period = period
     }.also(queue::offer)
 
+    /**
+     * 모든 태스크를 실행합니다.
+     */
     override fun run() {
         val queue = queue
         while (queue.peek().let { it != null && it.nextRun <= currentTicks }) {
