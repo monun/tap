@@ -39,6 +39,8 @@ abstract class Ticker : Runnable {
 
     protected val queue = PriorityQueue<TickerTask>()
 
+    var removeDelay = 0xFF
+
     protected open fun TickerTask.calculateNextRun() = nextRun + period
 
     fun runTask(runnable: Runnable, delay: Long = 0L) = registerTask(runnable, delay, TickerTask.NO_REPEATING)

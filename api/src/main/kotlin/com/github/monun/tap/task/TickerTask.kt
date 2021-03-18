@@ -20,7 +20,7 @@ package com.github.monun.tap.task
 import com.github.monun.tap.ref.UpstreamReference
 
 class TickerTask internal constructor(
-    scheduler: Ticker,
+    ticker: Ticker,
     val runnable: Runnable
 ) : Comparable<TickerTask> {
     companion object {
@@ -30,9 +30,9 @@ class TickerTask internal constructor(
         internal const val DONE = -3L
     }
 
-    private val schedulerRef = UpstreamReference(scheduler)
+    private val schedulerRef = UpstreamReference(ticker)
 
-    val scheduler: Ticker
+    val ticker: Ticker
         get() = schedulerRef.get()
 
     internal var nextRun: Long = -1L
@@ -55,13 +55,13 @@ class TickerTask internal constructor(
 
     fun cancel() {
         if (!isScheduled) return
-
         period = CANCEL
 
-        // 실행까지 남은 틱이 255 초과면 대기열에서 즉시 제거
-        // 아닐경우 자연스럽게 제거
-        if (nextRun - scheduler.currentTicks > 0xFF)
-            scheduler.remove(this)
+        // 실행까지 남은 틱이 Ticker의 removeDelay 값보다 이상일때 즉시 제거
+        // 아닐경우 tick 흐름에 따라 자연스럽게 제거
+        val ticker = ticker
+        if (nextRun - ticker.currentTicks >= ticker.removeDelay)
+            ticker.remove(this)
     }
 
     override fun compareTo(other: TickerTask): Int {
