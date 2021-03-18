@@ -100,7 +100,8 @@ interface PacketSupport {
     fun relEntityMoveLook(
         entityId: Int,
         delta: Vector,
-        yaw: Float, pitch: Float,
+        yaw: Float,
+        pitch: Float,
         onGround: Boolean
     ): PacketContainer {
         return relEntityMoveLook(
