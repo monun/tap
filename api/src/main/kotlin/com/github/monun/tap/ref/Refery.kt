@@ -16,20 +16,21 @@
 
 package com.github.monun.tap.ref
 
-import org.bukkit.Bukkit
-import org.bukkit.entity.Player
 import java.lang.ref.Reference
-import java.lang.ref.WeakReference
 import kotlin.reflect.KProperty
 
 
-interface Refy<T> {
+interface Refery<T> {
     var value: T?
+
+    operator fun getValue(thisRef: Any, property: KProperty<*>): T? = value
+
+    operator fun setValue(thisRef: Any, property: KProperty<*>, value: T?) {
+        this.value = value
+    }
 }
 
-interface Weaky<T> : Refy<T>
-
-abstract class WeakyImpl<T>(initValue: T?, private val supplier: () -> T) : Refy<T> {
+internal abstract class ReferyImpl<T>(initValue: T?, private val supplier: () -> T) : Refery<T> {
     @Suppress("LeakingThis")
     private var ref: Reference<T> = refer(initValue)
 
@@ -40,16 +41,4 @@ abstract class WeakyImpl<T>(initValue: T?, private val supplier: () -> T) : Refy
         }
 
     internal abstract fun refer(value: T?): Reference<T>
-}
-
-private class WeakImpl<T>(initValue: T?, supplier: () -> T) : WeakyImpl<T>(initValue, supplier), Weaky<T> {
-    override fun refer(value: T?): Reference<T> = WeakReference(value)
-}
-
-fun <T> weaky(initValue: T? = null, supplier: () -> T): Weaky<T> = WeakImpl(initValue, supplier)
-
-operator fun <T> Weaky<T>.getValue(thisRef: Any, property: KProperty<*>): T? = value
-
-operator fun <T> Weaky<T>.setValue(thisRef: Any, property: KProperty<*>, value: T?) {
-    this.value = value
 }
