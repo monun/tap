@@ -16,6 +16,8 @@
 
 package com.github.monun.tap.ref
 
+import org.bukkit.Bukkit
+import org.bukkit.entity.Player
 import java.lang.ref.Reference
 import java.lang.ref.WeakReference
 import kotlin.reflect.KProperty
@@ -46,10 +48,8 @@ private class WeakImpl<T>(initValue: T?, supplier: () -> T) : WeakyImpl<T>(initV
 
 fun <T> weaky(initValue: T? = null, supplier: () -> T): Weaky<T> = WeakImpl(initValue, supplier)
 
-operator fun <T> Refy<T>.getValue(thisRef: Any, property: KProperty<*>): T? = value
+operator fun <T> Weaky<T>.getValue(thisRef: Any, property: KProperty<*>): T? = value
 
-operator fun <T> Refy<T>.setValue(thisRef: Any, property: KProperty<*>, value: T?) {
+operator fun <T> Weaky<T>.setValue(thisRef: Any, property: KProperty<*>, value: T?) {
     this.value = value
 }
-
-
