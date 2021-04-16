@@ -22,7 +22,7 @@ import java.util.regex.Pattern
 /**
  * [renderTemplates]
  */
-fun Collection<String>.renderTemplatesAll(config: ConfigurationSection): List<String> {
+fun Iterable<String>.renderTemplatesAll(config: ConfigurationSection): List<String> {
     val list = ArrayList<String>(count())
 
     for (s in this) {
