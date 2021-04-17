@@ -22,14 +22,8 @@ import java.util.regex.Pattern
 /**
  * [renderTemplates]
  */
-fun Iterable<String>.renderTemplatesAll(config: ConfigurationSection): List<String> {
-    val list = ArrayList<String>(count())
-
-    for (s in this) {
-        list += s.renderTemplates(config)
-    }
-
-    return list
+fun Iterable<String>.renderTemplatesAll(config: ConfigurationSection) = map {
+    it.renderTemplates(config)
 }
 
 /**
