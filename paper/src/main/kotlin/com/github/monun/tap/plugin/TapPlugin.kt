@@ -16,12 +16,6 @@
 
 package com.github.monun.tap.plugin
 
-import com.github.monun.tap.template.renderTemplates
-import com.github.monun.tap.template.renderTemplatesAll
-import net.kyori.adventure.text.Component
-import net.kyori.adventure.text.Component.text
-import net.kyori.adventure.text.ComponentBuilder
-import org.bukkit.configuration.file.YamlConfiguration
 import org.bukkit.plugin.java.JavaPlugin
 
 class TapPlugin : JavaPlugin()
