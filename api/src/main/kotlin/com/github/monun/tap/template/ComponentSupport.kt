@@ -29,3 +29,10 @@ fun TextComponent.Builder.renderTemplates(config: ConfigurationSection): TextCom
 
     return this
 }
+
+fun Iterable<TextComponent>.renderTemplatesAll(config: ConfigurationSection) = map {
+    it.toBuilder().renderTemplates(config).build()
+}
+
+fun Iterable<TextComponent.Builder>.renderTemplatesAll(config: ConfigurationSection) =
+    forEach { it.renderTemplates(config) }
