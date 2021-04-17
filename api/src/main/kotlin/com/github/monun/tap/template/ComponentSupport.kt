@@ -16,25 +16,16 @@
 
 package com.github.monun.tap.template
 
-import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.TextComponent
 import org.bukkit.configuration.ConfigurationSection
 
-/**
- * [String.renderTemplates]
- */
-fun Component.renderTemplates(
-    config: ConfigurationSection
-) {
-    if (this is TextComponent) {
-        content(content().renderTemplates(config))
+fun TextComponent.renderTemplates(config: ConfigurationSection) = toBuilder().renderTemplates(config).build()
+
+fun TextComponent.Builder.renderTemplates(config: ConfigurationSection): TextComponent.Builder {
+    applyDeep {
+        if (it is TextComponent.Builder)
+            it.content(it.content().renderTemplates(config))
     }
 
-    for (child in children()) {
-        child.renderTemplates(config)
-    }
-}
-
-fun Iterable<Component>.renderTemplatesAll(config: ConfigurationSection) = forEach { component ->
-    component.renderTemplates(config)
+    return this
 }
