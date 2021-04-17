@@ -16,12 +16,13 @@
 
 package com.github.monun.tap.template
 
+import net.kyori.adventure.text.BuildableComponent
+import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.ComponentBuilder
 import net.kyori.adventure.text.TextComponent
 import org.bukkit.configuration.ConfigurationSection
 
-fun TextComponent.renderTemplates(config: ConfigurationSection) = toBuilder().renderTemplates(config).build()
-
-fun TextComponent.Builder.renderTemplates(config: ConfigurationSection): TextComponent.Builder {
+fun <T : ComponentBuilder<*, *>> T.renderTemplates(config: ConfigurationSection): T {
     applyDeep {
         if (it is TextComponent.Builder)
             it.content(it.content().renderTemplates(config))
@@ -30,9 +31,19 @@ fun TextComponent.Builder.renderTemplates(config: ConfigurationSection): TextCom
     return this
 }
 
-fun Iterable<TextComponent>.renderTemplatesAll(config: ConfigurationSection) = map {
-    it.toBuilder().renderTemplates(config).build()
+@Suppress("UNCHECKED_CAST")
+fun <T : Component> T.renderTemplates(config: ConfigurationSection) = if (this is BuildableComponent<*, *>) {
+    toBuilder().renderTemplates(config).build() as T
+} else {
+    this
 }
 
-fun Iterable<TextComponent.Builder>.renderTemplatesAll(config: ConfigurationSection) =
+
+@JvmName("renderComponentBuilderTemplatesAll")
+fun <T : ComponentBuilder<*, *>> Iterable<T>.renderTemplatesAll(config: ConfigurationSection) =
     forEach { it.renderTemplates(config) }
+
+@JvmName("renderComponentTemplatesAll")
+fun <T : Component> Iterable<T>.renderTemplatesAll(config: ConfigurationSection): List<T> = map {
+    it.renderTemplates(config)
+}
