@@ -129,12 +129,6 @@ tasks {
             from(subproject.sourceSets["main"].allSource)
         }
     }
-    create<Copy>("copyToServer") {
-        from(shadowJar)
-        var dest = file(".server/plugins")
-        if (File(dest, shadowJar.get().archiveFileName.get()).exists()) dest = File(dest, "update")
-        into(dest)
-    }
     shadowJar {
         archiveClassifier.set("")
         exclude("LICENSE.txt") // mpl
@@ -149,6 +143,13 @@ tasks {
             }
         }
         relocate("org.mariuszgromada.math", "${rootProject.group}.${rootProject.name}.org.mariuszgromada.math")
+    }
+    create<Copy>("copyToServer") {
+        from(shadowJar)
+        var dest = File(rootDir, ".server/plugins")
+        // if plugin.jar exists in plugins change dest to plugins/update
+        if (File(dest, "Tap.jar").exists()) dest = File(dest, "update")
+        into(dest)
     }
     create<DefaultTask>("setupWorkspace") {
         doLast {
