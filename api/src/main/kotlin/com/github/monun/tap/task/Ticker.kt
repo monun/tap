@@ -107,6 +107,13 @@ abstract class Ticker : Runnable {
         queue.remove(task)
     }
 
+    fun cancelAll() {
+        queue.apply {
+            forEach { it.period = TickerTask.CANCEL }
+            clear()
+        }
+    }
+
     private class Plank : Ticker() {
         override var currentTicks = 0L
 
