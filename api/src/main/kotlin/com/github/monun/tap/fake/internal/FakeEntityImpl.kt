@@ -301,7 +301,6 @@ class FakeEntityImpl internal constructor(
 
         effects.let { effects ->
             while (effects.isNotEmpty()) {
-                println(trackers)
                 trackers.sendServerPacketAll(Packet.entityStatus(bukkitEntity.entityId, effects.remove()))
             }
         }
