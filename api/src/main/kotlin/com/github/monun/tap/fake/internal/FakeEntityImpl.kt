@@ -63,6 +63,8 @@ class FakeEntityImpl internal constructor(
     override val passengers: List<FakeEntity>
         get() = ImmutableList.copyOf(_passengers)
 
+    private val effects = LinkedList<Byte>()
+
     private var updateTrackers = true
     private var updateLocation = false
     private var updateTeleport = false
@@ -296,6 +298,13 @@ class FakeEntityImpl internal constructor(
                 computeTracker(queue.remove())
             }
         }
+
+        effects.let { effects ->
+            while (effects.isNotEmpty()) {
+                println(trackers)
+                trackers.sendServerPacketAll(Packet.entityStatus(bukkitEntity.entityId, effects.remove()))
+            }
+        }
     }
 
     private enum class MoveResult {
@@ -466,6 +475,13 @@ class FakeEntityImpl internal constructor(
             updateEquipment = true
             enqueue()
         }
+    }
+
+    override fun playEffect(data: Byte) {
+        if (dead) return
+
+        effects += data
+        enqueue()
     }
 
     override fun excludeTracker(player: Player) {

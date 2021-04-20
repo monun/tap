@@ -28,7 +28,6 @@ import org.bukkit.entity.FallingBlock
  * @author Nemo
  */
 interface FakeSupport {
-
     fun getNetworkId(entity: Entity): Int
 
     fun <T : Entity> createEntity(entityClass: Class<out Entity>, world: World): T?

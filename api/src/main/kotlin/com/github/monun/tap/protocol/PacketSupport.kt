@@ -16,6 +16,7 @@
 
 package com.github.monun.tap.protocol
 
+import com.comphenix.protocol.PacketType
 import com.comphenix.protocol.events.PacketContainer
 import com.comphenix.protocol.wrappers.WrappedDataWatcher
 import org.bukkit.FireworkEffect
@@ -113,6 +114,13 @@ interface PacketSupport {
             pitch,
             onGround
         )
+    }
+
+    fun entityStatus(entityId: Int, data: Byte) = PacketContainer(PacketType.Play.Server.ENTITY_STATUS).apply {
+        integers
+            .write(0, entityId)
+        bytes
+            .write(0, data)
     }
 
     fun mount(entityId: Int, mountEntityIds: IntArray): PacketContainer

@@ -16,6 +16,7 @@
 
 package com.github.monun.tap.fake
 
+import org.bukkit.EntityEffect
 import org.bukkit.Location
 import org.bukkit.entity.Entity
 import org.bukkit.entity.Player
@@ -54,6 +55,11 @@ interface FakeEntity {
     fun <T : Entity> updateMetadata(applier: T.() -> Unit)
 
     fun updateEquipment(applier: EntityEquipment.() -> Unit)
+
+    fun playEffect(data: Byte)
+
+    @Suppress("DEPRECATION")
+    fun playEffect(type: EntityEffect) = playEffect(type.data)
 
     fun excludeTracker(player: Player)
 
