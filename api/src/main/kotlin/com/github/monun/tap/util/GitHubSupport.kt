@@ -18,6 +18,7 @@ package com.github.monun.tap.util
 
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.bukkit.plugin.java.JavaPlugin
@@ -160,6 +161,7 @@ private val JavaPlugin.updateFile: File
  * @see[String.compareVersion]
  *
  */
+@DelicateCoroutinesApi
 fun JavaPlugin.updateFromGitHubMagically(
     owner: String,
     project: String,
@@ -167,6 +169,7 @@ fun JavaPlugin.updateFromGitHubMagically(
     reciever: ((String) -> Unit)? = null
 ) {
     reciever?.invoke("Attempt to update.")
+
     GlobalScope.launch {
         GitHubSupport.downloadLatestRelease(updateFile, owner, project, description.version, asset) {
             onSuccess { url ->
