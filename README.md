@@ -12,6 +12,12 @@
  * 추가적인 인벤토리 함수
  * GitHub를 통한 업데이트 (BETA)
  * Tick 기반 태스크 스케쥴러 (Ticker)
+
+### 환경
+* JAVA 16
+* Kotlin 1.5.10
+* ProtocolLib 4.6.0
+* Paper 1.13.2 - 1.16.5
  
 ### Gradle
 ```groovy
