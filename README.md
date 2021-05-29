@@ -14,8 +14,8 @@
  * Tick 기반 태스크 스케쥴러 (Ticker)
 
 ### 환경
-* JAVA 16
-* Kotlin 1.5.10
+* JDK 11
+* Kotlin 1.4.32
 * ProtocolLib 4.6.0
 * Paper 1.13.2 - 1.16.5
  

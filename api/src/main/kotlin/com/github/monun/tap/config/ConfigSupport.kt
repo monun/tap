@@ -282,7 +282,7 @@ private fun String.toConfigKey(): String {
         val c = builder[i]
 
         if (c.isUpperCase()) {
-            builder[i] = c.lowercaseChar()
+            builder[i] = c.toLowerCase()
 
             if (i > 0) {
                 builder.insert(i, '-')

@@ -17,35 +17,36 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.io.OutputStream
 
-
 plugins {
-    kotlin("jvm") version "1.5.10"
-    id("com.github.johnrengelman.shadow") version "7.0.0"
+    kotlin("jvm") version "1.4.32"
+    id("com.github.johnrengelman.shadow") version "5.2.0"
     `maven-publish`
 }
 
+/*
 // ProtocolLib 파일 다운로드 링크 (저장소 응답 없을시 사용)
-//downloadLibrary(
-//    "https://ci.dmulloy2.net/job/ProtocolLib/lastSuccessfulBuild/artifact/target/ProtocolLib.jar",
-//    "ProtocolLib.jar"
-//)
-//
-//fun downloadLibrary(url: String, fileName: String) {
-//    val parent = File(projectDir, "libs").also {
-//        it.mkdirs()
-//    }
-//    val jar = File(parent, fileName)
-//
-//    uri(url).toURL().openConnection().run {
-//        val lastModified = lastModified
-//        if (lastModified != jar.lastModified()) {
-//            inputStream.use { stream ->
-//                jar.writeBytes(stream.readBytes())
-//                jar.setLastModified(lastModified)
-//            }
-//        }
-//    }
-//}
+downloadLibrary(
+    "https://ci.dmulloy2.net/job/ProtocolLib/lastSuccessfulBuild/artifact/target/ProtocolLib.jar",
+    "ProtocolLib.jar"
+)
+
+fun downloadLibrary(url: String, fileName: String) {
+    val parent = File(projectDir, "libs").also {
+        it.mkdirs()
+    }
+    val jar = File(parent, fileName)
+
+    uri(url).toURL().openConnection().run {
+        val lastModified = lastModified
+        if (lastModified != jar.lastModified()) {
+            inputStream.use { stream ->
+                jar.writeBytes(stream.readBytes())
+                jar.setLastModified(lastModified)
+            }
+        }
+    }
+}
+*/
 
 allprojects {
     apply(plugin = "org.jetbrains.kotlin.jvm")
@@ -59,7 +60,7 @@ allprojects {
 
     dependencies {
         compileOnly(kotlin("stdlib"))
-        compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.0")
+        compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.3")
         compileOnly("com.comphenix.protocol:ProtocolLib:4.6.0")
 //        compileOnly(rootProject.fileTree("dir" to "libs", "include" to "*.jar"))
 
@@ -73,11 +74,11 @@ allprojects {
 
     tasks {
         withType<JavaCompile> {
-            sourceCompatibility = "16"
-            targetCompatibility = "16"
+            sourceCompatibility = "11"
+            targetCompatibility = "11"
         }
         withType<KotlinCompile> {
-            kotlinOptions.jvmTarget = "16"
+            kotlinOptions.jvmTarget = "11"
         }
         test {
             useJUnitPlatform()

@@ -28,7 +28,7 @@ import java.util.*
  */
 object AlphanumComparator : Comparator<String?> {
     private fun isDigit(ch: Char): Boolean {
-        return ch.code in 48..57
+        return ch.toInt() in 48..57
     }
 
     /** Length of string is passed in for improved efficiency (only need to calculate it once)  */

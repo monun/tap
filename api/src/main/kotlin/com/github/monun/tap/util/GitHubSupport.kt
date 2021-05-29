@@ -18,7 +18,6 @@ package com.github.monun.tap.util
 
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
-import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.bukkit.plugin.java.JavaPlugin
@@ -161,7 +160,7 @@ private val JavaPlugin.updateFile: File
  * @see[String.compareVersion]
  *
  */
-@DelicateCoroutinesApi
+
 fun JavaPlugin.updateFromGitHubMagically(
     owner: String,
     project: String,
