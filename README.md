@@ -43,4 +43,4 @@ dependencies {
 <br>
 
 
-[![Jetbrains](https://i.ibb.co/fp0CyZ7/jetbrains.png | )](https://jb.gg/OpenSource)
+[![Jetbrains](https://i.ibb.co/fp0CyZ7/jetbrains.png|width=100)](https://jb.gg/OpenSource)
