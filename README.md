@@ -42,5 +42,4 @@ dependencies {
 <br>
 <br>
 
-
-[![Jetbrains](https://i.ibb.co/fp0CyZ7/jetbrains.png =100x100)](https://jb.gg/OpenSource)
+<img src="https://i.ibb.co/fp0CyZ7/jetbrains.png" width="100">(https://jb.gg/OpenSource)
