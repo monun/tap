@@ -42,4 +42,6 @@ dependencies {
 <br>
 <br>
 
-<center><a href="https://jb.gg/OpenSource" target="_blank"><img src="https://i.ibb.co/fp0CyZ7/jetbrains.png" width="100" alt="JetBrains"></a></center>
+<p align="center">
+ <a href="https://jb.gg/OpenSource" target="_blank"><img src="https://i.ibb.co/fp0CyZ7/jetbrains.png" width="100" alt="JetBrains"></a>
+</p>
