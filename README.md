@@ -42,4 +42,4 @@ dependencies {
 <br>
 <br>
 
-<img src="https://i.ibb.co/fp0CyZ7/jetbrains.png" width="100">(https://jb.gg/OpenSource)
+<img src="https://i.ibb.co/fp0CyZ7/jetbrains.png" width="100" alt="JetBrains">(https://jb.gg/OpenSource)
