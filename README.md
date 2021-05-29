@@ -43,5 +43,5 @@ dependencies {
 <br>
 
 <p align="center">
- <a href="https://jb.gg/OpenSource" target="_blank"><img src="https://i.ibb.co/fp0CyZ7/jetbrains.png" width="300" alt="JetBrains"></a>
+ <a href="https://jb.gg/OpenSource" target="_blank"><img src="https://i.ibb.co/fp0CyZ7/jetbrains.png" width="250" alt="JetBrains"></a>
 </p>
