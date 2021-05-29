@@ -19,8 +19,8 @@ import java.io.OutputStream
 
 
 plugins {
-    kotlin("jvm") version "1.5.0"
-    id("com.github.johnrengelman.shadow") version "5.2.0"
+    kotlin("jvm") version "1.5.10"
+    id("com.github.johnrengelman.shadow") version "7.0.0"
     `maven-publish`
 }
 
@@ -59,7 +59,7 @@ allprojects {
 
     dependencies {
         compileOnly(kotlin("stdlib"))
-        compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.0-RC")
+        compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.0")
         compileOnly("com.comphenix.protocol:ProtocolLib:4.6.0")
 //        compileOnly(rootProject.fileTree("dir" to "libs", "include" to "*.jar"))
 
@@ -73,11 +73,11 @@ allprojects {
 
     tasks {
         withType<JavaCompile> {
-            sourceCompatibility = "11"
-            targetCompatibility = "11"
+            sourceCompatibility = "16"
+            targetCompatibility = "16"
         }
         withType<KotlinCompile> {
-            kotlinOptions.jvmTarget = "11"
+            kotlinOptions.jvmTarget = "16"
         }
         test {
             useJUnitPlatform()
