@@ -15,6 +15,7 @@
  */
 
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import java.io.OutputStream
 
 plugins {
@@ -131,22 +132,21 @@ tasks {
         }
     }
     shadowJar {
-        archiveClassifier.set("")
+        archiveClassifier.set("") // for publish
         exclude("LICENSE.txt") // mpl
-        gradle.taskGraph.whenReady {
-            if (hasTask(":publishTapPublicationToMavenLocal")) { // maven publish
-                dependencies {
-                    exclude(project(":paper"))
-                }
-            } else {
-                archiveVersion.set("")
-                archiveBaseName.set(project(":paper").property("pluginName").toString())
-            }
-        }
+        dependencies { exclude(project(":paper")) }
         relocate("org.mariuszgromada.math", "${rootProject.group}.${rootProject.name}.org.mariuszgromada.math")
     }
+    create<ShadowJar>("paperTestJar") {
+        archiveBaseName.set("Tap")
+        archiveVersion.set("") // For bukkit plugin update
+        archiveClassifier.set("TEST")
+        from(sourceSets["main"].output)
+
+        configurations = listOf(project.configurations.implementation.get().apply { isCanBeResolved = true })
+    }
     create<Copy>("copyToServer") {
-        from(shadowJar)
+        from(named("paperTestJar"))
         var dest = File(rootDir, ".server/plugins")
         // if plugin.jar exists in plugins change dest to plugins/update
         if (File(dest, "Tap.jar").exists()) dest = File(dest, "update")
