@@ -1,5 +1,10 @@
 #!/bin/sh
 
+curl -s "https://get.sdkman.io" | bash
+source "$HOME/.sdkman/bin/sdkman-init.sh"
+sdk install java 16.0.1-zulu
+sdk use java 16.0.1-zulu
+
 ./gradlew clean copyToServer -Prelocate=false
 
 server=paper
