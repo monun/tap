@@ -3,7 +3,7 @@ jdk: openjdk8
 branches:
   only:
     - master
-    - develop
+    - legacy-jdk8
 
 before_install:
   - chmod +x ./gradlew
