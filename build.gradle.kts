@@ -68,7 +68,7 @@ allprojects {
 
     dependencies {
         compileOnly(kotlin("stdlib"))
-        compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.3")
+        compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.0")
         compileOnly("com.comphenix.protocol:ProtocolLib:4.6.0")
 //        compileOnly(rootProject.fileTree("dir" to "libs", "include" to "*.jar"))
 
