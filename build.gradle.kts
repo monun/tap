@@ -25,6 +25,12 @@ plugins {
     `maven-publish`
 }
 
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(8))
+    }
+}
+
 /*
 // ProtocolLib 파일 다운로드 링크 (저장소 응답 없을시 사용)
 downloadLibrary(
@@ -76,7 +82,6 @@ allprojects {
 
     tasks {
         withType<JavaCompile> {
-            sourceCompatibility = "1.8"
             targetCompatibility = "1.8"
         }
         withType<KotlinCompile> {
