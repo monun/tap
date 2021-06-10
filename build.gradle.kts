@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import java.io.IOException
 import java.io.OutputStream
 
 plugins {
     kotlin("jvm") version "1.5.10"
-    id("com.github.johnrengelman.shadow") version "7.0.0"
+    id("com.github.johnrengelman.shadow") version "5.2.0"
     `maven-publish`
 }
 
@@ -75,11 +76,11 @@ allprojects {
 
     tasks {
         withType<JavaCompile> {
-            sourceCompatibility = "16"
-            targetCompatibility = "16"
+            sourceCompatibility = "1.8"
+            targetCompatibility = "1.8"
         }
         withType<KotlinCompile> {
-            kotlinOptions.jvmTarget = "16"
+            kotlinOptions.jvmTarget = "1.8"
         }
         test {
             useJUnitPlatform()
@@ -137,20 +138,25 @@ tasks {
         dependencies { exclude(project(":paper")) }
         relocate("org.mariuszgromada.math", "${rootProject.group}.${rootProject.name}.org.mariuszgromada.math")
     }
-    create<ShadowJar>("paperTestJar") {
+    create<ShadowJar>("debugJar") {
         archiveBaseName.set("Tap")
         archiveVersion.set("") // For bukkit plugin update
-        archiveClassifier.set("TEST")
+        archiveClassifier.set("DEBUG")
         from(sourceSets["main"].output)
-
         configurations = listOf(project.configurations.implementation.get().apply { isCanBeResolved = true })
-    }
-    create<Copy>("copyToServer") {
-        from(named("paperTestJar"))
+
         var dest = File(rootDir, ".server/plugins")
-        // if plugin.jar exists in plugins change dest to plugins/update
-        if (File(dest, "Tap.jar").exists()) dest = File(dest, "update")
-        into(dest)
+        val pluginName = archiveFileName.get()
+        val pluginFile = File(dest, pluginName)
+        if (pluginFile.exists()) dest = File(dest, "update")
+
+        doLast {
+//            dest.mkdirs()
+            copy {
+                from(archiveFile)
+                into(dest)
+            }
+        }
     }
     create<DefaultTask>("setupWorkspace") {
         doLast {
@@ -186,8 +192,8 @@ tasks {
                         main = "-jar"
                         args = listOf("./${buildtools.name}", "--rev", v)
                         // Silent
-                        standardOutput = OutputStream.nullOutputStream()
-                        errorOutput = OutputStream.nullOutputStream()
+                        standardOutput = nullOutputStream()
+                        errorOutput = nullOutputStream()
                     }
                 }
             }.onFailure {
@@ -214,6 +220,31 @@ publishing {
         create<MavenPublication>("Tap") {
             project.shadow.component(this)
             artifact(tasks["sourcesJar"])
+        }
+    }
+}
+
+fun nullOutputStream(): OutputStream {
+    return object : OutputStream() {
+        @Volatile
+        private var closed = false
+
+        private fun ensureOpen() {
+            if (closed) {
+                throw IOException("Stream closed")
+            }
+        }
+
+        override fun write(b: Int) {
+            ensureOpen()
+        }
+
+        override fun write(b: ByteArray, off: Int, len: Int) {
+            ensureOpen()
+        }
+
+        override fun close() {
+            closed = true
         }
     }
 }

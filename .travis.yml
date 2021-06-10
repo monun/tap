@@ -1,16 +1,11 @@
 language: java
-
+jdk: openjdk8
 branches:
   only:
     - master
     - develop
 
 before_install:
-  - curl -s "https://get.sdkman.io" | bash
-  - source "$HOME/.sdkman/bin/sdkman-init.sh"
-  - sdk install java 8.0.292-zulu
-  - sdk install java 16.0.1-zulu
-  - sdk use java 16.0.1-zulu
   - chmod +x ./gradlew
 
 install:
