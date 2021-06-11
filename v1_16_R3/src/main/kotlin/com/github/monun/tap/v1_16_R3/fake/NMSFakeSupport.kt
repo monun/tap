@@ -78,7 +78,7 @@ class NMSFakeSupport : FakeSupport {
     override fun getMountedYOffset(entity: Entity): Double {
         entity as CraftEntity
 
-        return entity.handle.bb()
+        return entity.handle.bc()
     }
 
     override fun getYOffset(entity: Entity): Double {
