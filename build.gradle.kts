@@ -189,7 +189,7 @@ tasks {
                     javaexec {
                         workingDir(buildtoolsDir)
                         main = "-jar"
-                        args = listOf("./${buildtools.name}", "--rev", v)//, "-Xmx16384M", "-Xms16384M", "-Xmn16384m")
+                        args = listOf("./${buildtools.name}", "--rev", v, "--disable-java-check")
                         // Silent
                         standardOutput = nullOutputStream()
                         errorOutput = nullOutputStream()
