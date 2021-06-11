@@ -17,6 +17,7 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import java.io.IOException
 import java.io.OutputStream
+import org.apache.commons.io.output.NullOutputStream
 
 plugins {
     kotlin("jvm") version "1.5.10"
@@ -191,8 +192,8 @@ tasks {
                         main = "-jar"
                         args = listOf("./${buildtools.name}", "--rev", v, "--disable-java-check")
                         // Silent
-                        standardOutput = nullOutputStream()
-                        errorOutput = nullOutputStream()
+                        standardOutput = NullOutputStream.NULL_OUTPUT_STREAM
+                        errorOutput = NullOutputStream.NULL_OUTPUT_STREAM
                     }
                 }
             }.onFailure {
@@ -219,31 +220,6 @@ publishing {
         create<MavenPublication>("Tap") {
             project.shadow.component(this)
             artifact(tasks["sourcesJar"])
-        }
-    }
-}
-
-fun nullOutputStream(): OutputStream {
-    return object : OutputStream() {
-        @Volatile
-        private var closed = false
-
-        private fun ensureOpen() {
-            if (closed) {
-                throw IOException("Stream closed")
-            }
-        }
-
-        override fun write(b: Int) {
-            ensureOpen()
-        }
-
-        override fun write(b: ByteArray, off: Int, len: Int) {
-            ensureOpen()
-        }
-
-        override fun close() {
-            closed = true
         }
     }
 }
