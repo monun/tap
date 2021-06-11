@@ -3,7 +3,7 @@
 ./gradlew clean debugJar
 
 server=paper
-version=1.16.5
+version=1.17
 plugins=(
     'https://github.com/monun/kotlin-plugin/releases/latest/download/Kotlin-1.5.10.jar'
     'https://ci.dmulloy2.net/job/ProtocolLib/lastSuccessfulBuild/artifact/target/ProtocolLib.jar'
