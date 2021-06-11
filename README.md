@@ -17,7 +17,7 @@
 * JDK 8
 * Kotlin 1.5.10
 * ProtocolLib 4.6.0
-* Paper 1.13.2 - 1.16.5
+* Paper 1.13.2 - 1.7
  
 ### Gradle
 ```groovy
