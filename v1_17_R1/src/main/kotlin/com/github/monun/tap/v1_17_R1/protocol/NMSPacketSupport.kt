@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-package com.github.monun.tap.v1_13_R2.protocol
+package com.github.monun.tap.v1_17_R1.protocol
 
 import com.comphenix.protocol.PacketType
 import com.comphenix.protocol.events.PacketContainer
 import com.comphenix.protocol.wrappers.EnumWrappers
+import com.comphenix.protocol.wrappers.Pair
 import com.comphenix.protocol.wrappers.WrappedDataWatcher
 import com.github.monun.tap.fake.createFakeEntity
 import com.github.monun.tap.protocol.PacketSupport
@@ -31,7 +32,7 @@ import org.bukkit.entity.LivingEntity
 import org.bukkit.inventory.EquipmentSlot
 import org.bukkit.inventory.ItemStack
 import org.bukkit.util.Vector
-import java.util.UUID
+import java.util.*
 
 class NMSPacketSupport : PacketSupport {
     override fun spawnEntity(
@@ -98,41 +99,34 @@ class NMSPacketSupport : PacketSupport {
         }
     }
 
-    override fun entityEquipment(entityId: Int, slot: EquipmentSlot, item: ItemStack): PacketContainer {
+    override fun entityEquipment(
+        entityId: Int,
+        slot: EquipmentSlot,
+        item: ItemStack
+    ): PacketContainer {
         return PacketContainer(PacketType.Play.Server.ENTITY_EQUIPMENT).apply {
             integers
                 .write(0, entityId)
-            itemSlots
-                .write(0, slot.convertToItemSlot())
-            itemModifier
-                .write(0, item)
+            slotStackPairLists
+                .write(0, Collections.singletonList(Pair(slot.convertToItemSlot(), item)))
         }
     }
 
     override fun entityEquipment(living: LivingEntity): List<PacketContainer> {
-        val list = arrayListOf<PacketContainer>()
+        val list = arrayListOf<Pair<EnumWrappers.ItemSlot, ItemStack>>()
 
         for (slot in EquipmentSlot.values()) {
-            living.equipment?.run {
-                list += PacketContainer(PacketType.Play.Server.ENTITY_EQUIPMENT).apply {
-                    integers
-                        .write(0, living.entityId)
-                    itemSlots
-                        .write(0, slot.convertToItemSlot())
-                    itemModifier
-                        .write(0, when (slot) {
-                            EquipmentSlot.HAND -> itemInMainHand
-                            EquipmentSlot.OFF_HAND -> itemInOffHand
-                            EquipmentSlot.FEET -> boots
-                            EquipmentSlot.LEGS -> leggings
-                            EquipmentSlot.CHEST -> chestplate
-                            EquipmentSlot.HEAD -> helmet
-                        }?: ItemStack(Material.AIR))
-                }
-            }
+            list.add(Pair(slot.convertToItemSlot(), living.equipment?.getItem(slot) ?: ItemStack(Material.AIR)))
         }
 
-        return list
+        return Collections.singletonList(
+            PacketContainer(PacketType.Play.Server.ENTITY_EQUIPMENT).apply {
+                integers
+                    .write(0, living.entityId)
+                slotStackPairLists
+                    .write(0, list)
+            }
+        )
     }
 
     override fun entityTeleport(
@@ -169,9 +163,10 @@ class NMSPacketSupport : PacketSupport {
         return PacketContainer(PacketType.Play.Server.REL_ENTITY_MOVE).apply {
             integers
                 .write(0, entityId)
-                .write(1, deltaX.toInt())
-                .write(2, deltaY.toInt())
-                .write(3, deltaZ.toInt())
+            shorts
+                .write(0, deltaX)
+                .write(1, deltaY)
+                .write(2, deltaZ)
             booleans
                 .write(0, onGround)
         }
@@ -189,9 +184,10 @@ class NMSPacketSupport : PacketSupport {
         return PacketContainer(PacketType.Play.Server.REL_ENTITY_MOVE_LOOK).apply {
             integers
                 .write(0, entityId)
-                .write(1, deltaX.toInt())
-                .write(2, deltaY.toInt())
-                .write(3, deltaZ.toInt())
+            shorts
+                .write(0, deltaX)
+                .write(1, deltaY)
+                .write(2, deltaZ)
             bytes
                 .write(0, (yaw * 256.0F / 360.0F).toInt().toByte())
                 .write(1, (pitch * 256.0F / 360.0F).toInt().toByte())
