@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-package com.github.monun.tap.v1_16_R3.fake
+package com.github.monun.tap.v1_17_R1.fake
 
 import com.github.monun.tap.fake.FakeSupport
-import net.minecraft.server.v1_16_R3.EntityFallingBlock
-import net.minecraft.server.v1_16_R3.IRegistry
+import net.minecraft.core.IRegistry
+import net.minecraft.world.entity.item.EntityFallingBlock
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.World
 import org.bukkit.block.data.BlockData
-import org.bukkit.craftbukkit.v1_16_R3.CraftWorld
-import org.bukkit.craftbukkit.v1_16_R3.block.data.CraftBlockData
-import org.bukkit.craftbukkit.v1_16_R3.entity.CraftEntity
+import org.bukkit.craftbukkit.v1_17_R1.CraftWorld
+import org.bukkit.craftbukkit.v1_17_R1.block.data.CraftBlockData
+import org.bukkit.craftbukkit.v1_17_R1.entity.CraftEntity
 import org.bukkit.entity.Entity
 import org.bukkit.entity.FallingBlock
 
@@ -37,7 +37,7 @@ class NMSFakeSupport : FakeSupport {
     override fun getNetworkId(entity: Entity): Int {
         entity as CraftEntity
 
-        return IRegistry.ENTITY_TYPE.a(entity.handle.entityType)
+        return IRegistry.Y.getId(entity.handle.entityType)
     }
 
     @Suppress("UNCHECKED_CAST")
@@ -70,7 +70,7 @@ class NMSFakeSupport : FakeSupport {
         val nmsEntity = entity.handle
 
         loc.run {
-            nmsEntity.world = (world as CraftWorld).handle
+            nmsEntity.t = (world as CraftWorld).handle
             nmsEntity.setPositionRotation(x, y, z, yaw, pitch)
         }
     }
@@ -78,19 +78,19 @@ class NMSFakeSupport : FakeSupport {
     override fun getMountedYOffset(entity: Entity): Double {
         entity as CraftEntity
 
-        return entity.handle.bc()
+        return entity.handle.bl()
     }
 
     override fun getYOffset(entity: Entity): Double {
         entity as CraftEntity
 
-        return entity.handle.bb()
+        return entity.handle.bk()
     }
 
     override fun createSpawnPacket(entity: Entity): Any {
         entity as CraftEntity
 
-        return entity.handle.P()
+        return entity.handle.packet
     }
 
     override fun createFallingBlock(blockData: BlockData): FallingBlock {
@@ -102,7 +102,7 @@ class NMSFakeSupport : FakeSupport {
                 0.0,
                 (blockData as CraftBlockData).state
             )
-        entity.ticksLived = 1
+        entity.R = 1
 
         return entity.bukkitEntity as FallingBlock
     }

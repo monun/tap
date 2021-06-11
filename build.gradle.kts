@@ -159,6 +159,7 @@ tasks {
     create<DefaultTask>("setupWorkspace") {
         doLast {
             val versions = arrayOf(
+                "1.17",
                 "1.16.5",
                 "1.16.3",
                 "1.16.1",
@@ -188,7 +189,7 @@ tasks {
                     javaexec {
                         workingDir(buildtoolsDir)
                         main = "-jar"
-                        args = listOf("./${buildtools.name}", "--rev", v)
+                        args = listOf("./${buildtools.name}", "--rev", v, "--disable-java-check")
                         // Silent
                         standardOutput = nullOutputStream()
                         errorOutput = nullOutputStream()
