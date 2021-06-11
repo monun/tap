@@ -31,7 +31,7 @@ import org.bukkit.entity.LivingEntity
 import org.bukkit.inventory.EquipmentSlot
 import org.bukkit.inventory.ItemStack
 import org.bukkit.util.Vector
-import java.util.UUID
+import java.util.*
 
 class NMSPacketSupport : PacketSupport {
     override fun spawnEntity(
