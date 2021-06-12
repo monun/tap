@@ -60,10 +60,11 @@ allprojects {
     apply(plugin = "org.jetbrains.kotlin.jvm")
 
     repositories {
-        mavenLocal()
         mavenCentral()
+        maven(url = "https://oss.sonatype.org/content/repositories/snapshots/")
         maven(url = "https://papermc.io/repo/repository/maven-public/")
         maven(url = "https://repo.dmulloy2.net/repository/public/")
+        mavenLocal()
     }
 
     dependencies {
