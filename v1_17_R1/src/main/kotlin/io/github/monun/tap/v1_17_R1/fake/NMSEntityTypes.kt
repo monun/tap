@@ -16,8 +16,8 @@
 
 package io.github.monun.tap.v1_17_R1.fake
 
-import net.minecraft.core.IRegistry
-import net.minecraft.world.entity.EntityTypes
+import net.minecraft.core.Registry
+import net.minecraft.world.entity.EntityType
 import org.bukkit.Bukkit
 import org.bukkit.craftbukkit.v1_17_R1.CraftServer
 import java.util.*
@@ -28,13 +28,13 @@ import org.bukkit.entity.Entity as BukkitEntity
  */
 internal object NMSEntityTypes {
 
-    private val ENTITIES: MutableMap<Class<out BukkitEntity>, EntityTypes<*>> = HashMap()
+    private val ENTITIES: MutableMap<Class<out BukkitEntity>, EntityType<*>> = HashMap()
 
     init {
-        val world = (Bukkit.getServer() as CraftServer).server.worlds.first()
+        val world = (Bukkit.getServer() as CraftServer).server.allLevels.first()
 
-        IRegistry.Y.forEach { type ->
-            type.a(world)?.let { entity ->
+        Registry.ENTITY_TYPE.forEach { type ->
+            type.create(world)?.let { entity ->
                 val bukkitClass = entity.bukkitEntity.javaClass
                 val interfaces = bukkitClass.interfaces
 
@@ -49,7 +49,7 @@ internal object NMSEntityTypes {
         }
     }
 
-    fun findType(bukkitClass: Class<out BukkitEntity>): EntityTypes<*>? {
+    fun findType(bukkitClass: Class<out BukkitEntity>): EntityType<*>? {
         return ENTITIES[bukkitClass]
     }
 
