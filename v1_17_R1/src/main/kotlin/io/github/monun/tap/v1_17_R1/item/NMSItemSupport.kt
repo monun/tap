@@ -17,9 +17,9 @@
 package io.github.monun.tap.v1_17_R1.item
 
 import io.github.monun.tap.item.ItemSupport
-import net.minecraft.nbt.NBTTagCompound
+import net.minecraft.nbt.CompoundTag
 import net.minecraft.world.damagesource.DamageSource
-import net.minecraft.world.entity.player.PlayerInventory
+import net.minecraft.world.entity.player.Inventory
 import net.minecraft.world.item.ItemStack
 import org.bukkit.craftbukkit.v1_17_R1.CraftEquipmentSlot
 import org.bukkit.craftbukkit.v1_17_R1.entity.CraftPlayer
@@ -32,13 +32,13 @@ import org.bukkit.inventory.PlayerInventory as BukkitPlayerInventory
 class NMSItemSupport : ItemSupport {
     override fun saveToJsonString(item: BukkitItemStack): String {
         val nmsItem = CraftItemStack.asNMSCopy(item)
-        return nmsItem.save(NBTTagCompound()).toString()
+        return nmsItem.save(CompoundTag()).toString()
     }
 
     override fun damageArmor(playerInventory: BukkitPlayerInventory, attackDamage: Double) {
         val nmsInventory = (playerInventory as CraftInventoryPlayer).inventory
 
-        nmsInventory.a(DamageSource.d, attackDamage.toFloat(), PlayerInventory.f)
+        nmsInventory.hurtArmor(DamageSource.LAVA, attackDamage.toFloat(), Inventory.ALL_ARMOR_SLOTS)
     }
 
     override fun damageSlot(playerInventory: BukkitPlayerInventory, slot: EquipmentSlot, damage: Int) {
@@ -47,17 +47,17 @@ class NMSItemSupport : ItemSupport {
         val nmsItem = nmsInventory.getItem(slot)
 
         if (!nmsItem.isEmpty) {
-            nmsItem.damage(damage, (playerInventory.holder as CraftPlayer).handle) { player ->
-                player.broadcastItemBreak(nmsSlot)
+            nmsItem.hurtAndBreak(damage, (playerInventory.holder as CraftPlayer).handle) { player ->
+                player.broadcastBreakEvent(nmsSlot)
             }
         }
     }
 }
 
-internal fun PlayerInventory.getItem(slot: EquipmentSlot): ItemStack {
+internal fun Inventory.getItem(slot: EquipmentSlot): ItemStack {
     return when (slot) {
-        EquipmentSlot.HAND -> itemInHand
-        EquipmentSlot.OFF_HAND -> j[0]
+        EquipmentSlot.HAND -> getSelected()
+        EquipmentSlot.OFF_HAND -> offhand[0]
         EquipmentSlot.FEET -> armorContents[0]
         EquipmentSlot.LEGS -> armorContents[1]
         EquipmentSlot.CHEST -> armorContents[2]

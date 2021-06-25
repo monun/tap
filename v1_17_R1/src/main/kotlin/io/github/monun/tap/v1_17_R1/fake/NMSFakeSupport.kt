@@ -18,8 +18,8 @@ package io.github.monun.tap.v1_17_R1.fake
 
 import com.comphenix.protocol.events.PacketContainer
 import io.github.monun.tap.fake.FakeSupport
-import net.minecraft.core.IRegistry
-import net.minecraft.world.entity.item.EntityFallingBlock
+import net.minecraft.core.Registry
+import net.minecraft.world.entity.item.FallingBlockEntity
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.World
@@ -38,14 +38,14 @@ class NMSFakeSupport : FakeSupport {
     override fun getNetworkId(entity: Entity): Int {
         entity as CraftEntity
 
-        return IRegistry.Y.getId(entity.handle.entityType)
+        return Registry.ENTITY_TYPE.getId(entity.handle.type)
     }
 
     @Suppress("UNCHECKED_CAST")
     override fun <T : Entity> createEntity(entityClass: Class<out Entity>, world: World): T? {
         return NMSEntityTypes.findType(entityClass)?.run {
             val nmsWorld = (world as CraftWorld).handle
-            this.a(nmsWorld)?.bukkitEntity as T
+            this.create(nmsWorld)?.bukkitEntity as T
         }
     }
 
@@ -71,39 +71,39 @@ class NMSFakeSupport : FakeSupport {
         val nmsEntity = entity.handle
 
         loc.run {
-            nmsEntity.t = (world as CraftWorld).handle
-            nmsEntity.setPositionRotation(x, y, z, yaw, pitch)
+            nmsEntity.level = (world as CraftWorld).handle
+            nmsEntity.moveTo(x, y, z, yaw, pitch)
         }
     }
 
     override fun getMountedYOffset(entity: Entity): Double {
         entity as CraftEntity
 
-        return entity.handle.bl()
+        return entity.handle.passengersRidingOffset
     }
 
     override fun getYOffset(entity: Entity): Double {
         entity as CraftEntity
 
-        return entity.handle.bk()
+        return entity.handle.myRidingOffset
     }
 
     override fun createSpawnPacket(entity: Entity): PacketContainer{
         entity as CraftEntity
 
-        return PacketContainer.fromPacket(entity.handle.packet)
+        return PacketContainer.fromPacket(entity.handle.addEntityPacket)
     }
 
     override fun createFallingBlock(blockData: BlockData): FallingBlock {
         val entity =
-            EntityFallingBlock(
+            FallingBlockEntity(
                 (Bukkit.getWorlds().first() as CraftWorld).handle,
                 0.0,
                 0.0,
                 0.0,
                 (blockData as CraftBlockData).state
             )
-        entity.R = 1
+        entity.tickCount = 1
 
         return entity.bukkitEntity as FallingBlock
     }
