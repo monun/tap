@@ -1,44 +1,17 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
-import java.io.IOException
-import java.io.OutputStream
-import org.apache.commons.io.output.NullOutputStream
+import java.io.OutputStream.nullOutputStream
 
 plugins {
-    kotlin("jvm") version "1.5.10"
-    id("com.github.johnrengelman.shadow") version "5.2.0"
+    kotlin("jvm") version "1.5.20"
+    id("com.github.johnrengelman.shadow") version "7.0.0"
     `maven-publish`
 }
 
 java {
     toolchain {
-        languageVersion.set(JavaLanguageVersion.of(8))
+        languageVersion.set(JavaLanguageVersion.of(16))
     }
 }
-
-/*
-// ProtocolLib 파일 다운로드 링크 (저장소 응답 없을시 사용)
-downloadLibrary(
-    "https://ci.dmulloy2.net/job/ProtocolLib/lastSuccessfulBuild/artifact/target/ProtocolLib.jar",
-    "ProtocolLib.jar"
-)
-
-fun downloadLibrary(url: String, fileName: String) {
-    val parent = File(projectDir, "libs").also {
-        it.mkdirs()
-    }
-    val jar = File(parent, fileName)
-
-    uri(url).toURL().openConnection().run {
-        val lastModified = lastModified
-        if (lastModified != jar.lastModified()) {
-            inputStream.use { stream ->
-                jar.writeBytes(stream.readBytes())
-                jar.setLastModified(lastModified)
-            }
-        }
-    }
-}
-*/
 
 allprojects {
     apply(plugin = "org.jetbrains.kotlin.jvm")
@@ -54,7 +27,7 @@ allprojects {
     dependencies {
         compileOnly(kotlin("stdlib"))
         compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.0")
-        compileOnly("com.comphenix.protocol:ProtocolLib:4.6.0")
+        compileOnly("com.comphenix.protocol:ProtocolLib:4.7.0-SNAPSHOT")
 //        compileOnly(rootProject.fileTree("dir" to "libs", "include" to "*.jar"))
 
         implementation("org.mariuszgromada.math:MathParser.org-mXparser:4.4.2")
@@ -62,7 +35,7 @@ allprojects {
         testImplementation("org.junit.jupiter:junit-jupiter-api:5.7.0")
         testImplementation("org.junit.jupiter:junit-jupiter-engine:5.7.0")
         testImplementation("org.mockito:mockito-core:3.6.28")
-        testImplementation("org.spigotmc:spigot:1.16.5-R0.1-SNAPSHOT")
+        testImplementation("org.spigotmc:spigot:1.17-R0.1-SNAPSHOT")
     }
 
     tasks {
@@ -86,9 +59,9 @@ subprojects {
     if (path in setOf(":api", ":paper")) {
         // setup api & test plugin
         dependencies {
-            compileOnly("com.destroystokyo.paper:paper-api:1.16.5-R0.1-SNAPSHOT")
+            compileOnly("io.papermc.paper:paper-api:1.17-R0.1-SNAPSHOT")
 
-            testImplementation("com.destroystokyo.paper:paper-api:1.16.5-R0.1-SNAPSHOT")
+            testImplementation("io.papermc.paper:paper-api:1.17-R0.1-SNAPSHOT")
         }
     } else {
         //setup nms
@@ -99,9 +72,9 @@ subprojects {
 }
 
 dependencies {
-    implementation(project(":api"))
-    implementation(project(":paper"))
-    implementation(fileTree("dir" to ".jitpack", "include" to "*.jar"))
+    subprojects {
+        implementation(this)
+    }
 }
 
 tasks {
@@ -129,7 +102,7 @@ tasks {
         from(sourceSets["main"].output)
         configurations = listOf(project.configurations.implementation.get().apply { isCanBeResolved = true })
 
-        var dest = File(rootDir, ".server/plugins")
+        var dest = File(rootDir, ".debug/plugins")
         val pluginName = archiveFileName.get()
         val pluginFile = File(dest, pluginName)
         if (pluginFile.exists()) dest = File(dest, "update")
@@ -145,13 +118,7 @@ tasks {
     create<DefaultTask>("setupWorkspace") {
         doLast {
             val versions = arrayOf(
-                "1.17",
-                "1.16.5",
-                "1.16.3",
-                "1.16.1",
-                "1.15.2",
-                "1.14.4",
-                "1.13.2"
+                "1.17"
             )
             val buildtoolsDir = File(".buildtools")
             val buildtools = File(buildtoolsDir, "BuildTools.jar")
@@ -174,11 +141,11 @@ tasks {
 
                     javaexec {
                         workingDir(buildtoolsDir)
-                        main = "-jar"
+                        mainClass.set("-jar")
                         args = listOf("./${buildtools.name}", "--rev", v, "--disable-java-check")
                         // Silent
-                        standardOutput = NullOutputStream.NULL_OUTPUT_STREAM
-                        errorOutput = NullOutputStream.NULL_OUTPUT_STREAM
+                        standardOutput = nullOutputStream()
+                        errorOutput = nullOutputStream()
                     }
                 }
             }.onFailure {
@@ -187,15 +154,7 @@ tasks {
             buildtoolsDir.deleteRecursively()
         }
     }
-    create<Jar>("jitpack") {
-        dependsOn(subprojects.map { it.tasks.getByName("classes") })
-        from(subprojects.filter { it.name.startsWith("v") }.map { it.sourceSets["main"].output })
-        destinationDirectory.set(file(".jitpack"))
-        archiveVersion.set("")
-        archiveBaseName.set("jitpack")
-    }
     build {
-        dependsOn(named("jitpack"))
         finalizedBy(shadowJar)
     }
 }

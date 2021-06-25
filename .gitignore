@@ -19,5 +19,5 @@ libs/
 # Buildtools
 .buildtools/
 
-# Server
-.server/
+# Debug
+.debug/
