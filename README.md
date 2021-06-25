@@ -16,7 +16,7 @@
 ### 환경
 * JDK 16
 * Kotlin 1.5.20
-* ProtocolLib 4.6.0
+* ProtocolLib 4.7.0
 * Paper 1.17
  
 ### Gradle
