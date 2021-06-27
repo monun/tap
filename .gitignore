@@ -21,3 +21,6 @@ libs/
 
 # Debug
 .debug/
+
+# Paper submodule
+.paper/

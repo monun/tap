@@ -5,6 +5,7 @@ import net.md_5.specialsource.JarMapping
 import net.md_5.specialsource.JarRemapper
 import net.md_5.specialsource.provider.JarProvider
 import net.md_5.specialsource.provider.JointProvider
+import org.apache.tools.ant.taskdefs.condition.Os
 import java.io.OutputStream.nullOutputStream
 import org.gradle.jvm.tasks.Jar as GradleJar
 
@@ -126,7 +127,8 @@ subprojects {
                         spigotOutput.delete()
                     } else {
                         logger.warn("Mojang and Spigot mapping should be specified for ${
-                            path.drop(1).takeWhile { it != ':' }}.")
+                            path.drop(1).takeWhile { it != ':' }
+                        }.")
                     }
                 }
             }
@@ -215,6 +217,63 @@ tasks {
                 it.printStackTrace()
             }
             buildtoolsDir.deleteRecursively()
+        }
+    }
+    register<DefaultTask>("setupDebugServer") {
+        dependsOn(":debugJar")
+        doLast {
+            fun runProcess(directory: File, vararg command: String) {
+                val process = ProcessBuilder(*command).directory(directory).start()
+                val buffer = ByteArray(1000)
+                while (process.isAlive) {
+                    if (process.inputStream.available() > 0) {
+                        val count = process.inputStream.read(buffer)
+                        System.out.write(buffer, 0, count)
+                    }
+                    if (process.errorStream.available() > 0) {
+                        val count = process.errorStream.read(buffer)
+                        System.err.write(buffer, 0, count)
+                    }
+                    Thread.sleep(1)
+                }
+                System.out.writeBytes(process.inputStream.readBytes())
+                System.err.writeBytes(process.errorStream.readBytes())
+
+                process.waitFor()
+            }
+
+            fun runGitProcess(directory: File, vararg command: String) {
+                runProcess(directory, "git", "-c", "commit.gpgsign=false", "-c", "core.safecrlf=false", *command)
+            }
+
+            val projectDir = layout.projectDirectory.asFile
+            val debugDir = File(projectDir, ".debug")
+            val paperDir = File(projectDir, ".paper")
+            val buildDir = File(paperDir, "Paper-Server/build/libs")
+            val gradle = if (Os.isFamily(Os.FAMILY_WINDOWS)) "gradlew.bat" else "gradlew"
+
+            var shouldUpdate = false
+
+            if (paperDir.listFiles()?.isEmpty() != false) {
+                shouldUpdate = true
+                runGitProcess(projectDir, "submodule", "update", "--init")
+            }
+
+            if (project.hasProperty("updatePaper")) {
+                shouldUpdate = true
+                runGitProcess(paperDir, "fetch", "--all")
+                runGitProcess(paperDir, "reset", "--hard", "\"origin/master\"")
+            }
+
+            if (shouldUpdate) {
+                runProcess(paperDir, File(paperDir, gradle).absolutePath, "applyPatches")
+                runProcess(paperDir, File(paperDir, gradle).absolutePath, "shadowJar")
+
+                buildDir.listFiles()?.forEach { file ->
+                    println("Copying ${file.name} into .debug")
+                    file.copyTo(File(debugDir, file.name), true)
+                }
+            }
         }
     }
     build {
