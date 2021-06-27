@@ -1,10 +1,10 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+import de.undercouch.gradle.tasks.download.Download
 import net.md_5.specialsource.Jar
 import net.md_5.specialsource.JarMapping
 import net.md_5.specialsource.JarRemapper
 import net.md_5.specialsource.provider.JarProvider
 import net.md_5.specialsource.provider.JointProvider
-import java.io.File
 import java.io.OutputStream.nullOutputStream
 import org.gradle.jvm.tasks.Jar as GradleJar
 
@@ -94,43 +94,39 @@ subprojects {
         tasks {
             jar {
                 doLast {
+                    fun remap(jarFile: File, outputFile: File, mappingFile: File, reversed: Boolean = false) {
+                        val inputJar = Jar.init(jarFile)
+
+                        val mapping = JarMapping()
+                        mapping.loadMappings(mappingFile.canonicalPath, reversed, false, null, null)
+
+                        val provider = JointProvider()
+                        provider.add(JarProvider(inputJar))
+                        mapping.setFallbackInheritanceProvider(provider)
+
+                        val mapper = JarRemapper(mapping)
+                        mapper.remapJar(inputJar, outputFile)
+                        inputJar.close()
+                    }
+
                     val archiveFile = archiveFile.get().asFile
-                    val mojangOutput = File(archiveFile.parentFile, "remapped-mojang.jar")
+
+                    val obfOutput = File(archiveFile.parentFile, "remapped-obf.jar")
                     val spigotOutput = File(archiveFile.parentFile, "remapped-spigot.jar")
 
                     val mojangMapping = configurations.named("mojangMapping").get().firstOrNull()
                     val spigotMapping = configurations.named("spigotMapping").get().firstOrNull()
 
                     if (mojangMapping != null && spigotMapping != null) {
-                        var inputJar = Jar.init(archiveFile)
-                        val mojang = JarMapping()
-                        mojang.loadMappings(mojangMapping.canonicalPath, true, false, null, null)
+                        remap(archiveFile, obfOutput, mojangMapping, true)
+                        remap(obfOutput, spigotOutput, spigotMapping)
 
-                        val mojangProvider = JointProvider()
-                        mojangProvider.add(JarProvider(inputJar))
-                        mojang.setFallbackInheritanceProvider(mojangProvider)
-
-                        val mojangRemapper = JarRemapper(mojang)
-                        mojangRemapper.remapJar(inputJar, mojangOutput)
-                        inputJar.close()
-
-                        inputJar = Jar.init(mojangOutput)
-                        val spigot = JarMapping()
-                        spigot.loadMappings(spigotMapping)
-
-                        val spigotProvider = JointProvider()
-                        spigotProvider.add(JarProvider(inputJar))
-                        spigot.setFallbackInheritanceProvider(spigotProvider)
-
-                        val spigotRemapper = JarRemapper(spigot)
-                        spigotRemapper.remapJar(inputJar, spigotOutput)
-                        inputJar.close()
-
-                        archiveFile.writeBytes(spigotOutput.readBytes())
-                        mojangOutput.delete()
+                        spigotOutput.copyTo(archiveFile, true)
+                        obfOutput.delete()
                         spigotOutput.delete()
                     } else {
-                        logger.warn("Mojang and Spigot mapping should be specified for ${path.drop(1).takeWhile { it != ':' }}.")
+                        logger.warn("Mojang and Spigot mapping should be specified for ${
+                            path.drop(1).takeWhile { it != ':' }}.")
                     }
                 }
             }
@@ -196,7 +192,7 @@ tasks {
                 repos.find { it.name.startsWith(version) }?.also { println("Skip downloading spigot-$version") } == null
             }.also { if (it.isEmpty()) return@doLast }
 
-            val download by registering(de.undercouch.gradle.tasks.download.Download::class) {
+            val download by registering(Download::class) {
                 src("https://hub.spigotmc.org/jenkins/job/BuildTools/lastSuccessfulBuild/artifact/target/BuildTools.jar")
                 dest(buildtools)
             }
