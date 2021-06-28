@@ -76,10 +76,6 @@ project(":api") {
             from("$buildDir/dokka/html/") {
                 include("**")
             }
-
-            from("$rootDir/src/main/resources/") {
-                include("*.html")
-            }
         }
     }
 }
