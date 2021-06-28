@@ -17,7 +17,7 @@
 package io.github.monun.tap.effect
 
 import io.github.monun.tap.protocol.PacketSupport
-import io.github.monun.tap.protocol.sendServerPacket
+import io.github.monun.tap.protocol.sendPacket
 import org.bukkit.FireworkEffect
 import org.bukkit.Location
 import org.bukkit.World
@@ -27,7 +27,7 @@ import org.bukkit.util.Vector
 
 fun Player.playFirework(x: Double, y: Double, z: Double, effect: FireworkEffect) {
     PacketSupport.INSTANCE.spawnFireworkParticles(x, y, z, effect).forEach { packet ->
-        sendServerPacket(packet)
+        sendPacket(packet)
     }
 }
 
@@ -47,7 +47,7 @@ fun World.playFirework(x: Double, y: Double, z: Double, effect: FireworkEffect, 
         val playerLoc = player.location
         if (box.contains(playerLoc.x, playerLoc.y, playerLoc.z)) {
             for (packet in packets) {
-                player.sendServerPacket(packet)
+                player.sendPacket(packet)
             }
         }
     }

@@ -140,19 +140,3 @@ interface PacketSupport {
 
     fun spawnFireworkParticles(x: Double, y: Double, z: Double, effect: FireworkEffect): List<PacketContainer>
 }
-
-fun Player.sendServerPacket(packet: PacketContainer) {
-    packet.sendTo(this)
-}
-
-fun Iterable<Player>.sendPacketAll(packet: PacketContainer) {
-    packet.sendTo(this)
-}
-
-fun World.sendServerPacket(packet: PacketContainer) {
-    packet.sendTo(players)
-}
-
-fun Server.sendServerPacket(packet: PacketContainer) {
-    packet.sendTo(onlinePlayers)
-}

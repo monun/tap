@@ -17,7 +17,7 @@
 package io.github.monun.tap.fake.internal
 
 import io.github.monun.tap.protocol.PacketContainer
-import io.github.monun.tap.protocol.sendServerPacket
+import io.github.monun.tap.protocol.sendPacket
 import io.github.monun.tap.ref.UpstreamReference
 import org.bukkit.entity.Player
 
@@ -102,6 +102,6 @@ internal class FakeTracker(
 
 internal fun Iterable<FakeTracker>.sendServerPacketAll(packet: PacketContainer) {
     for (tracker in this) {
-        tracker.player.sendServerPacket(packet)
+        tracker.player.sendPacket(packet)
     }
 }

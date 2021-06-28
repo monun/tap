@@ -21,9 +21,9 @@ import io.github.monun.tap.fake.createSpawnPacket
 import io.github.monun.tap.fake.mountedYOffset
 import io.github.monun.tap.fake.setLocation
 import io.github.monun.tap.protocol.PacketSupport
-import io.github.monun.tap.protocol.sendServerPacket
 import io.github.monun.tap.ref.UpstreamReference
 import com.google.common.collect.ImmutableList
+import io.github.monun.tap.protocol.sendPacket
 import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.entity.ArmorStand
@@ -324,7 +324,7 @@ class FakeEntityImpl internal constructor(
 
             for (tracker in trackers) {
                 if (tracker !in vehicle.trackers) {
-                    tracker.player.sendServerPacket(
+                    tracker.player.sendPacket(
                         PacketSupport.INSTANCE.entityTeleport(bukkitEntity, deltaLocation)
                     )
                 }
@@ -419,25 +419,25 @@ class FakeEntityImpl internal constructor(
     private fun spawnTo(player: Player) {
         val bukkitEntity = bukkitEntity
 
-        player.sendServerPacket(bukkitEntity.createSpawnPacket())
-        player.sendServerPacket(PacketSupport.INSTANCE.entityMetadata(bukkitEntity))
+        player.sendPacket(bukkitEntity.createSpawnPacket())
+        player.sendPacket(PacketSupport.INSTANCE.entityMetadata(bukkitEntity))
 
         if (bukkitEntity is ArmorStand) {
             PacketSupport.INSTANCE.entityEquipment(bukkitEntity).let { packet ->
-                player.sendServerPacket(packet)
+                player.sendPacket(packet)
             }
         }
 
         _passengers.let { passengers ->
             if (passengers.isNotEmpty()) {
-                player.sendServerPacket(
+                player.sendPacket(
                     PacketSupport.INSTANCE.mount(bukkitEntity.entityId, passengers.toIntArray())
                 )
             }
         }
 
         vehicle?.let { vehicle ->
-            player.sendServerPacket(
+            player.sendPacket(
                 PacketSupport.INSTANCE.mount(vehicle.bukkitEntity.entityId, vehicle._passengers.toIntArray())
             )
         }
@@ -452,7 +452,7 @@ class FakeEntityImpl internal constructor(
     }
 
     internal fun despawnTo(player: Player) {
-        player.sendServerPacket(PacketSupport.INSTANCE.entityDestroy((bukkitEntity.entityId)))
+        player.sendPacket(PacketSupport.INSTANCE.entityDestroy((bukkitEntity.entityId)))
     }
 
     @Suppress("UNCHECKED_CAST")
