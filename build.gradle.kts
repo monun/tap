@@ -12,7 +12,6 @@ plugins {
     kotlin("jvm") version "1.5.20"
     `maven-publish`
     signing
-    id("org.jetbrains.dokka") version "1.4.32"
 }
 
 buildscript {
@@ -267,7 +266,6 @@ publishing {
         create<MavenPublication>(rootProject.name) {
             from(components["java"])
             artifact(tasks["sourcesJar"])
-            artifact(tasks["dokkaJar"])
 
             repositories {
                 mavenLocal()
@@ -329,6 +327,6 @@ publishing {
 
 signing {
     isRequired = true
-    sign(tasks["sourcesJar"], tasks["dokkaJar"], tasks["jar"])
+    sign(tasks["sourcesJar"], tasks["jar"])
     sign(publishing.publications[rootProject.name])
 }
