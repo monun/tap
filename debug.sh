@@ -5,7 +5,6 @@
 # ./gradlew clean setupDebugServer -PupdatePaper
 
 plugins=(
-  'https://ci.dmulloy2.net/job/ProtocolLib/lastSuccessfulBuild/artifact/target/ProtocolLib.jar'
 )
 
 script=$(basename "$0")

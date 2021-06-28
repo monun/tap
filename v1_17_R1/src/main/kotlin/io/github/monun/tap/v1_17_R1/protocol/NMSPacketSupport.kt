@@ -16,31 +16,45 @@
 
 package io.github.monun.tap.v1_17_R1.protocol
 
-import com.comphenix.protocol.PacketType
-import com.comphenix.protocol.events.PacketContainer
-import com.comphenix.protocol.wrappers.EnumWrappers
-import com.comphenix.protocol.wrappers.Pair
-import com.comphenix.protocol.wrappers.WrappedDataWatcher
+import com.mojang.datafixers.util.Pair
 import io.github.monun.tap.fake.createFakeEntity
 import io.github.monun.tap.protocol.PacketSupport
 import io.github.monun.tap.protocol.toProtocolDegrees
 import io.github.monun.tap.protocol.toProtocolDelta
+import io.netty.buffer.Unpooled
+import net.minecraft.network.FriendlyByteBuf
+import net.minecraft.network.protocol.game.ClientboundAddEntityPacket
+import net.minecraft.network.protocol.game.ClientboundAddMobPacket
+import net.minecraft.network.protocol.game.ClientboundEntityEventPacket
+import net.minecraft.network.protocol.game.ClientboundMoveEntityPacket
+import net.minecraft.network.protocol.game.ClientboundRemoveEntityPacket
+import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket
+import net.minecraft.network.protocol.game.ClientboundSetEquipmentPacket
+import net.minecraft.network.protocol.game.ClientboundSetPassengersPacket
+import net.minecraft.network.protocol.game.ClientboundTeleportEntityPacket
 import org.bukkit.FireworkEffect
+import org.bukkit.craftbukkit.v1_17_R1.entity.CraftEntity
+import org.bukkit.craftbukkit.v1_17_R1.inventory.CraftItemStack
+import org.bukkit.craftbukkit.v1_17_R1.util.CraftVector
+import org.bukkit.entity.Entity
 import org.bukkit.entity.EntityType
 import org.bukkit.entity.Firework
 import org.bukkit.inventory.EquipmentSlot
 import org.bukkit.inventory.ItemStack
 import org.bukkit.util.Vector
-import java.util.*
+import java.util.UUID
 
-private fun EquipmentSlot.convertToItemSlot(): EnumWrappers.ItemSlot {
+import net.minecraft.world.entity.EntityType as NMSEntityType
+import net.minecraft.world.entity.EquipmentSlot as NMSEquipmentSlot
+
+private fun EquipmentSlot.toNMS(): NMSEquipmentSlot {
     return when (this) {
-        EquipmentSlot.HAND -> EnumWrappers.ItemSlot.MAINHAND
-        EquipmentSlot.OFF_HAND -> EnumWrappers.ItemSlot.OFFHAND
-        EquipmentSlot.FEET -> EnumWrappers.ItemSlot.FEET
-        EquipmentSlot.LEGS -> EnumWrappers.ItemSlot.LEGS
-        EquipmentSlot.CHEST -> EnumWrappers.ItemSlot.CHEST
-        EquipmentSlot.HEAD -> EnumWrappers.ItemSlot.HEAD
+        EquipmentSlot.HAND -> NMSEquipmentSlot.MAINHAND
+        EquipmentSlot.OFF_HAND -> NMSEquipmentSlot.OFFHAND
+        EquipmentSlot.FEET -> NMSEquipmentSlot.FEET
+        EquipmentSlot.LEGS -> NMSEquipmentSlot.LEGS
+        EquipmentSlot.CHEST -> NMSEquipmentSlot.CHEST
+        EquipmentSlot.HEAD -> NMSEquipmentSlot.HEAD
     }
 }
 
@@ -56,25 +70,21 @@ class NMSPacketSupport : PacketSupport {
         type: EntityType,
         objectId: Int,
         velocity: Vector
-    ) = PacketContainer(PacketType.Play.Server.SPAWN_ENTITY).apply {
-        integers
-            .write(0, entityId)
-        uuiDs
-            .write(0, uuid)
-        doubles
-            .write(0, x)
-            .write(1, y)
-            .write(2, z)
-        integers
-            .write(1, velocity.x.toProtocolDelta())
-            .write(2, velocity.y.toProtocolDelta())
-            .write(3, velocity.z.toProtocolDelta())
-            .write(4, yaw.toProtocolDegrees())
-            .write(5, pitch.toProtocolDegrees())
-        entityTypeModifier
-            .write(0, type)
-        integers
-            .write(6, objectId)
+    ): NMSPacketContainer {
+        val packet = ClientboundAddEntityPacket(
+            entityId,
+            uuid,
+            x,
+            y,
+            z,
+            yaw,
+            pitch,
+            NMSEntityType.byString(type.name).get(),
+            objectId,
+            CraftVector.toNMS(velocity)
+        )
+
+        return NMSPacketContainer(packet)
     }
 
     override fun spawnEntityLiving(
@@ -88,46 +98,42 @@ class NMSPacketSupport : PacketSupport {
         pitch: Float,
         roll: Float,
         velocity: Vector
-    ) = PacketContainer(PacketType.Play.Server.SPAWN_ENTITY_LIVING).apply {
-        integers
-            .write(0, entityId)
-        uuiDs
-            .write(0, uuid)
-        integers
-            .write(1, typeId)
-        doubles
-            .write(0, x)
-            .write(1, y)
-            .write(2, z)
-        integers
-            .write(2, velocity.x.toProtocolDelta())
-            .write(3, velocity.y.toProtocolDelta())
-            .write(4, velocity.z.toProtocolDelta())
-        bytes
-            .write(0, yaw.toProtocolDegrees().toByte())
-            .write(1, pitch.toProtocolDegrees().toByte())
-            .write(2, roll.toProtocolDegrees().toByte())
+    ): NMSPacketContainer {
+        val byteBuf = FriendlyByteBuf(Unpooled.buffer())
+
+        byteBuf.writeVarInt(entityId)
+        byteBuf.writeUUID(uuid)
+        byteBuf.writeVarInt(typeId)
+        byteBuf.writeDouble(x)
+        byteBuf.writeDouble(y)
+        byteBuf.writeDouble(z)
+        byteBuf.writeByte(yaw.toProtocolDegrees())
+        byteBuf.writeByte(pitch.toProtocolDegrees())
+        byteBuf.writeByte(roll.toProtocolDegrees())
+        byteBuf.writeShort(velocity.x.toProtocolDelta())
+        byteBuf.writeShort(velocity.y.toProtocolDelta())
+        byteBuf.writeShort(velocity.z.toProtocolDelta())
+
+        val packet = ClientboundAddMobPacket(byteBuf)
+        return NMSPacketContainer(packet)
     }
 
-    override fun entityMetadata(
-        entityId: Int,
-        dataWatcher: WrappedDataWatcher
-    ) = PacketContainer(PacketType.Play.Server.ENTITY_METADATA).apply {
-        integers
-            .write(0, entityId)
-        watchableCollectionModifier
-            .write(0, dataWatcher.deepClone().watchableObjects)
+    override fun entityMetadata(entity: Entity): NMSPacketContainer {
+        entity as CraftEntity
+
+        val entityId = entity.entityId
+        val entityData = entity.handle.entityData
+
+        val packet = ClientboundSetEntityDataPacket(entityId, entityData, true)
+        return NMSPacketContainer(packet)
     }
 
 
-    override fun entityEquipment(
-        entityId: Int,
-        equipments: Map<EquipmentSlot, ItemStack>
-    ) = PacketContainer(PacketType.Play.Server.ENTITY_EQUIPMENT).apply {
-        integers
-            .write(0, entityId)
-        slotStackPairLists
-            .write(0, equipments.toList().map { Pair(it.first.convertToItemSlot(), it.second) })
+    override fun entityEquipment(entityId: Int, equipments: Map<EquipmentSlot, ItemStack>): NMSPacketContainer {
+        val packet = ClientboundSetEquipmentPacket(entityId, equipments.map { entry ->
+            Pair(entry.key.toNMS(), CraftItemStack.asNMSCopy(entry.value))
+        })
+        return NMSPacketContainer(packet)
     }
 
     override fun entityTeleport(
@@ -138,18 +144,19 @@ class NMSPacketSupport : PacketSupport {
         yaw: Float,
         pitch: Float,
         onGround: Boolean
-    ) = PacketContainer(PacketType.Play.Server.ENTITY_TELEPORT).apply {
-        integers
-            .write(0, entityId)
-        doubles
-            .write(0, x)
-            .write(1, y)
-            .write(2, z)
-        bytes
-            .write(0, yaw.toProtocolDegrees().toByte())
-            .write(0, pitch.toProtocolDegrees().toByte())
-        booleans
-            .write(0, onGround)
+    ): NMSPacketContainer {
+        val byteBuf = FriendlyByteBuf(Unpooled.buffer())
+
+        byteBuf.writeVarInt(entityId)
+        byteBuf.writeDouble(x)
+        byteBuf.writeDouble(y)
+        byteBuf.writeDouble(z)
+        byteBuf.writeByte(yaw.toProtocolDegrees())
+        byteBuf.writeByte(pitch.toProtocolDegrees())
+        byteBuf.writeBoolean(onGround)
+
+        val packet = ClientboundTeleportEntityPacket(byteBuf)
+        return NMSPacketContainer(packet)
     }
 
     override fun relEntityMove(
@@ -158,20 +165,9 @@ class NMSPacketSupport : PacketSupport {
         deltaY: Short,
         deltaZ: Short,
         onGround: Boolean
-    ) = PacketContainer(PacketType.Play.Server.REL_ENTITY_MOVE).apply {
-        integers
-            .write(0, entityId)
-        shorts
-            .write(0, deltaX)
-            .write(1, deltaY)
-            .write(2, deltaZ)
-        bytes
-            .write(0, 0)
-            .write(1, 0)
-        booleans
-            .write(0, onGround)
-            .write(1, true)
-            .write(2, false)
+    ): NMSPacketContainer {
+        val packet = ClientboundMoveEntityPacket.Pos(entityId, deltaX, deltaY, deltaZ, onGround)
+        return NMSPacketContainer(packet)
     }
 
     override fun relEntityMoveLook(
@@ -182,47 +178,50 @@ class NMSPacketSupport : PacketSupport {
         yaw: Float,
         pitch: Float,
         onGround: Boolean
-    ) = PacketContainer(PacketType.Play.Server.REL_ENTITY_MOVE_LOOK).apply {
-        integers
-            .write(0, entityId)
-        shorts
-            .write(0, deltaX)
-            .write(1, deltaY)
-            .write(2, deltaZ)
-        bytes
-            .write(0, yaw.toProtocolDegrees().toByte())
-            .write(1, pitch.toProtocolDegrees().toByte())
-        booleans
-            .write(0, onGround)
-            .write(1, true)
-            .write(2, true)
+    ): NMSPacketContainer {
+        val packet = ClientboundMoveEntityPacket.PosRot(
+            entityId,
+            deltaX,
+            deltaY,
+            deltaZ,
+            yaw.toProtocolDegrees().toByte(),
+            pitch.toProtocolDegrees().toByte(),
+            onGround
+        )
+        return NMSPacketContainer(packet)
     }
 
     override fun entityStatus(
         entityId: Int,
         data: Byte
-    ) = PacketContainer(PacketType.Play.Server.ENTITY_STATUS).apply {
-        integers
-            .write(0, entityId)
-        bytes
-            .write(0, data)
+    ): NMSPacketContainer {
+        val byteBuf = FriendlyByteBuf(Unpooled.buffer())
+
+        byteBuf.writeVarInt(entityId)
+        byteBuf.writeByte(data.toInt())
+
+        val packet = ClientboundEntityEventPacket(byteBuf)
+        return NMSPacketContainer(packet)
     }
 
     override fun mount(
         entityId: Int,
         mountEntityIds: IntArray
-    ) = PacketContainer(PacketType.Play.Server.MOUNT).apply {
-        integers
-            .write(0, entityId)
-        integerArrays
-            .write(0, mountEntityIds)
+    ): NMSPacketContainer {
+        val byteBuf = FriendlyByteBuf(Unpooled.buffer())
+
+        byteBuf.writeVarInt(entityId)
+        byteBuf.writeVarIntArray(mountEntityIds)
+
+        val packet = ClientboundSetPassengersPacket(byteBuf)
+        return NMSPacketContainer(packet)
     }
 
     override fun entityDestroy(
         entityId: Int
-    ) = PacketContainer(PacketType.Play.Server.ENTITY_DESTROY).apply {
-        integers
-            .write(0, entityId)
+    ): NMSPacketContainer {
+        val packet = ClientboundRemoveEntityPacket(entityId)
+        return NMSPacketContainer(packet)
     }
 
     override fun spawnFireworkParticles(
@@ -230,7 +229,7 @@ class NMSPacketSupport : PacketSupport {
         y: Double,
         z: Double,
         effect: FireworkEffect
-    ): List<PacketContainer> {
+    ): List<NMSPacketContainer> {
         val firework = requireNotNull(Firework::class.java.createFakeEntity()).apply {
             fireworkMeta = fireworkMeta.apply { addEffect(effect) }
         }

@@ -7,6 +7,7 @@ import net.md_5.specialsource.provider.JarProvider
 import net.md_5.specialsource.provider.JointProvider
 import org.apache.tools.ant.taskdefs.condition.Os
 import java.io.OutputStream.nullOutputStream
+
 import org.gradle.jvm.tasks.Jar as GradleJar
 
 plugins {
@@ -45,8 +46,6 @@ allprojects {
     dependencies {
         compileOnly(kotlin("stdlib"))
         compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.0")
-        compileOnly("com.comphenix.protocol:ProtocolLib:4.7.0-SNAPSHOT")
-//        compileOnly(rootProject.fileTree("dir" to "libs", "include" to "*.jar"))
 
         implementation("org.mariuszgromada.math:MathParser.org-mXparser:4.4.2")
 

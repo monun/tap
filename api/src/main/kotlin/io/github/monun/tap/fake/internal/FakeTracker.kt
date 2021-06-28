@@ -16,7 +16,7 @@
 
 package io.github.monun.tap.fake.internal
 
-import com.comphenix.protocol.events.PacketContainer
+import io.github.monun.tap.protocol.PacketContainer
 import io.github.monun.tap.protocol.sendServerPacket
 import io.github.monun.tap.ref.UpstreamReference
 import org.bukkit.entity.Player
