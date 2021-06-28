@@ -4,3 +4,4 @@ api-version: '1.13'
 version: $version
 libraries:
   - org.jetbrains.kotlin:kotlin-stdlib:1.5.20
+  - org.mariuszgromada.math:MathParser.org-mXparser:4.4.2
