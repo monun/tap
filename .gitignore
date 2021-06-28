@@ -18,6 +18,3 @@ build/
 
 # Debug
 .debug/
-
-# Paper submodule
-.paper/
