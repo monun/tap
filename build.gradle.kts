@@ -12,6 +12,7 @@ plugins {
     kotlin("jvm") version "1.5.20"
     `maven-publish`
     signing
+    id("org.jetbrains.dokka") version "1.4.32"
 }
 
 buildscript {
@@ -61,6 +62,25 @@ allprojects {
 project(":paper") {
     dependencies {
         implementation(project(":api"))
+    }
+}
+
+project(":api") {
+    apply(plugin = "org.jetbrains.dokka")
+
+    tasks {
+        create<GradleJar>("dokkaJar") {
+            archiveClassifier.set("javadoc")
+            dependsOn("dokkaHtml")
+
+            from("$buildDir/dokka/html/") {
+                include("**")
+            }
+
+            from("$rootDir/src/main/resources/") {
+                include("*.html")
+            }
+        }
     }
 }
 
@@ -137,8 +157,8 @@ tasks {
     create<GradleJar>("sourcesJar") {
         archiveClassifier.set("sources")
 
-        for (subproject in subprojects) {
-            from(subproject.sourceSets["main"].allSource)
+        subprojects.filter { it.path != ":paper" }.onEach { from(it.sourceSets["main"].output) }.forEach { sourceProject ->
+            from(sourceProject.sourceSets["main"].allSource)
         }
     }
     create<GradleJar>("debugJar") {
@@ -266,6 +286,7 @@ publishing {
         create<MavenPublication>(rootProject.name) {
             from(components["java"])
             artifact(tasks["sourcesJar"])
+            artifact(project(":api").tasks["dokkaJar"])
 
             repositories {
                 mavenLocal()
@@ -327,6 +348,6 @@ publishing {
 
 signing {
     isRequired = true
-    sign(tasks["sourcesJar"], tasks["jar"])
+    sign(tasks["sourcesJar"], project(":api").tasks["dokkaJar"], tasks["jar"])
     sign(publishing.publications[rootProject.name])
 }
