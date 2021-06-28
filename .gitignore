@@ -13,11 +13,11 @@ build/
 # Avoid ignoring Jitpack jar file (.jar files are usually ignored)
 !jitpack.jar
 
-# External Library
-libs/
-
 # Buildtools
 .buildtools/
 
 # Debug
 .debug/
+
+# Paper submodule
+.paper/

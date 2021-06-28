@@ -16,8 +16,8 @@
 
 package io.github.monun.tap.v1_17_R1.fake
 
-import com.comphenix.protocol.events.PacketContainer
 import io.github.monun.tap.fake.FakeSupport
+import io.github.monun.tap.v1_17_R1.protocol.NMSPacketContainer
 import net.minecraft.core.Registry
 import net.minecraft.world.entity.item.FallingBlockEntity
 import org.bukkit.Bukkit
@@ -88,10 +88,10 @@ class NMSFakeSupport : FakeSupport {
         return entity.handle.myRidingOffset
     }
 
-    override fun createSpawnPacket(entity: Entity): PacketContainer{
+    override fun createSpawnPacket(entity: Entity): NMSPacketContainer {
         entity as CraftEntity
 
-        return PacketContainer.fromPacket(entity.handle.addEntityPacket)
+        return NMSPacketContainer(entity.handle.addEntityPacket)
     }
 
     override fun createFallingBlock(blockData: BlockData): FallingBlock {

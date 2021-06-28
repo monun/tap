@@ -1,11 +1,13 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+import de.undercouch.gradle.tasks.download.Download
 import net.md_5.specialsource.Jar
 import net.md_5.specialsource.JarMapping
 import net.md_5.specialsource.JarRemapper
 import net.md_5.specialsource.provider.JarProvider
 import net.md_5.specialsource.provider.JointProvider
-import java.io.File
+import org.apache.tools.ant.taskdefs.condition.Os
 import java.io.OutputStream.nullOutputStream
+
 import org.gradle.jvm.tasks.Jar as GradleJar
 
 plugins {
@@ -44,8 +46,6 @@ allprojects {
     dependencies {
         compileOnly(kotlin("stdlib"))
         compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.0")
-        compileOnly("com.comphenix.protocol:ProtocolLib:4.7.0-SNAPSHOT")
-//        compileOnly(rootProject.fileTree("dir" to "libs", "include" to "*.jar"))
 
         implementation("org.mariuszgromada.math:MathParser.org-mXparser:4.4.2")
 
@@ -94,43 +94,40 @@ subprojects {
         tasks {
             jar {
                 doLast {
+                    fun remap(jarFile: File, outputFile: File, mappingFile: File, reversed: Boolean = false) {
+                        val inputJar = Jar.init(jarFile)
+
+                        val mapping = JarMapping()
+                        mapping.loadMappings(mappingFile.canonicalPath, reversed, false, null, null)
+
+                        val provider = JointProvider()
+                        provider.add(JarProvider(inputJar))
+                        mapping.setFallbackInheritanceProvider(provider)
+
+                        val mapper = JarRemapper(mapping)
+                        mapper.remapJar(inputJar, outputFile)
+                        inputJar.close()
+                    }
+
                     val archiveFile = archiveFile.get().asFile
-                    val mojangOutput = File(archiveFile.parentFile, "remapped-mojang.jar")
+
+                    val obfOutput = File(archiveFile.parentFile, "remapped-obf.jar")
                     val spigotOutput = File(archiveFile.parentFile, "remapped-spigot.jar")
 
                     val mojangMapping = configurations.named("mojangMapping").get().firstOrNull()
                     val spigotMapping = configurations.named("spigotMapping").get().firstOrNull()
 
                     if (mojangMapping != null && spigotMapping != null) {
-                        var inputJar = Jar.init(archiveFile)
-                        val mojang = JarMapping()
-                        mojang.loadMappings(mojangMapping.canonicalPath, true, false, null, null)
+                        remap(archiveFile, obfOutput, mojangMapping, true)
+                        remap(obfOutput, spigotOutput, spigotMapping)
 
-                        val mojangProvider = JointProvider()
-                        mojangProvider.add(JarProvider(inputJar))
-                        mojang.setFallbackInheritanceProvider(mojangProvider)
-
-                        val mojangRemapper = JarRemapper(mojang)
-                        mojangRemapper.remapJar(inputJar, mojangOutput)
-                        inputJar.close()
-
-                        inputJar = Jar.init(mojangOutput)
-                        val spigot = JarMapping()
-                        spigot.loadMappings(spigotMapping)
-
-                        val spigotProvider = JointProvider()
-                        spigotProvider.add(JarProvider(inputJar))
-                        spigot.setFallbackInheritanceProvider(spigotProvider)
-
-                        val spigotRemapper = JarRemapper(spigot)
-                        spigotRemapper.remapJar(inputJar, spigotOutput)
-                        inputJar.close()
-
-                        archiveFile.writeBytes(spigotOutput.readBytes())
-                        mojangOutput.delete()
+                        spigotOutput.copyTo(archiveFile, true)
+                        obfOutput.delete()
                         spigotOutput.delete()
                     } else {
-                        logger.warn("Mojang and Spigot mapping should be specified for ${path.drop(1).takeWhile { it != ':' }}.")
+                        logger.warn("Mojang and Spigot mapping should be specified for ${
+                            path.drop(1).takeWhile { it != ':' }
+                        }.")
                     }
                 }
             }
@@ -196,7 +193,7 @@ tasks {
                 repos.find { it.name.startsWith(version) }?.also { println("Skip downloading spigot-$version") } == null
             }.also { if (it.isEmpty()) return@doLast }
 
-            val download by registering(de.undercouch.gradle.tasks.download.Download::class) {
+            val download by registering(Download::class) {
                 src("https://hub.spigotmc.org/jenkins/job/BuildTools/lastSuccessfulBuild/artifact/target/BuildTools.jar")
                 dest(buildtools)
             }
@@ -219,6 +216,63 @@ tasks {
                 it.printStackTrace()
             }
             buildtoolsDir.deleteRecursively()
+        }
+    }
+    register<DefaultTask>("setupDebugServer") {
+        dependsOn(":debugJar")
+        doLast {
+            fun runProcess(directory: File, vararg command: String) {
+                val process = ProcessBuilder(*command).directory(directory).start()
+                val buffer = ByteArray(1000)
+                while (process.isAlive) {
+                    if (process.inputStream.available() > 0) {
+                        val count = process.inputStream.read(buffer)
+                        System.out.write(buffer, 0, count)
+                    }
+                    if (process.errorStream.available() > 0) {
+                        val count = process.errorStream.read(buffer)
+                        System.err.write(buffer, 0, count)
+                    }
+                    Thread.sleep(1)
+                }
+                System.out.writeBytes(process.inputStream.readBytes())
+                System.err.writeBytes(process.errorStream.readBytes())
+
+                process.waitFor()
+            }
+
+            fun runGitProcess(directory: File, vararg command: String) {
+                runProcess(directory, "git", "-c", "commit.gpgsign=false", "-c", "core.safecrlf=false", *command)
+            }
+
+            val projectDir = layout.projectDirectory.asFile
+            val debugDir = File(projectDir, ".debug")
+            val paperDir = File(projectDir, ".paper")
+            val buildDir = File(paperDir, "Paper-Server/build/libs")
+            val gradle = if (Os.isFamily(Os.FAMILY_WINDOWS)) "gradlew.bat" else "gradlew"
+
+            var shouldUpdate = false
+
+            if (paperDir.listFiles()?.isEmpty() != false) {
+                shouldUpdate = true
+                runGitProcess(projectDir, "submodule", "update", "--init")
+            }
+
+            if (project.hasProperty("updatePaper")) {
+                shouldUpdate = true
+                runGitProcess(paperDir, "fetch", "--all")
+                runGitProcess(paperDir, "reset", "--hard", "\"origin/master\"")
+            }
+
+            if (shouldUpdate) {
+                runProcess(paperDir, File(paperDir, gradle).absolutePath, "applyPatches")
+                runProcess(paperDir, File(paperDir, gradle).absolutePath, "shadowJar")
+
+                buildDir.listFiles()?.forEach { file ->
+                    println("Copying ${file.name} into .debug")
+                    file.copyTo(File(debugDir, file.name), true)
+                }
+            }
         }
     }
     build {

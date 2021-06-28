@@ -1,10 +1,10 @@
 #!/bin/bash
 
-./gradlew clean debugJar
+./gradlew clean setupDebugServer
+# To Update Paper:
+# ./gradlew clean setupDebugServer -PupdatePaper
 
-server='https://papermc.io/api/v1/paper/1.17/latest/download'
 plugins=(
-  'https://ci.dmulloy2.net/job/ProtocolLib/lastSuccessfulBuild/artifact/target/ProtocolLib.jar'
 )
 
 script=$(basename "$0")
@@ -26,12 +26,12 @@ cd "$server_folder"
 
 if [ ! -f "$server_config" ]; then
     cat << EOF > $server_config
-server=$server
+server="."
 debug=true
 debug_port=5005
 backup=false
 restart=false
-memory=16
+memory=2
 plugins=(
 EOF
     for plugin in "${plugins[@]}"

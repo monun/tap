@@ -1,6 +1,5 @@
 name: $pluginName
 main: $pluginMain
-depend: [ ProtocolLib ]
 api-version: '1.13'
 version: $version
 libraries:

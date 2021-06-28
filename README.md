@@ -16,7 +16,6 @@
 ### 환경
 * JDK 16
 * Kotlin 1.5.20
-* ProtocolLib 4.7.0
 * Paper 1.17
  
 ### Gradle
@@ -35,7 +34,6 @@ dependencies {
 ``` 
 
 ### NOTE
-* Tap의 Packet 패키지를 이용하기 위해선 [ProtocolLib](https://github.com/dmulloy2/ProtocolLib/releases) 을 필요로 합니다.
 * Tap의 개발환경 구축을 위해선 spigot 1.17 이 필요합니다. [BuildTools](https://www.spigotmc.org/wiki/buildtools/) 를 이용해 로컬 메이븐 저장소에 spigot을 배포하세요.
 * `./gradlew setupWorkspace` 명령으로 간단하게 배포할수있습니다.
   

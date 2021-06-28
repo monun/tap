@@ -16,9 +16,6 @@
 
 package io.github.monun.tap.protocol
 
-import com.comphenix.protocol.ProtocolLibrary
-import com.comphenix.protocol.events.PacketContainer
-import com.comphenix.protocol.wrappers.WrappedDataWatcher
 import io.github.monun.tap.loader.LibraryLoader
 import org.bukkit.FireworkEffect
 import org.bukkit.Location
@@ -31,7 +28,7 @@ import org.bukkit.entity.Player
 import org.bukkit.inventory.EquipmentSlot
 import org.bukkit.inventory.ItemStack
 import org.bukkit.util.Vector
-import java.util.*
+import java.util.UUID
 
 fun Double.toProtocolDelta(): Int {
     return (this.coerceIn(-3.9, 3.9) * 8000.0).toInt()
@@ -73,16 +70,9 @@ interface PacketSupport {
         velocity: Vector = Vector()
     ): PacketContainer
 
-    fun entityMetadata(entityId: Int, dataWatcher: WrappedDataWatcher): PacketContainer
+    fun entityMetadata(entity: Entity): PacketContainer
 
-    fun entityMetadata(entity: Entity): PacketContainer {
-        return entityMetadata(entity.entityId, WrappedDataWatcher.getEntityWatcher(entity))
-    }
-
-    fun entityEquipment(
-        entityId: Int,
-        equipments: Map<EquipmentSlot, ItemStack>
-    ): PacketContainer
+    fun entityEquipment(entityId: Int, equipments: Map<EquipmentSlot, ItemStack>): PacketContainer
 
     fun entityEquipment(living: LivingEntity) = entityEquipment(living.entityId, living.equipment?.let { equipment ->
         EquipmentSlot.values().associateWith { equipment.getItem(it) }
@@ -151,20 +141,18 @@ interface PacketSupport {
     fun spawnFireworkParticles(x: Double, y: Double, z: Double, effect: FireworkEffect): List<PacketContainer>
 }
 
-private val protocolManager = ProtocolLibrary.getProtocolManager()
-
 fun Player.sendServerPacket(packet: PacketContainer) {
-    protocolManager.sendServerPacket(this, packet)
+    packet.sendTo(this)
 }
 
-fun Iterable<Player>.sendPacketAll(packet: PacketContainer) = forEach {
-    it.sendServerPacket(packet)
+fun Iterable<Player>.sendPacketAll(packet: PacketContainer) {
+    packet.sendTo(this)
 }
 
 fun World.sendServerPacket(packet: PacketContainer) {
-    players.forEach { it.sendServerPacket(packet) }
+    packet.sendTo(players)
 }
 
 fun Server.sendServerPacket(packet: PacketContainer) {
-    onlinePlayers.forEach { it.sendServerPacket(packet) }
+    packet.sendTo(onlinePlayers)
 }

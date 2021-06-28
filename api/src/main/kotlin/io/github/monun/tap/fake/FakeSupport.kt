@@ -16,8 +16,8 @@
 
 package io.github.monun.tap.fake
 
-import com.comphenix.protocol.events.PacketContainer
 import io.github.monun.tap.loader.LibraryLoader
+import io.github.monun.tap.protocol.PacketContainer
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.World
