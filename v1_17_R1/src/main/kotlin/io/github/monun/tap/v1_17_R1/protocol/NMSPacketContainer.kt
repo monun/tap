@@ -58,7 +58,7 @@ class NMSPacketContainer(private val packet: Packet<*>) : PacketContainer {
     }
 
     private fun sendTo(player: ServerPlayer) {
-        player.connection?.send(packet)
+        player.connection?.send(packet, null)
     }
 
     companion object {
