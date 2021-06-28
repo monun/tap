@@ -1,8 +1,5 @@
 # Tap
 
-[![Build Status](https://travis-ci.com/monun/tap.svg?branch=master)](https://travis-ci.com/monun/tap)
-[![JitPack](https://jitpack.io/v/monun/tap.svg)](https://jitpack.io/#monun/tap)
-
 ## Kotlin으로 작성된 Paper 라이브러리
 
 #### 지원 기능
@@ -53,8 +50,12 @@ dependencies {
   spigot을 배포하세요.
 * `./gradlew setupWorkspace` 명령으로 간단하게 배포할수있습니다.
 
-<br>
-<br>
+### 기여자
+
+* [patrick-choe](https://github.com/patrick-choe)
+  * java 소스 코드 제거
+  * mojang-mapping 빌드환경 구축
+  * mavenCentral 배포
 
 
 [![Jetbrains](https://i.ibb.co/fp0CyZ7/jetbrains.png)](https://jb.gg/OpenSource)
