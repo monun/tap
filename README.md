@@ -16,25 +16,36 @@
 * GitHub를 통한 업데이트 (BETA)
 * Tick 기반 태스크 스케쥴러 (Ticker)
 
-### 환경
+#### 환경
 
 * JDK 16
 * Kotlin 1.5.20
 * Paper 1.17
 
-### Gradle
+#### Gradle
 
 ```groovy
 repositories {
-    ...
-    mavenCentral
+    mavenCentral()
 }
-
 ...
 dependencies {
-    implementation 'io.github.monun:tap:Tag'
+    implementation 'io.github.monun:tap:4.0.0-RC'
 }
-``` 
+```
+
+#### 빌드
+
+> ##### 1.17+
+> * plugin.yml에 라이브러리 정보를 아래와 같이 입력하세요.
+> ```yaml
+> name: ...
+> main: ...
+> version: ...
+> ...
+> libraries:
+>   - io.github.monun:tap:4.0.0
+> ```
 
 ### NOTE
 
