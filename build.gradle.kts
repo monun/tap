@@ -1,4 +1,3 @@
-import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import de.undercouch.gradle.tasks.download.Download
 import net.md_5.specialsource.Jar
 import net.md_5.specialsource.JarMapping
@@ -7,13 +6,13 @@ import net.md_5.specialsource.provider.JarProvider
 import net.md_5.specialsource.provider.JointProvider
 import org.apache.tools.ant.taskdefs.condition.Os
 import java.io.OutputStream.nullOutputStream
-
 import org.gradle.jvm.tasks.Jar as GradleJar
 
 plugins {
     kotlin("jvm") version "1.5.20"
-    id("com.github.johnrengelman.shadow") version "7.0.0"
     `maven-publish`
+    signing
+    id("org.jetbrains.dokka") version "1.4.32"
 }
 
 buildscript {
@@ -39,14 +38,12 @@ allprojects {
         mavenCentral()
         maven(url = "https://oss.sonatype.org/content/repositories/snapshots/")
         maven(url = "https://papermc.io/repo/repository/maven-public/")
-        maven(url = "https://repo.dmulloy2.net/repository/public/")
         mavenLocal()
     }
 
     dependencies {
-        compileOnly(kotlin("stdlib"))
-        compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.0")
-
+        implementation(kotlin("stdlib"))
+        implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.0")
         implementation("org.mariuszgromada.math:MathParser.org-mXparser:4.4.2")
 
         testImplementation("org.junit.jupiter:junit-jupiter-api:5.7.0")
@@ -65,10 +62,6 @@ allprojects {
 project(":paper") {
     dependencies {
         implementation(project(":api"))
-
-        subprojects.filter { it.name != path }.forEach { subproject ->
-            implementation(subproject)
-        }
     }
 }
 
@@ -90,83 +83,73 @@ subprojects {
         dependencies {
             implementation(project(":api"))
         }
-
-        tasks {
-            jar {
-                doLast {
-                    if (!gradle.taskGraph.hasTask(":debugJar")) {
-                        fun remap(jarFile: File, outputFile: File, mappingFile: File, reversed: Boolean = false) {
-                            val inputJar = Jar.init(jarFile)
-
-                            val mapping = JarMapping()
-                            mapping.loadMappings(mappingFile.canonicalPath, reversed, false, null, null)
-
-                            val provider = JointProvider()
-                            provider.add(JarProvider(inputJar))
-                            mapping.setFallbackInheritanceProvider(provider)
-
-                            val mapper = JarRemapper(mapping)
-                            mapper.remapJar(inputJar, outputFile)
-                            inputJar.close()
-                        }
-
-                        val archiveFile = archiveFile.get().asFile
-
-                        val obfOutput = File(archiveFile.parentFile, "remapped-obf.jar")
-                        val spigotOutput = File(archiveFile.parentFile, "remapped-spigot.jar")
-
-                        val mojangMapping = configurations.named("mojangMapping").get().firstOrNull()
-                        val spigotMapping = configurations.named("spigotMapping").get().firstOrNull()
-
-                        if (mojangMapping != null && spigotMapping != null) {
-                            remap(archiveFile, obfOutput, mojangMapping, true)
-                            remap(obfOutput, spigotOutput, spigotMapping)
-
-                            spigotOutput.copyTo(archiveFile, true)
-                            obfOutput.delete()
-                            spigotOutput.delete()
-                        } else {
-                            logger.warn("Mojang and Spigot mapping should be specified for ${
-                                path.drop(1).takeWhile { it != ':' }
-                            }.")
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-dependencies {
-    subprojects {
-        implementation(this)
     }
 }
 
 tasks {
     jar {
-        subprojects.filter { it.name != ":paper" }.forEach { subproject ->
-            from(subproject.sourceSets["main"].output)
+        from(project(":paper").sourceSets["main"].output)
+
+        val targetProjects = subprojects.filter { it.path != ":paper" }.onEach { from(it.sourceSets["main"].output) }
+        val nmsProjects = targetProjects.filter { it.path != ":api" }
+
+        doLast {
+            fun remap(jarFile: File, outputFile: File, mappingFile: File, reversed: Boolean = false) {
+                val inputJar = Jar.init(jarFile)
+
+                val mapping = JarMapping()
+                mapping.loadMappings(mappingFile.canonicalPath, reversed, false, null, null)
+
+                val provider = JointProvider()
+                provider.add(JarProvider(inputJar))
+                mapping.setFallbackInheritanceProvider(provider)
+
+                val mapper = JarRemapper(mapping)
+                mapper.remapJar(inputJar, outputFile)
+                inputJar.close()
+            }
+
+            val archiveFile = archiveFile.get().asFile
+
+            val obfOutput = File(archiveFile.parentFile, "remapped-obf.jar")
+            val spigotOutput = File(archiveFile.parentFile, "remapped-spigot.jar")
+
+            nmsProjects.forEach { nmsProject ->
+                val configurations = nmsProject.configurations
+                val mojangMapping = configurations.named("mojangMapping").get().firstOrNull()
+                val spigotMapping = configurations.named("spigotMapping").get().firstOrNull()
+
+                if (mojangMapping != null && spigotMapping != null) {
+                    remap(archiveFile, obfOutput, mojangMapping, true)
+                    remap(obfOutput, spigotOutput, spigotMapping)
+
+                    spigotOutput.copyTo(archiveFile, true)
+                    obfOutput.delete()
+                    spigotOutput.delete()
+                    println("Successfully obfuscate jar (${nmsProject.name})")
+                } else {
+                    logger.warn("Mojang and Spigot mapping should be specified for ${
+                        path.drop(1).takeWhile { it != ':' }
+                    }.")
+                }
+            }
         }
     }
     create<GradleJar>("sourcesJar") {
         archiveClassifier.set("sources")
+
         for (subproject in subprojects) {
             from(subproject.sourceSets["main"].allSource)
         }
     }
-    shadowJar {
-        archiveClassifier.set("") // for publish
-        exclude("LICENSE.txt") // mpl
-        dependencies { exclude(project(":paper")) }
-        relocate("org.mariuszgromada.math", "${rootProject.group}.${rootProject.name}.org.mariuszgromada.math")
-    }
-    create<ShadowJar>("debugJar") {
+    create<GradleJar>("debugJar") {
         archiveBaseName.set("Tap")
         archiveVersion.set("") // For bukkit plugin update
         archiveClassifier.set("DEBUG")
-        from(sourceSets["main"].output)
-        configurations = listOf(project.configurations.implementation.get().apply { isCanBeResolved = true })
+
+        subprojects.forEach { subproject ->
+            from(subproject.sourceSets["main"].output)
+        }
 
         var dest = File(rootDir, ".debug/plugins")
         val pluginName = archiveFileName.get()
@@ -174,13 +157,13 @@ tasks {
         if (pluginFile.exists()) dest = File(dest, "update")
 
         doLast {
-//            dest.mkdirs()
             copy {
                 from(archiveFile)
                 into(dest)
             }
         }
     }
+
     create<DefaultTask>("setupWorkspace") {
         doLast {
             val versions = arrayOf(
@@ -277,16 +260,75 @@ tasks {
             }
         }
     }
-    build {
-        finalizedBy(shadowJar)
-    }
 }
 
 publishing {
     publications {
-        create<MavenPublication>("Tap") {
-            project.shadow.component(this)
+        create<MavenPublication>(rootProject.name) {
+            from(components["java"])
             artifact(tasks["sourcesJar"])
+            artifact(tasks["dokkaJar"])
+
+            repositories {
+                mavenLocal()
+
+                maven {
+                    name = "central"
+
+                    credentials.runCatching {
+                        val nexusUsername: String by project
+                        val nexusPassword: String by project
+                        username = nexusUsername
+                        password = nexusPassword
+                    }.onFailure {
+                        logger.warn("Failed to load nexus credentials, Check the gradle.properties")
+                    }
+
+                    url = uri(
+                        if ("SNAPSHOT" in version) {
+                            "https://s01.oss.sonatype.org/content/repositories/snapshots/"
+                        } else {
+                            "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
+                        }
+                    )
+                }
+            }
+
+            pom {
+                name.set(rootProject.name)
+                description.set("Paper plugin library")
+                url.set("https://github.com/monun/tap")
+
+                licenses {
+                    license {
+                        name.set("GNU General Public License version 3")
+                        url.set("https://opensource.org/licenses/GPL-3.0")
+                    }
+                }
+
+                developers {
+                    developer {
+                        id.set("monun")
+                        name.set("Monun")
+                        email.set("monun1010@gmail.com")
+                        url.set("https://github.com/monun")
+                        roles.addAll("developer")
+                        timezone.set("Asia/Seoul")
+                    }
+                }
+
+                scm {
+                    connection.set("scm:git:git://github.com/monun/tap.git")
+                    developerConnection.set("scm:git:ssh://github.com:monun/tap.git")
+                    url.set("https://github.com/monun/tap")
+                }
+            }
         }
     }
+}
+
+signing {
+    isRequired = true
+    sign(tasks["sourcesJar"], tasks["dokkaJar"], tasks["jar"])
+    sign(publishing.publications[rootProject.name])
 }
