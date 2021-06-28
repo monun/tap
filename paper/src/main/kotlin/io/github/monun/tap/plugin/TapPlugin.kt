@@ -16,6 +16,11 @@
 
 package io.github.monun.tap.plugin
 
+import io.github.monun.tap.protocol.PacketSupport
 import org.bukkit.plugin.java.JavaPlugin
 
-class TapPlugin : JavaPlugin()
+class TapPlugin : JavaPlugin() {
+    override fun onEnable() {
+        PacketSupport.INSTANCE.mount(1, intArrayOf(1))
+    }
+}
