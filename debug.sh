@@ -1,6 +1,6 @@
 #!/bin/bash
 
-./gradlew clean setupDebugServer
+#./gradlew clean setupDebugServer
 # To Update Paper:
 # ./gradlew clean setupDebugServer -PupdatePaper
 
