@@ -197,7 +197,7 @@ class NMSPacketSupport : PacketSupport {
     ): NMSPacketContainer {
         val byteBuf = FriendlyByteBuf(Unpooled.buffer())
 
-        byteBuf.writeVarInt(entityId)
+        byteBuf.writeInt(entityId)
         byteBuf.writeByte(data.toInt())
 
         val packet = ClientboundEntityEventPacket(byteBuf)
