@@ -21,6 +21,7 @@ import io.github.monun.tap.fake.createFakeEntity
 import io.github.monun.tap.protocol.PacketSupport
 import io.github.monun.tap.protocol.toProtocolDegrees
 import io.github.monun.tap.protocol.toProtocolDelta
+import io.github.monun.tap.v1_17_R1.fake.NMSEntityTypes
 import io.netty.buffer.Unpooled
 import net.minecraft.network.FriendlyByteBuf
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket
@@ -44,7 +45,6 @@ import org.bukkit.inventory.ItemStack
 import org.bukkit.util.Vector
 import java.util.UUID
 
-import net.minecraft.world.entity.EntityType as NMSEntityType
 import net.minecraft.world.entity.EquipmentSlot as NMSEquipmentSlot
 
 private fun EquipmentSlot.toNMS(): NMSEquipmentSlot {
@@ -71,6 +71,8 @@ class NMSPacketSupport : PacketSupport {
         objectId: Int,
         velocity: Vector
     ): NMSPacketContainer {
+        val entityClass = type.entityClass ?: throw IllegalArgumentException("Unknown EntityType: ${type.name}")
+
         val packet = ClientboundAddEntityPacket(
             entityId,
             uuid,
@@ -79,7 +81,7 @@ class NMSPacketSupport : PacketSupport {
             z,
             yaw,
             pitch,
-            NMSEntityType.byString(type.name).get(),
+            NMSEntityTypes.findType(entityClass),
             objectId,
             CraftVector.toNMS(velocity)
         )
@@ -197,7 +199,7 @@ class NMSPacketSupport : PacketSupport {
     ): NMSPacketContainer {
         val byteBuf = FriendlyByteBuf(Unpooled.buffer())
 
-        byteBuf.writeVarInt(entityId)
+        byteBuf.writeInt(entityId)
         byteBuf.writeByte(data.toInt())
 
         val packet = ClientboundEntityEventPacket(byteBuf)

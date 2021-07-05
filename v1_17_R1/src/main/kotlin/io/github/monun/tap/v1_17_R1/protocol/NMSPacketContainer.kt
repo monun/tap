@@ -24,6 +24,6 @@ import org.bukkit.entity.Player
 
 class NMSPacketContainer(private val packet: Packet<*>) : PacketContainer {
     override fun sendTo(player: Player) {
-        (player as CraftPlayer).handle.connection.send(packet)
+        (player as CraftPlayer).handle.connection.send(packet, null)
     }
 }
