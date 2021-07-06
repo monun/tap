@@ -46,8 +46,8 @@ allprojects {
         implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.0")
         implementation("org.mariuszgromada.math:MathParser.org-mXparser:4.4.2")
 
-        testImplementation("org.junit.jupiter:junit-jupiter-api:5.7.0")
-        testImplementation("org.junit.jupiter:junit-jupiter-engine:5.7.0")
+        testImplementation("org.junit.jupiter:junit-jupiter-api:5.7.2")
+        testImplementation("org.junit.jupiter:junit-jupiter-engine:5.7.2")
         testImplementation("org.mockito:mockito-core:3.6.28")
         testImplementation("org.spigotmc:spigot:1.17-R0.1-SNAPSHOT:remapped-mojang")
     }
