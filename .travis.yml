@@ -1,9 +1,8 @@
 language: java
-jdk: openjdk8
+jdk: openjdk16
 branches:
   only:
     - master
-    - legacy-jdk8
 
 before_install:
   - chmod +x ./gradlew
