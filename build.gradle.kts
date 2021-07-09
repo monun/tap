@@ -102,6 +102,11 @@ subprojects {
 }
 
 tasks {
+    create<Copy>("publishJavadocToGithubPages") {
+        dependsOn(project(":api").tasks["dokkaHtml"])
+        from("${project(":api").buildDir}/dokka/html")
+        into("${project.projectDir}/docs/")
+    }
     jar {
         from(project(":paper").sourceSets["main"].output)
 
