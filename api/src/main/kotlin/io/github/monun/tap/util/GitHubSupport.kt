@@ -25,6 +25,7 @@ import org.bukkit.plugin.java.JavaPlugin
 import java.io.File
 import java.net.HttpURLConnection
 import java.net.URL
+import java.util.concurrent.CompletableFuture
 
 object GitHubSupport {
     private const val GITHUB_API = "https://api.github.com"
@@ -168,7 +169,8 @@ fun JavaPlugin.updateFromGitHubMagically(
     project: String,
     asset: String,
     reciever: ((String) -> Unit)? = null
-) {
+): CompletableFuture<File> {
+    val future = CompletableFuture<File>()
     reciever?.invoke("Attempt to update.")
 
     GlobalScope.launch {
@@ -177,6 +179,7 @@ fun JavaPlugin.updateFromGitHubMagically(
                 reciever?.run {
                     invoke("Updated successfully. Applies after the server restarts.")
                     invoke(url)
+                    future.complete(updateFile)
                 }
             }
             onFailure { t ->
@@ -188,4 +191,5 @@ fun JavaPlugin.updateFromGitHubMagically(
             }
         }
     }
+    return future
 }
