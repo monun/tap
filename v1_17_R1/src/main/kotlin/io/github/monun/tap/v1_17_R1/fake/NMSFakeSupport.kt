@@ -20,7 +20,6 @@ import io.github.monun.tap.fake.FakeSupport
 import io.github.monun.tap.v1_17_R1.protocol.NMSPacketContainer
 import net.minecraft.core.Registry
 import net.minecraft.world.entity.item.FallingBlockEntity
-import net.minecraft.world.entity.item.ItemEntity
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.World
@@ -28,11 +27,8 @@ import org.bukkit.block.data.BlockData
 import org.bukkit.craftbukkit.v1_17_R1.CraftWorld
 import org.bukkit.craftbukkit.v1_17_R1.block.data.CraftBlockData
 import org.bukkit.craftbukkit.v1_17_R1.entity.CraftEntity
-import org.bukkit.craftbukkit.v1_17_R1.inventory.CraftItemStack
 import org.bukkit.entity.Entity
 import org.bukkit.entity.FallingBlock
-import org.bukkit.entity.Item
-import org.bukkit.inventory.ItemStack
 
 /**
  * @author Nemo
@@ -110,19 +106,5 @@ class NMSFakeSupport : FakeSupport {
         entity.tickCount = 1
 
         return entity.bukkitEntity as FallingBlock
-    }
-
-    override fun createItemEntity(item: ItemStack): Item {
-        val entity =
-            ItemEntity(
-                (Bukkit.getWorlds().first() as CraftWorld).handle,
-                0.0,
-                0.0,
-                0.0,
-                CraftItemStack.asNMSCopy(item)
-            )
-        entity.setNeverPickUp()
-
-        return entity.bukkitEntity as Item
     }
 }
