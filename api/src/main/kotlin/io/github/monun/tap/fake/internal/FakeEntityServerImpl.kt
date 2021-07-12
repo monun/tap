@@ -28,6 +28,7 @@ import org.bukkit.event.HandlerList
 import org.bukkit.event.Listener
 import org.bukkit.event.entity.PlayerDeathEvent
 import org.bukkit.event.player.PlayerQuitEvent
+import org.bukkit.inventory.ItemStack
 import org.bukkit.plugin.java.JavaPlugin
 import java.util.*
 import kotlin.collections.ArrayList
@@ -75,6 +76,17 @@ class FakeEntityServerImpl(plugin: JavaPlugin) : FakeEntityServer {
             setLocation(location)
         }
         val fakeEntity = FakeEntityImpl(this, bukkitFallingBlock, location)
+        _entities += fakeEntity
+        enqueue(fakeEntity)
+
+        return fakeEntity
+    }
+
+    override fun dropItem(location: Location, item: ItemStack): FakeEntity {
+        val bukkitItemEntity = createItemEntity(item).apply {
+            setLocation(location)
+        }
+        val fakeEntity = FakeEntityImpl(this, bukkitItemEntity, location)
         _entities += fakeEntity
         enqueue(fakeEntity)
 

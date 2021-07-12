@@ -21,6 +21,7 @@ import org.bukkit.Location
 import org.bukkit.block.data.BlockData
 import org.bukkit.entity.Entity
 import org.bukkit.entity.Player
+import org.bukkit.inventory.ItemStack
 import org.bukkit.plugin.java.JavaPlugin
 
 interface FakeEntityServer {
@@ -35,6 +36,8 @@ interface FakeEntityServer {
     fun spawnEntity(location: Location, clazz: Class<out Entity>): FakeEntity
 
     fun spawnFallingBlock(location: Location, blockData: BlockData): FakeEntity
+
+    fun dropItem(location: Location, item: ItemStack): FakeEntity
 
     fun addPlayer(player: Player)
 
