@@ -24,6 +24,8 @@ import org.bukkit.World
 import org.bukkit.block.data.BlockData
 import org.bukkit.entity.Entity
 import org.bukkit.entity.FallingBlock
+import org.bukkit.entity.Item
+import org.bukkit.inventory.ItemStack
 
 /**
  * @author Nemo
@@ -46,6 +48,8 @@ interface FakeSupport {
     fun createSpawnPacket(entity: Entity): PacketContainer
 
     fun createFallingBlock(blockData: BlockData): FallingBlock
+
+    fun createItemEntity(item: ItemStack): Item
 }
 
 internal val FakeSupportNMS = LibraryLoader.load(FakeSupport::class.java)
@@ -81,4 +85,8 @@ fun Entity.createSpawnPacket(): PacketContainer {
 
 fun createFallingBlock(blockData: BlockData): FallingBlock {
     return FakeSupportNMS.createFallingBlock(blockData)
+}
+
+fun createItemEntity(item: ItemStack): Item {
+    return FakeSupportNMS.createItemEntity(item)
 }
