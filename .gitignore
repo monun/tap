@@ -10,11 +10,9 @@ build/
 !gradle-wrapper.jar
 !gradle-wrapper.properties
 
-# Avoid ignoring Jitpack jar file (.jar files are usually ignored)
-!jitpack.jar
+# Debug server folder
+.debug-mojang/
+.debug-paper/
 
-# Buildtools
+# BuildTools
 .buildtools/
-
-# Debug
-.debug/

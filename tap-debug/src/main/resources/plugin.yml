@@ -1,0 +1,6 @@
+name: ${rootProject.name.capitalize()}
+version: $version
+main: $group.${rootProject.name}.plugin.${rootProject.name.capitalize()}Plugin
+libraries:
+  - org.jetbrains.kotlin:kotlin-stdlib:1.5.20
+  - org.mariuszgromada.math:MathParser.org-mXparser:4.4.2
