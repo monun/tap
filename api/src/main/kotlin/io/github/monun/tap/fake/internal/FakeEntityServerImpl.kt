@@ -71,7 +71,9 @@ class FakeEntityServerImpl(plugin: JavaPlugin) : FakeEntityServer {
     }
 
     override fun spawnFallingBlock(location: Location, blockData: BlockData): FakeEntity {
-        val bukkitFallingBlock = createFallingBlock(blockData)
+        val bukkitFallingBlock = createFallingBlock(blockData).apply {
+            setLocation(location)
+        }
         val fakeEntity = FakeEntityImpl(this, bukkitFallingBlock, location)
         _entities += fakeEntity
         enqueue(fakeEntity)
