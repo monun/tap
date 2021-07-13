@@ -6,7 +6,7 @@
 
 ---
 
-### 4.1.0
+### 4.1.0 (BUG)
 
 * Kotlin 2.1.0
 * pom에 dependencies가 빠져있던 버그 수정
