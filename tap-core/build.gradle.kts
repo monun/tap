@@ -90,7 +90,6 @@ tasks {
     }
 
     register<Jar>("paperJar") {
-        from(project(":tap-api").sourceSets["main"].output)
         from(sourceSets["main"].output)
 
         subprojects.forEach {
@@ -119,6 +118,7 @@ publishing {
     publications {
         register<MavenPublication>("tap") {
             artifactId = "tap"
+
             from(components["java"])
             artifact(tasks["paperJar"])
             artifact(tasks["sourcesJar"])
