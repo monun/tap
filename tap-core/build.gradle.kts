@@ -119,7 +119,6 @@ publishing {
     publications {
         register<MavenPublication>("tap") {
             artifactId = "tap"
-
             from(components["java"])
             artifact(tasks["paperJar"])
             artifact(tasks["sourcesJar"])
