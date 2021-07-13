@@ -1,15 +1,26 @@
 ---
+
+### 4.1.1
+
+* 배포시 tap-api가 빠지던 버그 수정
+
+---
+
 ### 4.1.0
+
 * Kotlin 2.1.0
 * pom에 dependencies가 빠져있던 버그 수정
+
 ---
+
 ### 4.0.0
 
 #### Structure
+
 * 멀티 프로젝트 정리
-  * :api -> :tap-api
-  * :core -> :api 의 internal 패키지 분리 
-  * nms(:v1_xx_Rx) -> :tap-core:v1_XX_X
+    * :api -> :tap-api
+    * :core -> :api 의 internal 패키지 분리
+    * nms(:v1_xx_Rx) -> :tap-core:v1_XX_X
 
 #### Environment
 
@@ -31,7 +42,7 @@
 
 #### Changes
 
-* `Any#computeConfig` 확장 함수를 `ConfigSupport#computeConfig` 함수로 변경 
+* `Any#computeConfig` 확장 함수를 `ConfigSupport#computeConfig` 함수로 변경
 * Support 인스턴스를 Companion으로 변경 `PacketSupport.INSTANCE.func()) -> PacketSupport.func()`
 * `GitHubSupport#updateFromGitHubMagically` 함수 향상
 * 버전 식별자 추가
