@@ -21,8 +21,10 @@ buildscript {
     }
 }
 
+val api = project(":tap-api")
+
 dependencies {
-    implementation(project(":tap-api"))
+    implementation(api)
 }
 
 subprojects {
@@ -37,7 +39,7 @@ subprojects {
     }
 
     dependencies {
-        implementation(project(":tap-api"))
+        implementation(api)
         implementation(requireNotNull(parent)) // core
     }
 
@@ -83,7 +85,11 @@ subprojects {
 }
 
 tasks {
-    create<Jar>("paperJar") {
+    jar {
+        archiveClassifier.set("core")
+    }
+
+    register<Jar>("paperJar") {
         from(project(":tap-api").sourceSets["main"].output)
         from(sourceSets["main"].output)
 
@@ -94,12 +100,12 @@ tasks {
         }
     }
 
-    create<Jar>("sourcesJar") {
+    register<Jar>("sourcesJar") {
         archiveClassifier.set("sources")
-        from(sourceSets["main"].allSource)
+        (listOf(project) + subprojects).forEach { from(it.sourceSets["main"].allSource) }
     }
 
-    create<Jar>("dokkaJar") {
+    register<Jar>("dokkaJar") {
         archiveClassifier.set("javadoc")
         dependsOn("dokkaHtml")
 
@@ -111,9 +117,10 @@ tasks {
 
 publishing {
     publications {
-        create<MavenPublication>("tap") {
+        register<MavenPublication>("tap") {
             artifactId = "tap"
 
+            from(components["java"])
             artifact(tasks["paperJar"])
             artifact(tasks["sourcesJar"])
             artifact(tasks["dokkaJar"])
@@ -178,6 +185,6 @@ publishing {
 
 signing {
     isRequired = true
-    sign(tasks["paperJar"], tasks["sourcesJar"], tasks["dokkaJar"])
+    sign(tasks.jar.get(), tasks["paperJar"], tasks["sourcesJar"], tasks["dokkaJar"])
     sign(publishing.publications["tap"])
 }
