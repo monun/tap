@@ -50,7 +50,7 @@ annotation class RangeDouble(val min: Double = java.lang.Double.MIN_VALUE, val m
 @Retention(AnnotationRetention.RUNTIME)
 annotation class Name(val value: String)
 
-private object PrimitiveSupport {
+object ConfigSupport {
     private val primitiveAdapters = HashMap<Class<*>, (Field, Any) -> Any>()
 
     init {
@@ -95,12 +95,10 @@ private object PrimitiveSupport {
         }
     }
 
-    fun findAdapter(type: Class<*>): ((Field, Any) -> Any)? {
+    private fun findAdapter(type: Class<*>): ((Field, Any) -> Any)? {
         return primitiveAdapters[type]
     }
-}
 
-object ConfigSupport {
     /**
      * 설정을 인스턴스의 [Config] 속성에 적용합니다.
      * 결손된 값이 있다면 설정에 저장하고 **true**를 반환합니다.
@@ -116,24 +114,23 @@ object ConfigSupport {
      * @see RangeFloat
      * @see RangeDouble
      */
-    fun computeConfig(target: Any, config: ConfigurationSection, separateByClass: Boolean = false): Boolean {
+    fun compute(target: Any, config: ConfigurationSection, separateByClass: Boolean = false): Boolean {
         var absent = false
-        val configurables = javaClass.getConfigurables()
+        val configurables = target.javaClass.getConfigurables()
 
         for ((clazz, list) in configurables) {
             val sectionPath = if (separateByClass) clazz.configKey else ""
             var section = if (sectionPath.isNotBlank()) config.getConfigurationSection(sectionPath) else config
 
             for ((field, settings) in list) {
-                val key = settings.value.let { if (it.isNotBlank()) it else field.name.toConfigKey() }
-
+                val key = settings.value.let { it.ifBlank { field.name.toConfigKey() } }
                 var value = section?.get(key)
 
                 if (value != null) {
                     val type = field.type
                     when {
                         type.isPrimitive -> {
-                            value = PrimitiveSupport.findAdapter(type)?.invoke(field, value)
+                            value = findAdapter(type)?.invoke(field, value)
                         }
                         type.isEnum -> {
                             try {
@@ -205,10 +202,10 @@ object ConfigSupport {
      * @see RangeFloat
      * @see RangeDouble
      */
-    fun computeConfig(target: Any, configFile: File, separateByClass: Boolean = false): Boolean {
+    fun compute(target: Any, configFile: File, separateByClass: Boolean = false): Boolean {
         if (!configFile.exists()) {
             val config = YamlConfiguration()
-            computeConfig(target, config)
+            compute(target, config)
             config.save(configFile)
 
             return true
@@ -216,7 +213,7 @@ object ConfigSupport {
 
         val config = YamlConfiguration.loadConfiguration(configFile)
 
-        if (computeConfig(target, config, separateByClass)) {
+        if (compute(target, config, separateByClass)) {
             config.save(configFile)
 
             return true
@@ -297,4 +294,8 @@ private fun String.toConfigKey(): String {
     }
 
     return builder.toString()
+}
+
+fun ConfigurationSection.compute(target: Any, separateByClass: Boolean = false): Boolean {
+    return ConfigSupport.compute(target, this, separateByClass)
 }

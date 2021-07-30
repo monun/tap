@@ -18,57 +18,21 @@
 
 package io.github.monun.tap.plugin
 
-import io.github.monun.tap.fake.FakeEntityServer
-import org.bukkit.entity.Creeper
-import org.bukkit.event.EventHandler
-import org.bukkit.event.Listener
-import org.bukkit.event.block.Action
-import org.bukkit.event.player.PlayerInteractEvent
-import org.bukkit.event.player.PlayerJoinEvent
-import org.bukkit.event.player.PlayerQuitEvent
+import io.github.monun.tap.config.Config
+import io.github.monun.tap.config.compute
+import org.bukkit.configuration.file.YamlConfiguration
 import org.bukkit.plugin.java.JavaPlugin
 
 class TapPlugin : JavaPlugin() {
+    @Config
+    var a = "A"
+    @Config
+    var b = "B"
+
     override fun onEnable() {
-        val fakeEntityServer = FakeEntityServer.create(this)
-        server.apply {
-            scheduler.runTaskTimer(this@TapPlugin, fakeEntityServer::update, 0L, 1L)
-            pluginManager.registerEvents(EventListener(this@TapPlugin, fakeEntityServer), this@TapPlugin)
-        }
-    }
-}
-
-class EventListener(
-    private val plugin: JavaPlugin,
-    private val fakeEntityServer: FakeEntityServer
-) : Listener {
-    @EventHandler
-    fun onPlayerJoin(event: PlayerJoinEvent) {
-        fakeEntityServer.addPlayer(event.player)
-    }
-
-    @EventHandler
-    fun onPlayerQuit(event: PlayerQuitEvent) {
-        fakeEntityServer.removePlayer(event.player)
-    }
-
-    @EventHandler
-    fun onPlayerInteract(event: PlayerInteractEvent) {
-        val action = event.action
-
-        if (action == Action.LEFT_CLICK_AIR) {
-
-            val player = event.player
-            val location = player.location.apply {
-                add(direction.multiply(10))
-            }
-            val fakeEntity = fakeEntityServer.spawnEntity(location, Creeper::class.java)
-
-            plugin.server.scheduler.runTaskTimer(plugin, Runnable {
-                fakeEntity.moveTo(player.location.apply { add(direction.multiply(10)) })
-            }, 0L, 1L)
-        } else if (action == Action.RIGHT_CLICK_AIR) {
-            fakeEntityServer.entities.forEach { it.remove() }
-        }
+        val config = YamlConfiguration()
+        val absent = config.compute(this)
+        println(config.saveToString())
+        println(absent)
     }
 }

@@ -25,7 +25,9 @@ import io.github.monun.tap.fake.mountedYOffset
 import io.github.monun.tap.fake.setLocation
 import io.github.monun.tap.protocol.PacketSupport
 import io.github.monun.tap.protocol.sendPacket
-import io.github.monun.tap.ref.UpstreamReference
+import io.github.monun.tap.ref.Weaky
+import io.github.monun.tap.ref.getValue
+import io.github.monun.tap.ref.weaky
 import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.entity.ArmorStand
@@ -43,10 +45,7 @@ class FakeEntityImpl internal constructor(
     override val bukkitEntity: Entity,
     location: Location
 ) : FakeEntity {
-    private val serverRef = UpstreamReference(server)
-
-    override val server: FakeEntityServerImpl
-        get() = serverRef.get()
+    override val server by weaky(server)
 
     override val location: Location
         get() = currentLocation.clone()

@@ -1,3 +1,15 @@
+### 4.1.2
+
+* kotlin-reflect 의존성에 추가
+* `ConfigSupport`가 제대로 동작하지 않던 버그 수정
+* 함수 이름 변경 `ConfigSupport#computeConfig` -> `compute`
+* 최상위 확장 함수 추가 `ConfigurationSection#compute(Any)`
+* `UpstreamReference`를 `Weaky`로 변경
+* 활용이 애매한 클래스 제거
+    * `Refery`
+
+---
+
 ### 4.1.1
 
 * 배포시 tap-api가 빠지던 버그 수정

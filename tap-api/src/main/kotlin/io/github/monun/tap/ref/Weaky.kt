@@ -18,15 +18,40 @@
 
 package io.github.monun.tap.ref
 
-import java.lang.ref.Reference
+import org.jetbrains.annotations.NotNull
+import java.lang.ref.ReferenceQueue
 import java.lang.ref.WeakReference
+import kotlin.reflect.KProperty
 
+class Weaky<T> : WeakReference<T> {
+    internal constructor(referent: T) : super(referent)
+    internal constructor(
+        referent: T, q: ReferenceQueue<in T>
+    ) : super(referent, q)
 
-interface Weaky<T> : Refery<T>
+    @NotNull
+    override fun get(): T {
+        return super.get()
+            ?: throw IllegalStateException("Cannot get reference as it has already been Garbage Collected")
+    }
 
-private class WeakyImpl<T>(initValue: T?, supplier: () -> T) : ReferyImpl<T>(initValue, supplier), Weaky<T> {
-    override fun refer(value: T?): Reference<T> = WeakReference(value)
+    override fun hashCode(): Int {
+        return get().hashCode()
+    }
+
+    override fun equals(other: Any?): Boolean {
+        return get() == other
+    }
+
+    override fun toString(): String {
+        return get().toString()
+    }
 }
 
-fun <T> weaky(initValue: T? = null, supplier: () -> T): Weaky<T> = WeakyImpl(initValue, supplier)
+fun <T> weaky(referent: T) = Weaky(referent)
 
+fun <T> weaky(referent: T, queue: ReferenceQueue<in T>) = Weaky(referent, queue)
+
+operator fun <T> Weaky<T>.getValue(thisRef: Any?, property: KProperty<*>): T {
+    return get()
+}

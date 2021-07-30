@@ -18,7 +18,7 @@
 
 package io.github.monun.tap.task
 
-import io.github.monun.tap.ref.UpstreamReference
+import io.github.monun.tap.ref.Weaky
 
 /**
  * Ticker에 등록된 태스크입니다.
@@ -36,7 +36,7 @@ class TickerTask internal constructor(
         internal const val DONE = -3L
     }
 
-    private val schedulerRef = UpstreamReference(ticker)
+    private val schedulerRef = Weaky(ticker)
 
     /**
      * 태스크를 등록한 Ticker 객체입니다

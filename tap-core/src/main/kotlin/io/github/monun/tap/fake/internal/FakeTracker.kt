@@ -20,16 +20,16 @@ package io.github.monun.tap.fake.internal
 
 import io.github.monun.tap.protocol.PacketContainer
 import io.github.monun.tap.protocol.sendPacket
-import io.github.monun.tap.ref.UpstreamReference
+import io.github.monun.tap.ref.Weaky
+import io.github.monun.tap.ref.getValue
+import io.github.monun.tap.ref.weaky
 import org.bukkit.entity.Player
 
 internal class FakeTracker(
     server: FakeEntityServerImpl,
     val player: Player
 ) {
-    private val serverRef = UpstreamReference(server)
-    private val server
-        get() = serverRef.get()
+    private val server by weaky(server)
 
     internal var location = player.location
         private set

@@ -2,8 +2,10 @@ repositories {
     mavenLocal()
 }
 
+val api = project(":tap-api")
+
 dependencies {
-    implementation(project(":tap-api"))
+    implementation(api)
 }
 
 tasks {
@@ -38,6 +40,7 @@ tasks {
         archiveClassifier.set("DEBUG")
         archiveAppendix.set("PAPER")
 
+        from(api.sourceSets["main"].output)
         from(project.sourceSets["main"].output)
 
         (project(":tap-core").tasks.named("paperJar").get() as Jar).let { paperJar ->
