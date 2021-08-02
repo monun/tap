@@ -18,21 +18,65 @@
 
 package io.github.monun.tap.plugin
 
-import io.github.monun.tap.config.Config
-import io.github.monun.tap.config.compute
-import org.bukkit.configuration.file.YamlConfiguration
+import io.github.monun.tap.fake.FakeEntityServer
+import org.bukkit.Bukkit
+import org.bukkit.entity.ArmorStand
+import org.bukkit.event.EventHandler
+import org.bukkit.event.Listener
+import org.bukkit.event.player.PlayerInteractEvent
+import org.bukkit.event.player.PlayerJoinEvent
+import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.plugin.java.JavaPlugin
 
 class TapPlugin : JavaPlugin() {
-    @Config
-    var a = "A"
-    @Config
-    var b = "B"
-
     override fun onEnable() {
-        val config = YamlConfiguration()
-        val absent = config.compute(this)
-        println(config.saveToString())
-        println(absent)
+        FakeTest().apply {
+            register()
+        }
+    }
+}
+
+class FakeTest {
+    private lateinit var fakeEntityServer: FakeEntityServer
+
+    fun JavaPlugin.register() {
+        fakeEntityServer = FakeEntityServer.create(this)
+
+        server.scheduler.runTaskTimer(this, this@FakeTest::update, 0L, 1L)
+        server.pluginManager.registerEvents(object : Listener {
+            @EventHandler
+            fun onJoin(event: PlayerJoinEvent) {
+                fakeEntityServer.addPlayer(event.player)
+            }
+
+            @EventHandler
+            fun onQuit(event: PlayerQuitEvent) {
+                fakeEntityServer.removePlayer(event.player)
+            }
+
+            @EventHandler
+            fun onPlayerInteract(event: PlayerInteractEvent) {
+                event.item?.let { item ->
+                    val fakeItem = fakeEntityServer.spawnItem(
+                        event.player.eyeLocation.apply { add(direction.multiply(5.0)) },
+                        item.clone()
+                    )
+                    val fakeStand = fakeEntityServer.spawnEntity(event.player.eyeLocation.apply { add(direction.multiply(5.0)) }, ArmorStand::class.java).apply {
+                        updateMetadata<ArmorStand> {
+                            isInvisible = true
+                            isMarker = true
+                        }
+                    }
+
+                    fakeStand.addPassenger(fakeItem)
+                }
+            }
+        }, this)
+
+        Bukkit.getOnlinePlayers().forEach { fakeEntityServer.addPlayer(it) }
+    }
+
+    private fun update() {
+        fakeEntityServer.update()
     }
 }

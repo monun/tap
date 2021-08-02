@@ -83,7 +83,7 @@ class FakeEntityServerImpl(plugin: JavaPlugin) : FakeEntityServer {
         return fakeEntity
     }
 
-    override fun dropItem(location: Location, item: ItemStack): FakeEntity {
+    override fun spawnItem(location: Location, item: ItemStack): FakeEntity {
         val bukkitItemEntity = createItemEntity(item).apply {
             setLocation(location)
         }

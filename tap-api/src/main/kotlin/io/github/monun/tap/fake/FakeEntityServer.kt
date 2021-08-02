@@ -35,7 +35,7 @@ interface FakeEntityServer {
 
     fun spawnFallingBlock(location: Location, blockData: BlockData): FakeEntity
 
-    fun dropItem(location: Location, item: ItemStack): FakeEntity
+    fun spawnItem(location: Location, item: ItemStack): FakeEntity
 
     fun addPlayer(player: Player)
 
