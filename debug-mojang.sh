@@ -1,7 +1,9 @@
 #!/bin/bash
 
 server=$HOME/.m2/repository/io/papermc/paper/paper/1.17.1-R0.1-SNAPSHOT/paper-1.17.1-R0.1-SNAPSHOT-mojang-mapped.jar
+
 plugins=(
+'https://github.com/monun/auto-reloader/releases/latest/download/AutoReloader.jar'
 )
 
 script=$(basename "$0")
@@ -27,7 +29,7 @@ server=$server
 debug=true
 debug_port=5005
 backup=false
-restart=false
+force_restart=false
 memory=16
 plugins=(
 EOF
@@ -39,4 +41,4 @@ EOF
 fi
 
 chmod +x ./$server_script
-./$server_script
+./$server_script launch
