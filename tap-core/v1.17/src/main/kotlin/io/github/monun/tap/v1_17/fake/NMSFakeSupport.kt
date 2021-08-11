@@ -109,7 +109,6 @@ class NMSFakeSupport : FakeSupport {
                 0.0,
                 (blockData as CraftBlockData).state
             )
-        entity.tickCount = 1
 
         return entity.bukkitEntity as FallingBlock
     }

@@ -57,18 +57,22 @@ class FakeTest {
             @EventHandler
             fun onPlayerInteract(event: PlayerInteractEvent) {
                 event.item?.let { item ->
-                    val fakeItem = fakeEntityServer.spawnItem(
-                        event.player.eyeLocation.apply { add(direction.multiply(5.0)) },
-                        item.clone()
-                    )
-                    val fakeStand = fakeEntityServer.spawnEntity(event.player.eyeLocation.apply { add(direction.multiply(5.0)) }, ArmorStand::class.java).apply {
-                        updateMetadata<ArmorStand> {
-                            isInvisible = true
-                            isMarker = true
-                        }
-                    }
+                    val type = item.type
 
-                    fakeStand.addPassenger(fakeItem)
+                    if (type.isBlock) {
+                        val fakeFallingBlock = fakeEntityServer.spawnFallingBlock(
+                            event.player.eyeLocation.apply { add(direction.multiply(5.0)) },
+                            type.createBlockData()
+                        )
+                        val fakeStand = fakeEntityServer.spawnEntity(event.player.eyeLocation.apply { add(direction.multiply(5.0)) }, ArmorStand::class.java).apply {
+                            updateMetadata<ArmorStand> {
+                                isInvisible = true
+                                isMarker = true
+                            }
+                        }
+
+                        fakeStand.addPassenger(fakeFallingBlock)
+                    }
                 }
             }
         }, this)
