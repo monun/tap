@@ -64,10 +64,14 @@ internal class FakeTracker(
     internal fun clear() {
         valid = false
 
+        val player = player
+
         trackingEntities.apply {
             for (entity in this) {
                 entity.removeTracker(this@FakeTracker)
+                entity.despawnTo(player)
             }
+
             clear()
         }
     }
