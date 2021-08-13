@@ -23,9 +23,9 @@ import io.github.monun.tap.fake.FakeEntity
 import io.github.monun.tap.fake.createSpawnPacket
 import io.github.monun.tap.fake.mountedYOffset
 import io.github.monun.tap.fake.setLocation
+import io.github.monun.tap.protocol.AnimationType
 import io.github.monun.tap.protocol.PacketSupport
 import io.github.monun.tap.protocol.sendPacket
-import io.github.monun.tap.ref.Weaky
 import io.github.monun.tap.ref.getValue
 import io.github.monun.tap.ref.weaky
 import org.bukkit.Location
@@ -95,7 +95,12 @@ class FakeEntityImpl internal constructor(
                 if ((old == null && current.type != Material.AIR)
                     || !current.isSimilar(old)
                 ) {
-                    trackers.sendServerPacketAll(PacketSupport.entityEquipment(armorStand.entityId, mapOf(slot to current)))
+                    trackers.sendServerPacketAll(
+                        PacketSupport.entityEquipment(
+                            armorStand.entityId,
+                            mapOf(slot to current)
+                        )
+                    )
                 }
             }
         }
@@ -349,19 +354,23 @@ class FakeEntityImpl internal constructor(
                 bukkitEntity.setLocation(to)
                 trackers.sendServerPacketAll(PacketSupport.entityTeleport(bukkitEntity, to))
                 MoveResult.TELEPORT
-            } else { //Relative move
+            } else {
                 val yaw = to.yaw
                 val pitch = to.pitch
 
-                val packet = PacketSupport.relEntityMoveLook(
-                    bukkitEntity.entityId,
-                    deltaX.toShort(),
-                    deltaY.toShort(),
-                    deltaZ.toShort(),
-                    yaw,
-                    pitch,
-                    false
-                )
+                val packet = if (deltaX == 0L && deltaY == 0L && deltaZ == 0L && from.pitch == to.pitch) {
+                    PacketSupport.entityHeadLook(bukkitEntity.entityId, yaw)
+                } else {
+                    PacketSupport.relEntityMoveLook(
+                        bukkitEntity.entityId,
+                        deltaX.toShort(),
+                        deltaY.toShort(),
+                        deltaZ.toShort(),
+                        yaw,
+                        pitch,
+                        false
+                    )
+                }
 
                 deltaLocation.apply {
                     add(moveDelta)

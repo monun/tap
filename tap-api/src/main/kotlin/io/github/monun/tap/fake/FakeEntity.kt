@@ -18,6 +18,7 @@
 
 package io.github.monun.tap.fake
 
+import io.github.monun.tap.protocol.AnimationType
 import org.bukkit.EntityEffect
 import org.bukkit.Location
 import org.bukkit.entity.Entity
@@ -32,7 +33,6 @@ interface FakeEntity {
     val passengers: List<FakeEntity>
     val valid: Boolean
     val dead: Boolean
-
     var isVisible: Boolean
 
     fun addPassenger(passenger: FakeEntity): Boolean
@@ -62,6 +62,10 @@ interface FakeEntity {
 
     @Suppress("DEPRECATION")
     fun playEffect(type: EntityEffect) = playEffect(type.data)
+
+    fun playAnimation(action: Int)
+
+    fun playAnimation(action: AnimationType)
 
     fun excludeTracker(player: Player)
 
