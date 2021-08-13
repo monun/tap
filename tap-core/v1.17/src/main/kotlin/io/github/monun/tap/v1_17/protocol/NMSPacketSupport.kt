@@ -187,6 +187,14 @@ class NMSPacketSupport : PacketSupport {
         return NMSPacketContainer(packet)
     }
 
+    override fun entityHeadLook(entityId: Int, yaw: Float): NMSPacketContainer {
+        val byteBuf = FriendlyByteBuf(Unpooled.buffer())
+        byteBuf.writeVarInt(entityId)
+        byteBuf.writeByte(yaw.toProtocolDegrees())
+
+        return NMSPacketContainer(ClientboundRotateHeadPacket(byteBuf))
+    }
+
     override fun entityStatus(
         entityId: Int,
         data: Byte
@@ -198,6 +206,18 @@ class NMSPacketSupport : PacketSupport {
 
         val packet = ClientboundEntityEventPacket(byteBuf)
         return NMSPacketContainer(packet)
+    }
+
+    override fun entityAnimation(
+        entityId: Int,
+        action: Int
+    ): NMSPacketContainer {
+        val byteBuf = FriendlyByteBuf(Unpooled.buffer())
+
+        byteBuf.writeVarInt(entityId)
+        byteBuf.writeByte(action)
+
+        return NMSPacketContainer(ClientboundAnimatePacket(byteBuf))
     }
 
     override fun mount(

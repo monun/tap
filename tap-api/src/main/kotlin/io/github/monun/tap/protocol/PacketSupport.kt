@@ -35,11 +35,12 @@ fun Double.toProtocolDelta(): Int {
 
 fun Float.toProtocolDegrees(): Int {
     val i = (this * 256.0F / 360.0F).toInt()
+
     return if (i < i.toFloat()) i - 1 else i
 }
 
 interface PacketSupport {
-    companion object: PacketSupport by LibraryLoader.loadNMS(PacketSupport::class.java)
+    companion object : PacketSupport by LibraryLoader.loadNMS(PacketSupport::class.java)
 
     fun spawnEntity(
         entityId: Int,
@@ -129,7 +130,15 @@ interface PacketSupport {
         )
     }
 
+    fun entityHeadLook(entityId: Int, yaw: Float): PacketContainer
+
     fun entityStatus(entityId: Int, data: Byte): PacketContainer
+
+    fun entityAnimation(entityId: Int, action: Int): PacketContainer
+
+    fun entityAnimation(entityId: Int, action: AnimationType): PacketContainer {
+        return entityAnimation(entityId, action.ordinal)
+    }
 
     fun mount(entityId: Int, mountEntityIds: IntArray): PacketContainer
 
