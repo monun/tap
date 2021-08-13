@@ -26,7 +26,7 @@ if [ ! -f "$server_config" ]; then
     cat << EOF > $server_config
 server=$server
 debug=true
-debug_port=5005
+debug_port=25564
 backup=false
 force_restart=false
 memory=16
