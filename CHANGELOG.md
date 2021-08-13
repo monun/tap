@@ -1,8 +1,17 @@
-### 4.1.4
+### 4.1.6
+
+* FakeEntity가 이동이 없을때 머리가 회전하지 않던 버그 수정
+* `PacketSupport#entityAnimation` 함수 추가
+* `FakeEntity#animation` 함수 추가
+
+---
+
+### 4.1.5
 
 * FakeEntity가 플레이어 사망시 클라이언트에서 제거되지 않던 버그 수정
 
 ---
+
 ### 4.1.2
 
 * kotlin-reflect 의존성에 추가
