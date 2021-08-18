@@ -21,7 +21,7 @@
 * #### Environment
     * JDK 16
     * Kotlin 1.5.20
-    * Paper & Spigot 1.17, 1.17
+    * Paper & Spigot 1.17, 1.17.1
 
 ---
 
