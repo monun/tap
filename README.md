@@ -39,7 +39,7 @@ dependencies {
 }
 ```
 
-### plugins.yml
+### plugin.yml
 
 ```yaml
 name: ...
