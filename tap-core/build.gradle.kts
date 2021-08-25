@@ -151,7 +151,7 @@ publishing {
 
             pom {
                 name.set("tap")
-                description.set("pom description")
+                description.set("tap-api implementation")
                 url.set("https://github.com/monun/tap")
 
                 licenses {
