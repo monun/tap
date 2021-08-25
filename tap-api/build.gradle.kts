@@ -61,8 +61,8 @@ publishing {
 
             pom {
                 name.set("tap-api")
-                description.set("Command dsl for paper server")
-                url.set("https://github.com/monun/kommand")
+                description.set("Paper extension library")
+                url.set("https://github.com/monun/tap")
 
                 licenses {
                     license {
