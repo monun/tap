@@ -21,11 +21,6 @@
     * GitHub를 통한 업데이트 (BETA)
     * Tick 기반 태스크 스케쥴러 (Ticker)
 
-* #### Environment
-    * JDK 16
-    * Kotlin 1.5.30
-    * Paper & Spigot 1.17, 1.17.1
-
 ---
 
 #### Gradle
