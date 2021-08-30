@@ -3,7 +3,7 @@ version: $version
 main: $group.${rootProject.name}.plugin.${rootProject.name.capitalize()}Plugin
 api-version: 1.17
 libraries:
-  - org.jetbrains.kotlin:kotlin-stdlib:1.5.20
-  - org.jetbrains.kotlin:kotlin-reflect:1.5.20
-  - org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.0
+  - org.jetbrains.kotlin:kotlin-stdlib:1.5.30
+  - org.jetbrains.kotlin:kotlin-reflect:1.5.30
+  - org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.1
   - org.mariuszgromada.math:MathParser.org-mXparser:4.4.2
