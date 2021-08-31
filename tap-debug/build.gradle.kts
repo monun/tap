@@ -2,28 +2,43 @@ repositories {
     mavenLocal()
 }
 
-val api = project(":tap-api")
+val projectAPI = project(":${rootProject.name}-api")
+val projectCore = project(":${rootProject.name}-core")
 
 dependencies {
-    implementation(api)
+    implementation(projectAPI)
 }
+
+val pluginName = rootProject.name.split('-').joinToString("") { it.capitalize() }
+val packageName = rootProject.name.replace("-", "")
+extra.set("pluginName", pluginName)
+extra.set("packageName", packageName)
 
 tasks {
     processResources {
         filesMatching("*.yml") {
             expand(project.properties)
+            expand(extra.properties)
         }
     }
 
-    create<Jar>("debugMojangJar") {
-        archiveBaseName.set("Tap")
+    /**
+     * mojang mapping jar
+     *
+     * 빠른 디버그를 위해서 모든 모듈을 jar안에 포함
+     */
+    create<Jar>("mojangJar") {
+        archiveBaseName.set(pluginName)
         archiveVersion.set("")
-        archiveClassifier.set("DEBUG")
-        archiveAppendix.set("MOJANG")
+        archiveClassifier.set("MOJANG")
 
-        (listOf(project(":tap-api"), project) + project(":tap-core").let { listOf(it) + it.subprojects }).forEach {
+        (listOf(projectAPI, project, projectCore) + projectCore.subprojects).forEach {
             from(it.sourceSets["main"].output)
         }
+
+        from(project.sourceSets["main"].output)
+        exclude("paper-plugin.yml")
+        rename("mojang-plugin.yml", "plugin.yml")
 
         doLast {
             copy {
@@ -34,19 +49,23 @@ tasks {
         }
     }
 
-    create<Jar>("debugPaperJar") {
-        archiveBaseName.set("Tap")
+    /**
+     * spigot mapping jar
+     *
+     * 실제 환경 테스트를 위해서 서버에 모듈을 배포
+     * jar 파일에는 debug 모듈만 포함
+     */
+    create<Jar>("paperJar") {
+        dependsOn(projectAPI.tasks.named("publishAllPublicationsToDebugRepository"))
+        dependsOn(projectCore.tasks.named("publishAllPublicationsToDebugRepository"))
+
+        archiveBaseName.set(pluginName)
         archiveVersion.set("")
-        archiveClassifier.set("DEBUG")
-        archiveAppendix.set("PAPER")
+        archiveClassifier.set("PAPER")
 
-        from(api.sourceSets["main"].output)
         from(project.sourceSets["main"].output)
-
-        (project(":tap-core").tasks.named("paperJar").get() as Jar).let { paperJar ->
-            dependsOn(paperJar)
-            from(zipTree(paperJar.archiveFile))
-        }
+        exclude("mojang-plugin.yml")
+        rename("paper-plugin.yml", "plugin.yml")
 
         doLast {
             copy {
