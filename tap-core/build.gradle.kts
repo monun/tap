@@ -11,15 +11,6 @@ plugins {
     signing
 }
 
-buildscript {
-    repositories {
-        mavenCentral()
-    }
-
-    dependencies {
-        classpath("net.md-5:SpecialSource:1.10.0")
-    }
-}
 
 val api = project(":tap-api")
 
@@ -41,6 +32,21 @@ subprojects {
     dependencies {
         implementation(api)
         implementation(requireNotNull(parent)) // core
+
+        if (project.name.startsWith("v")) {
+            compileOnly("com.mojang:brigadier:1.0.18")
+
+            val nmsVersion = project.name.removePrefix("v")
+
+            // source
+            compileOnly("io.papermc.paper:paper-api:$nmsVersion-R0.1-SNAPSHOT")
+            compileOnly("io.papermc.paper:paper-mojangapi:$nmsVersion-R0.1-SNAPSHOT")
+
+            // binary
+            compileOnly("io.papermc.paper:paper:$nmsVersion-R0.1-SNAPSHOT:mojang-mapped")
+            mojangMapping("org.spigotmc:minecraft-server:$nmsVersion-R0.1-SNAPSHOT:maps-mojang@txt")
+            spigotMapping("org.spigotmc:minecraft-server:$nmsVersion-R0.1-SNAPSHOT:maps-spigot@csrg")
+        }
     }
 
     tasks {
