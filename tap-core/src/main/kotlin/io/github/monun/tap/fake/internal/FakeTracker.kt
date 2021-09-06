@@ -20,7 +20,6 @@ package io.github.monun.tap.fake.internal
 
 import io.github.monun.tap.protocol.PacketContainer
 import io.github.monun.tap.protocol.sendPacket
-import io.github.monun.tap.ref.Weaky
 import io.github.monun.tap.ref.getValue
 import io.github.monun.tap.ref.weaky
 import org.bukkit.entity.Player
