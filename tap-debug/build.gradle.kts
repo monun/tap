@@ -2,15 +2,15 @@ repositories {
     mavenLocal()
 }
 
-val projectAPI = project(":${rootProject.name}-api")
-val projectCore = project(":${rootProject.name}-core")
+val projectAPI = project(":tap-api")
+val projectCore = project(":tap-core")
 
 dependencies {
     implementation(projectAPI)
 }
 
-val pluginName = rootProject.name.split('-').joinToString("") { it.capitalize() }
-val packageName = rootProject.name.replace("-", "")
+val pluginName = "Tap"
+val packageName = "tap"
 extra.set("pluginName", pluginName)
 extra.set("packageName", packageName)
 
