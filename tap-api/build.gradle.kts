@@ -6,7 +6,7 @@ plugins {
 
 dependencies {
     implementation("org.jetbrains.kotlin:kotlin-reflect:1.5.21")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.1")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.0")
     implementation("org.mariuszgromada.math:MathParser.org-mXparser:4.4.2")
 }
 
