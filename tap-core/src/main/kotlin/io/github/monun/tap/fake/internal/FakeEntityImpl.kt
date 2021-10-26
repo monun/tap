@@ -24,6 +24,7 @@ import io.github.monun.tap.fake.createSpawnPacket
 import io.github.monun.tap.fake.mountedYOffset
 import io.github.monun.tap.fake.setLocation
 import io.github.monun.tap.protocol.AnimationType
+import io.github.monun.tap.protocol.PacketContainer
 import io.github.monun.tap.protocol.PacketSupport
 import io.github.monun.tap.protocol.sendPacket
 import io.github.monun.tap.ref.getValue
@@ -65,6 +66,7 @@ class FakeEntityImpl internal constructor(
         get() = ImmutableList.copyOf(_passengers)
 
     private val effects = LinkedList<Byte>()
+    private val packets = LinkedList<() -> PacketContainer>()
 
     private var updateTrackers = true
     private var updateLocation = false
@@ -310,6 +312,12 @@ class FakeEntityImpl internal constructor(
                 trackers.sendServerPacketAll(PacketSupport.entityStatus(bukkitEntity.entityId, effects.remove()))
             }
         }
+
+        packets.let { packets ->
+            while (packets.isNotEmpty()) {
+                broadcastImmediately(packets.remove().invoke())
+            }
+        }
     }
 
     private enum class MoveResult {
@@ -513,6 +521,17 @@ class FakeEntityImpl internal constructor(
             updateTrackers = true
             enqueue()
         }
+    }
+
+    override fun broadcast(packet: () -> PacketContainer) {
+        if (dead) return
+
+        packets += packet
+        enqueue()
+    }
+
+    override fun broadcastImmediately(packet: PacketContainer) {
+        trackers.sendServerPacketAll(packet)
     }
 
     fun checkState() {

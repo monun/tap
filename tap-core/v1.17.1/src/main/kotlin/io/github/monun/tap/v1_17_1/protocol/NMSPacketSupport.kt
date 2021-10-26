@@ -29,6 +29,7 @@ import io.netty.buffer.Unpooled
 import it.unimi.dsi.fastutil.ints.IntArrayList
 import net.minecraft.network.FriendlyByteBuf
 import net.minecraft.network.protocol.game.*
+import net.minecraft.world.phys.Vec3
 import org.bukkit.FireworkEffect
 import org.bukkit.craftbukkit.v1_17_R1.entity.CraftEntity
 import org.bukkit.craftbukkit.v1_17_R1.inventory.CraftItemStack
@@ -196,6 +197,12 @@ class NMSPacketSupport : PacketSupport {
         return NMSPacketContainer(ClientboundRotateHeadPacket(byteBuf))
     }
 
+    override fun entityVelocity(entityId: Int, vector: Vector): NMSPacketContainer {
+        val packet = ClientboundSetEntityMotionPacket(entityId, Vec3(vector.x, vector.y, vector.z))
+
+        return NMSPacketContainer(packet)
+    }
+
     override fun entityStatus(
         entityId: Int,
         data: Byte
@@ -231,6 +238,15 @@ class NMSPacketSupport : PacketSupport {
         byteBuf.writeVarIntArray(mountEntityIds)
 
         val packet = ClientboundSetPassengersPacket(byteBuf)
+        return NMSPacketContainer(packet)
+    }
+
+    override fun takeItem(
+        entityId: Int,
+        collectorId: Int,
+        stackAmount: Int
+    ): NMSPacketContainer {
+        val packet = ClientboundTakeItemEntityPacket(entityId, collectorId, stackAmount)
         return NMSPacketContainer(packet)
     }
 

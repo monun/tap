@@ -19,14 +19,20 @@
 package io.github.monun.tap.plugin
 
 import io.github.monun.tap.fake.FakeEntityServer
+import io.github.monun.tap.protocol.PacketSupport
 import org.bukkit.Bukkit
-import org.bukkit.entity.ArmorStand
+import org.bukkit.Material
+import org.bukkit.entity.Item
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
+import org.bukkit.event.block.Action
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerQuitEvent
+import org.bukkit.inventory.ItemStack
 import org.bukkit.plugin.java.JavaPlugin
+import org.bukkit.util.Vector
+import java.util.*
 
 class TapPlugin : JavaPlugin() {
     override fun onEnable() {
@@ -56,22 +62,26 @@ class FakeTest {
 
             @EventHandler
             fun onPlayerInteract(event: PlayerInteractEvent) {
-                event.item?.let { item ->
-                    val type = item.type
+                val player = event.player
+                val action = event.action
 
-                    if (type.isBlock) {
-                        val fakeFallingBlock = fakeEntityServer.spawnFallingBlock(
-                            event.player.eyeLocation.apply { add(direction.multiply(5.0)) },
-                            type.createBlockData()
-                        )
-                        val fakeStand = fakeEntityServer.spawnEntity(event.player.eyeLocation.apply { add(direction.multiply(5.0)) }, ArmorStand::class.java).apply {
-                            updateMetadata<ArmorStand> {
-                                isInvisible = true
-                                isMarker = true
+                if (action == Action.LEFT_CLICK_AIR || action == Action.LEFT_CLICK_BLOCK) {
+                    val target = player.getTargetBlock(64)!!.location.add(0.0, 1.0, 0.0)
+                    fakeEntityServer.spawnItem(target, ItemStack(Material.EMERALD)).apply {
+                        broadcast {
+                            PacketSupport.entityVelocity(bukkitEntity.entityId, bukkitEntity.velocity)
+                        }
+                    }
+                } else if (action == Action.RIGHT_CLICK_AIR || action == Action.RIGHT_CLICK_BLOCK) {
+                    player.getTargetEntity(64)?.let { target ->
+                        for (entity in fakeEntityServer.entities) {
+                            val bukkitEntity = entity.bukkitEntity
+
+                            if (bukkitEntity is Item) {
+                                entity.broadcastImmediately(PacketSupport.takeItem(bukkitEntity.entityId, target.entityId, 1))
+                                entity.remove()
                             }
                         }
-
-                        fakeStand.addPassenger(fakeFallingBlock)
                     }
                 }
             }

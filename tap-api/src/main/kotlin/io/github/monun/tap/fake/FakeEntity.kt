@@ -19,6 +19,7 @@
 package io.github.monun.tap.fake
 
 import io.github.monun.tap.protocol.AnimationType
+import io.github.monun.tap.protocol.PacketContainer
 import org.bukkit.EntityEffect
 import org.bukkit.Location
 import org.bukkit.entity.Entity
@@ -70,6 +71,12 @@ interface FakeEntity {
     fun excludeTracker(player: Player)
 
     fun includeTracker(player: Player)
+
+    fun broadcast(packet: () -> PacketContainer)
+
+    fun broadcast(packet: PacketContainer) = broadcast { packet }
+
+    fun broadcastImmediately(packet: PacketContainer) = broadcast { packet }
 
     fun remove()
 }

@@ -132,6 +132,8 @@ interface PacketSupport {
 
     fun entityHeadLook(entityId: Int, yaw: Float): PacketContainer
 
+    fun entityVelocity(entityId: Int, vector: Vector): PacketContainer
+
     fun entityStatus(entityId: Int, data: Byte): PacketContainer
 
     fun entityAnimation(entityId: Int, action: Int): PacketContainer
@@ -141,6 +143,8 @@ interface PacketSupport {
     }
 
     fun mount(entityId: Int, mountEntityIds: IntArray): PacketContainer
+
+    fun takeItem(entityId: Int, collectorId: Int, stackAmount: Int): PacketContainer
 
     fun removeEntity(entityId: Int): PacketContainer
 
