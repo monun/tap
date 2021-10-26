@@ -73,7 +73,7 @@ object GitHubSupport {
             val releaseInfo = latestReleaseURL.httpRequest {
                 requestMethod = "GET"
                 addRequestProperty("Accept", REQUEST_ACCEPT)
-                inputStream.bufferedReader().use { JsonParser().parse(it) as JsonObject }
+                inputStream.bufferedReader().use { JsonParser.parseReader(it) as JsonObject }
             }
             releaseInfo[KEY_TAG_NAME].asString.also {
                 if (version.compareVersion(it) >= 0) throw UpToDateException("UP TO DATE")
