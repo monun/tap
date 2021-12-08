@@ -5,6 +5,12 @@ plugins {
     id("io.github.monun.paperstrap") //buildSrc
 }
 
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(17))
+    }
+}
+
 paperstrap {
     File(rootDir, "${rootProject.name}-core").listFiles { file ->
         file.isDirectory && file.name.startsWith("v")
