@@ -1,14 +1,8 @@
 import io.github.monun.paperstrap.paperstrap
 
 plugins {
-    kotlin("jvm") version "1.5.21"
+    kotlin("jvm") version "1.6.0"
     id("io.github.monun.paperstrap") //buildSrc
-}
-
-java {
-    toolchain {
-        languageVersion.set(JavaLanguageVersion.of(16))
-    }
 }
 
 paperstrap {

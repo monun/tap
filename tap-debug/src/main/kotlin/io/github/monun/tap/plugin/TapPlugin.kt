@@ -22,6 +22,7 @@ import io.github.monun.tap.fake.FakeEntityServer
 import io.github.monun.tap.protocol.PacketSupport
 import org.bukkit.Bukkit
 import org.bukkit.Material
+import org.bukkit.entity.Bee
 import org.bukkit.entity.Item
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -31,8 +32,6 @@ import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.inventory.ItemStack
 import org.bukkit.plugin.java.JavaPlugin
-import org.bukkit.util.Vector
-import java.util.*
 
 class TapPlugin : JavaPlugin() {
     override fun onEnable() {
@@ -66,14 +65,20 @@ class FakeTest {
                 val action = event.action
 
                 if (action == Action.LEFT_CLICK_AIR || action == Action.LEFT_CLICK_BLOCK) {
-                    val target = player.getTargetBlock(64)!!.location.add(0.0, 1.0, 0.0)
-                    fakeEntityServer.spawnItem(target, ItemStack(Material.EMERALD)).apply {
+                    val target = player.getTargetBlock(32)!!.location.add(0.0, 1.0, 0.0)
+                    val item = fakeEntityServer.spawnItem(target, ItemStack(Material.EMERALD)).apply {
                         broadcast {
                             PacketSupport.entityVelocity(bukkitEntity.entityId, bukkitEntity.velocity)
                         }
                     }
+                    val bee = fakeEntityServer.spawnEntity(target, Bee::class.java)
+                    server.scheduler.runTaskLater(this@register, Runnable {
+                        item.remove()
+                        bee.remove()
+                    }, 100)
+
                 } else if (action == Action.RIGHT_CLICK_AIR || action == Action.RIGHT_CLICK_BLOCK) {
-                    player.getTargetEntity(64)?.let { target ->
+                    player.getTargetEntity(32)?.let { target ->
                         for (entity in fakeEntityServer.entities) {
                             val bukkitEntity = entity.bukkitEntity
 

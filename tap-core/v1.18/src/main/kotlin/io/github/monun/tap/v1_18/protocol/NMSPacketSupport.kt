@@ -16,23 +16,23 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.github.monun.tap.v1_17_1.protocol
+package io.github.monun.tap.v1_18.protocol
 
-import com.mojang.datafixers.util.Pair
 import io.github.monun.tap.fake.createFakeEntity
 import io.github.monun.tap.protocol.PacketContainer
 import io.github.monun.tap.protocol.PacketSupport
 import io.github.monun.tap.protocol.toProtocolDegrees
 import io.github.monun.tap.protocol.toProtocolDelta
-import io.github.monun.tap.v1_17_1.fake.NMSEntityTypes
+import io.github.monun.tap.v1_18.fake.NMSEntityTypes
 import io.netty.buffer.Unpooled
+import it.unimi.dsi.fastutil.ints.IntArrayList
 import net.minecraft.network.FriendlyByteBuf
 import net.minecraft.network.protocol.game.*
 import net.minecraft.world.phys.Vec3
 import org.bukkit.FireworkEffect
-import org.bukkit.craftbukkit.v1_17_R1.entity.CraftEntity
-import org.bukkit.craftbukkit.v1_17_R1.inventory.CraftItemStack
-import org.bukkit.craftbukkit.v1_17_R1.util.CraftVector
+import org.bukkit.craftbukkit.v1_18_R1.entity.CraftEntity
+import org.bukkit.craftbukkit.v1_18_R1.inventory.CraftItemStack
+import org.bukkit.craftbukkit.v1_18_R1.util.CraftVector
 import org.bukkit.entity.Entity
 import org.bukkit.entity.EntityType
 import org.bukkit.entity.Firework
@@ -128,7 +128,7 @@ class NMSPacketSupport : PacketSupport {
 
     override fun entityEquipment(entityId: Int, equipments: Map<EquipmentSlot, ItemStack>): NMSPacketContainer {
         val packet = ClientboundSetEquipmentPacket(entityId, equipments.map { entry ->
-            Pair(entry.key.toNMS(), CraftItemStack.asNMSCopy(entry.value))
+            com.mojang.datafixers.util.Pair(entry.key.toNMS(), CraftItemStack.asNMSCopy(entry.value))
         })
         return NMSPacketContainer(packet)
     }
@@ -257,7 +257,7 @@ class NMSPacketSupport : PacketSupport {
     }
 
     override fun removeEntities(vararg entityIds: Int): PacketContainer {
-        return NMSPacketContainer(ClientboundRemoveEntitiesPacket(*entityIds))
+        return NMSPacketContainer(ClientboundRemoveEntitiesPacket(IntArrayList((entityIds))))
     }
 
     override fun spawnFireworkParticles(
