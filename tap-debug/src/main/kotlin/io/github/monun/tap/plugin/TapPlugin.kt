@@ -18,6 +18,7 @@
 
 package io.github.monun.tap.plugin
 
+import io.github.monun.tap.fake.FakeEntity
 import io.github.monun.tap.fake.FakeEntityServer
 import io.github.monun.tap.protocol.PacketSupport
 import org.bukkit.Bukkit
@@ -71,10 +72,8 @@ class FakeTest {
                             PacketSupport.entityVelocity(bukkitEntity.entityId, bukkitEntity.velocity)
                         }
                     }
-                    val bee = fakeEntityServer.spawnEntity(target, Bee::class.java)
                     server.scheduler.runTaskLater(this@register, Runnable {
                         item.remove()
-                        bee.remove()
                     }, 100)
 
                 } else if (action == Action.RIGHT_CLICK_AIR || action == Action.RIGHT_CLICK_BLOCK) {

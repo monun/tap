@@ -24,6 +24,8 @@ import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.block.data.BlockData
 import org.bukkit.entity.Entity
+import org.bukkit.entity.FallingBlock
+import org.bukkit.entity.Item
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.HandlerList
@@ -36,10 +38,10 @@ import java.util.*
 
 class FakeEntityServerImpl(plugin: JavaPlugin) : FakeEntityServer {
 
-    internal val _entities = ArrayList<FakeEntityImpl>()
-    private val updateQueue = ArrayDeque<FakeEntityImpl>()
+    internal val _entities = ArrayList<FakeEntityImpl<*>>()
+    private val updateQueue = ArrayDeque<FakeEntityImpl<*>>()
 
-    override val entities: List<FakeEntity>
+    override val entities: List<FakeEntity<*>>
         get() = ImmutableList.copyOf(_entities)
 
     private val trackersByPlayer = WeakHashMap<Player, FakeTracker>()
@@ -55,7 +57,7 @@ class FakeEntityServerImpl(plugin: JavaPlugin) : FakeEntityServer {
         Bukkit.getPluginManager().registerEvents(listener, plugin)
     }
 
-    override fun spawnEntity(location: Location, clazz: Class<out Entity>): FakeEntity {
+    override fun <T : Entity> spawnEntity(location: Location, clazz: Class<T>): FakeEntity<T> {
         checkState()
 
         val bukkitWorld = location.world
@@ -72,7 +74,7 @@ class FakeEntityServerImpl(plugin: JavaPlugin) : FakeEntityServer {
         return fakeEntity
     }
 
-    override fun spawnFallingBlock(location: Location, blockData: BlockData): FakeEntity {
+    override fun spawnFallingBlock(location: Location, blockData: BlockData): FakeEntity<FallingBlock> {
         val bukkitFallingBlock = createFallingBlock(blockData).apply {
             setLocation(location)
         }
@@ -83,7 +85,7 @@ class FakeEntityServerImpl(plugin: JavaPlugin) : FakeEntityServer {
         return fakeEntity
     }
 
-    override fun spawnItem(location: Location, item: ItemStack): FakeEntity {
+    override fun spawnItem(location: Location, item: ItemStack): FakeEntity<Item> {
         val bukkitItemEntity = createItemEntity(item).apply {
             setLocation(location)
         }
@@ -126,7 +128,7 @@ class FakeEntityServerImpl(plugin: JavaPlugin) : FakeEntityServer {
 
     private fun updateEntities() {
         val updateQueue = updateQueue
-        var nextTickEntity: FakeEntityImpl? = null
+        var nextTickEntity: FakeEntityImpl<*>? = null
         while (updateQueue.isNotEmpty()) {
             val entity = updateQueue.peek()
 
@@ -179,7 +181,7 @@ class FakeEntityServerImpl(plugin: JavaPlugin) : FakeEntityServer {
         HandlerList.unregisterAll(this.listener)
     }
 
-    internal fun enqueue(entity: FakeEntityImpl) {
+    internal fun enqueue(entity: FakeEntityImpl<*>) {
         updateQueue.offer(entity)
     }
 

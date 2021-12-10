@@ -41,11 +41,11 @@ import org.bukkit.inventory.ItemStack
 import org.bukkit.util.Vector
 import java.util.*
 
-class FakeEntityImpl internal constructor(
+class FakeEntityImpl<T: Entity> internal constructor(
     server: FakeEntityServerImpl,
-    override val bukkitEntity: Entity,
+    override val bukkitEntity: T,
     location: Location
-) : FakeEntity {
+) : FakeEntity<T> {
     override val server by weaky(server)
 
     override val location: Location
@@ -58,11 +58,11 @@ class FakeEntityImpl internal constructor(
     private val trackers = HashSet<FakeTracker>()
     private val trackerComputeQueue = ArrayDeque<FakeTracker>()
 
-    override var vehicle: FakeEntityImpl? = null
+    override var vehicle: FakeEntityImpl<*>? = null
         private set
 
-    private val _passengers = HashSet<FakeEntityImpl>()
-    override val passengers: List<FakeEntity>
+    private val _passengers = HashSet<FakeEntityImpl<*>>()
+    override val passengers: List<FakeEntity<*>>
         get() = ImmutableList.copyOf(_passengers)
 
     private val effects = LinkedList<Byte>()
@@ -134,7 +134,7 @@ class FakeEntityImpl internal constructor(
         }
     }
 
-    private fun check(passenger: FakeEntity): FakeEntityImpl {
+    private fun check(passenger: FakeEntity<*>): FakeEntityImpl<*> {
         val impl = passenger as FakeEntityImpl
 
         passenger.checkState()
@@ -143,12 +143,12 @@ class FakeEntityImpl internal constructor(
         return impl
     }
 
-    override fun addPassenger(passenger: FakeEntity): Boolean {
+    override fun addPassenger(passenger: FakeEntity<*>): Boolean {
         checkState()
         val impl = check(passenger)
 
         passenger.let {
-            var entity: FakeEntityImpl? = this
+            var entity: FakeEntityImpl<*>? = this
 
             while (entity != null) {
                 if (entity === it)
@@ -171,7 +171,7 @@ class FakeEntityImpl internal constructor(
         return true
     }
 
-    override fun removePassenger(passenger: FakeEntity): Boolean {
+    override fun removePassenger(passenger: FakeEntity<*>): Boolean {
         val impl = check(passenger)
 
         if (impl.vehicle !== this) return false
@@ -474,10 +474,10 @@ class FakeEntityImpl internal constructor(
     }
 
     @Suppress("UNCHECKED_CAST")
-    override fun <T : Entity> updateMetadata(applier: T.() -> Unit) {
+    override fun updateMetadata(applier: T.() -> Unit) {
         if (dead) return
 
-        val entity = bukkitEntity as T
+        val entity = bukkitEntity
         applier(entity)
         updateMeta = true
         enqueue()
@@ -548,7 +548,7 @@ class FakeEntityImpl internal constructor(
     }
 }
 
-private fun Collection<FakeEntity>.toIntArray(): IntArray {
+private fun Collection<FakeEntity<*>>.toIntArray(): IntArray {
     val size = count()
     val array = IntArray(size)
 

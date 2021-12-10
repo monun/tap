@@ -22,6 +22,8 @@ import io.github.monun.tap.loader.LibraryLoader
 import org.bukkit.Location
 import org.bukkit.block.data.BlockData
 import org.bukkit.entity.Entity
+import org.bukkit.entity.FallingBlock
+import org.bukkit.entity.Item
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import org.bukkit.plugin.java.JavaPlugin
@@ -29,13 +31,13 @@ import org.bukkit.plugin.java.JavaPlugin
 interface FakeEntityServer {
     companion object: FakeInternal by LibraryLoader.loadImplement(FakeInternal::class.java)
 
-    val entities: List<FakeEntity>
+    val entities: List<FakeEntity<*>>
 
-    fun spawnEntity(location: Location, clazz: Class<out Entity>): FakeEntity
+    fun <T: Entity> spawnEntity(location: Location, clazz: Class<T>): FakeEntity<T>
 
-    fun spawnFallingBlock(location: Location, blockData: BlockData): FakeEntity
+    fun spawnFallingBlock(location: Location, blockData: BlockData): FakeEntity<FallingBlock>
 
-    fun spawnItem(location: Location, item: ItemStack): FakeEntity
+    fun spawnItem(location: Location, item: ItemStack): FakeEntity<Item>
 
     fun addPlayer(player: Player)
 

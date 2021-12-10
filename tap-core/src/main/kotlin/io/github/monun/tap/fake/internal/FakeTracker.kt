@@ -35,7 +35,7 @@ internal class FakeTracker(
 
     internal var valid = player.isOnline
 
-    private val trackingEntities = HashSet<FakeEntityImpl>()
+    private val trackingEntities = HashSet<FakeEntityImpl<*>>()
 
     fun update() {
         if (!valid) {
@@ -81,11 +81,11 @@ internal class FakeTracker(
         }
     }
 
-    internal fun removeEntity(entity: FakeEntityImpl) {
+    internal fun removeEntity(entity: FakeEntityImpl<*>) {
         this.trackingEntities -= entity
     }
 
-    internal fun addEntity(entity: FakeEntityImpl) {
+    internal fun addEntity(entity: FakeEntityImpl<*>) {
         this.trackingEntities += entity
     }
 

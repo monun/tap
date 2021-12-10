@@ -26,19 +26,19 @@ import org.bukkit.entity.Entity
 import org.bukkit.entity.Player
 import org.bukkit.inventory.EntityEquipment
 
-interface FakeEntity {
+interface FakeEntity<T: Entity> {
     val server: FakeEntityServer
-    val bukkitEntity: Entity
+    val bukkitEntity: T
     val location: Location
-    val vehicle: FakeEntity?
-    val passengers: List<FakeEntity>
+    val vehicle: FakeEntity<*>?
+    val passengers: List<*>
     val valid: Boolean
     val dead: Boolean
     var isVisible: Boolean
 
-    fun addPassenger(passenger: FakeEntity): Boolean
+    fun addPassenger(passenger: FakeEntity<*>): Boolean
 
-    fun removePassenger(passenger: FakeEntity): Boolean
+    fun removePassenger(passenger: FakeEntity<*>): Boolean
 
     fun eject(): Boolean
 
@@ -55,7 +55,7 @@ interface FakeEntity {
         })
     }
 
-    fun <T : Entity> updateMetadata(applier: T.() -> Unit)
+    fun updateMetadata(applier: T.() -> Unit)
 
     fun updateEquipment(applier: EntityEquipment.() -> Unit)
 
