@@ -31,6 +31,7 @@ import net.minecraft.network.protocol.game.*
 import net.minecraft.world.phys.Vec3
 import org.bukkit.FireworkEffect
 import org.bukkit.craftbukkit.v1_18_R1.entity.CraftEntity
+import org.bukkit.craftbukkit.v1_18_R1.inventory.CraftInventoryPlayer
 import org.bukkit.craftbukkit.v1_18_R1.inventory.CraftItemStack
 import org.bukkit.craftbukkit.v1_18_R1.util.CraftVector
 import org.bukkit.entity.Entity
@@ -38,6 +39,7 @@ import org.bukkit.entity.EntityType
 import org.bukkit.entity.Firework
 import org.bukkit.inventory.EquipmentSlot
 import org.bukkit.inventory.ItemStack
+import org.bukkit.inventory.PlayerInventory
 import org.bukkit.util.Vector
 import java.util.*
 import net.minecraft.world.entity.EquipmentSlot as NMSEquipmentSlot
@@ -283,5 +285,9 @@ class NMSPacketSupport : PacketSupport {
             entityStatus(firework.entityId, 17),
             removeEntity(firework.entityId)
         )
+    }
+
+    override fun containerSetSlot(containerId: Int, stateId: Int, slot: Int, item: ItemStack?): NMSPacketContainer {
+        return NMSPacketContainer(ClientboundContainerSetSlotPacket(containerId, stateId, slot, CraftItemStack.asNMSCopy(item)))
     }
 }

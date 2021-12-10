@@ -284,4 +284,8 @@ class NMSPacketSupport : PacketSupport {
             removeEntity(firework.entityId)
         )
     }
+
+    override fun containerSetSlot(containerId: Int, stateId: Int, slot: Int, item: ItemStack?): NMSPacketContainer {
+        return NMSPacketContainer(ClientboundContainerSetSlotPacket(containerId, stateId, slot, CraftItemStack.asNMSCopy(item)))
+    }
 }

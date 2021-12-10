@@ -18,19 +18,19 @@
 
 package io.github.monun.tap.plugin
 
-import io.github.monun.tap.fake.FakeEntity
 import io.github.monun.tap.fake.FakeEntityServer
 import io.github.monun.tap.protocol.PacketSupport
 import org.bukkit.Bukkit
 import org.bukkit.Material
-import org.bukkit.entity.Bee
 import org.bukkit.entity.Item
+import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.block.Action
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerQuitEvent
+import org.bukkit.event.player.PlayerToggleSneakEvent
 import org.bukkit.inventory.ItemStack
 import org.bukkit.plugin.java.JavaPlugin
 
@@ -39,6 +39,36 @@ class TapPlugin : JavaPlugin() {
         FakeTest().apply {
             register()
         }
+        SetSlotTest().apply {
+            register()
+        }
+    }
+}
+
+class SetSlotTest {
+    fun JavaPlugin.register() {
+        fun Player.updateSlot(isSneaking: Boolean = this.isSneaking) {
+            if (isSneaking) {
+                repeat(9) {
+                    PacketSupport.containerSetSlot(-2, 0, 0 + it, ItemStack(Material.RED_CONCRETE)).sendTo(this)
+                }
+            } else {
+                updateInventory()
+            }
+        }
+
+        server.pluginManager.registerEvents(object : Listener {
+            @EventHandler
+            fun onPlayerToggleSneak(event: PlayerToggleSneakEvent) {
+                event.player.updateSlot(event.isSneaking)
+            }
+        }, this)
+
+        server.scheduler.runTaskTimer(this, Runnable {
+            Bukkit.getOnlinePlayers().forEach {
+                if (it.isSneaking) it.updateSlot()
+            }
+        }, 0L, 1L)
     }
 }
 
@@ -82,7 +112,13 @@ class FakeTest {
                             val bukkitEntity = entity.bukkitEntity
 
                             if (bukkitEntity is Item) {
-                                entity.broadcastImmediately(PacketSupport.takeItem(bukkitEntity.entityId, target.entityId, 1))
+                                entity.broadcastImmediately(
+                                    PacketSupport.takeItem(
+                                        bukkitEntity.entityId,
+                                        target.entityId,
+                                        1
+                                    )
+                                )
                                 entity.remove()
                             }
                         }

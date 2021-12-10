@@ -26,6 +26,7 @@ import org.bukkit.entity.EntityType
 import org.bukkit.entity.LivingEntity
 import org.bukkit.inventory.EquipmentSlot
 import org.bukkit.inventory.ItemStack
+import org.bukkit.inventory.PlayerInventory
 import org.bukkit.util.Vector
 import java.util.*
 
@@ -151,4 +152,7 @@ interface PacketSupport {
     fun removeEntities(vararg entityIds: Int): PacketContainer
 
     fun spawnFireworkParticles(x: Double, y: Double, z: Double, effect: FireworkEffect): List<PacketContainer>
+
+    fun containerSetSlot(containerId: Int, stateId: Int, slot: Int, item: ItemStack?): PacketContainer =
+        throw UnsupportedOperationException()
 }
