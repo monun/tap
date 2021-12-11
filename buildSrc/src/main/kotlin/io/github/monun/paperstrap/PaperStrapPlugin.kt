@@ -112,21 +112,6 @@ class PaperStrapPlugin : Plugin<Project> {
                 }
                 finalizedBy(cleanPaperStrap)
             }
-
-            project.task("setupServer-$version") {
-                doLast {
-                    dependsOn(clonePaper)
-
-                    doLast {
-                        val commit = PaperAPI.commit(version, PaperAPI.latestBuild(version))
-
-                        paperDir.git("fetch", "--all", "--quiet")
-                        paperDir.git("checkout", "-f", commit, "--quiet")
-                        paperDir.gradle("applyPatches")
-                        paperDir.gradle("applyPatches")
-                    }
-                }
-            }
         }
 
         project.task("setupPaperAll") {

@@ -21,6 +21,12 @@
     * GitHub를 통한 업데이트 (BETA)
     * Tick 기반 태스크 스케쥴러 (Ticker)
 
+* #### Supported minecraft versions
+    * 1.17
+    * 1.17.1
+    * 1.18
+    * 1.18.1
+
 ---
 
 #### Gradle
