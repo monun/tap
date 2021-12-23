@@ -1,4 +1,10 @@
-### 4.2.0
+### 4.3.1
+
+* LibraryLoader - initArgs를 전달하지 않던 버그 수정
+
+---
+
+### 4.3.0
 
 * Minecraft 1.18
 * Java 17
