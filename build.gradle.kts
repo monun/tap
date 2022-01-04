@@ -25,7 +25,7 @@ buildscript {
     }
 
     dependencies {
-        classpath("net.md-5:SpecialSource:1.10.0")
+        classpath("net.md-5:SpecialSource:1.11.0")
     }
 }
 
