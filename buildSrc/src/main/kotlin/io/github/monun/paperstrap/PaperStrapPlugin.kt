@@ -60,6 +60,7 @@ class PaperStrapPlugin : Plugin<Project> {
         fun File.java(vararg args: String) {
             mkdirs()
             project.javaexec {
+                this.
                 workingDir = this@java
                 mainClass.set("-jar")
                 args(*args)
@@ -123,8 +124,8 @@ class PaperStrapPlugin : Plugin<Project> {
         }
 
         project.task("setupDependencies") {
-            dependsOn(papers)
             dependsOn(spigots)
+            dependsOn(papers)
         }
     }
 }
