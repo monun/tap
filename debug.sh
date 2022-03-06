@@ -23,13 +23,13 @@ cd "$server_folder" || exit
 
 if [ ! -f "$start_config" ]; then
   cat <<EOF >$start_config
-version=1.18.1
+version=1.18.2
 build=latest
 debug=true
 debug_port=5005
 backup=false
 force_restart=false
-memory=16
+memory=2
 plugins=(
 EOF
   for plugin in "${plugins[@]}"; do
