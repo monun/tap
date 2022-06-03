@@ -7,7 +7,7 @@ NAME=".debug-server"
 # Server type (type[vanilla, spigot, paper]-version[1.xx.x, unspecified]-build[latest, unspecified, xx])
 SERVER="paper-1.18.2-latest"
 # Server memory (GB)
-MEMORY=8
+MEMORY=2
 # jdwp port, Enable debug mode when 0 or higher (5005)
 DEBUG_PORT=5005
 # When the server shuts down, use tar to back up.
