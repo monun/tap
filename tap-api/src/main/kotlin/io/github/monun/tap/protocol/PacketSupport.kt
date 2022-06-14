@@ -19,15 +19,12 @@
 package io.github.monun.tap.protocol
 
 import io.github.monun.tap.loader.LibraryLoader
-import org.bukkit.FireworkEffect
 import org.bukkit.Location
 import org.bukkit.entity.Entity
-import org.bukkit.entity.EntityType
 import org.bukkit.entity.LivingEntity
 import org.bukkit.inventory.EquipmentSlot
 import org.bukkit.inventory.ItemStack
 import org.bukkit.util.Vector
-import java.util.*
 
 fun Double.toProtocolDelta(): Int {
     return (this.coerceIn(-3.9, 3.9) * 8000.0).toInt()
@@ -41,32 +38,6 @@ fun Float.toProtocolDegrees(): Int {
 
 interface PacketSupport {
     companion object : PacketSupport by LibraryLoader.loadNMS(PacketSupport::class.java)
-
-    fun spawnEntity(
-        entityId: Int,
-        uuid: UUID,
-        x: Double,
-        y: Double,
-        z: Double,
-        yaw: Float,
-        pitch: Float,
-        type: EntityType,
-        objectId: Int,
-        velocity: Vector = Vector()
-    ): PacketContainer
-
-    fun spawnEntityLiving(
-        entityId: Int,
-        uuid: UUID,
-        typeId: Int,
-        x: Double,
-        y: Double,
-        z: Double,
-        yaw: Float,
-        pitch: Float,
-        roll: Float,
-        velocity: Vector = Vector()
-    ): PacketContainer
 
     fun entityMetadata(entity: Entity): PacketContainer
 
@@ -149,8 +120,6 @@ interface PacketSupport {
     fun removeEntity(entityId: Int): PacketContainer
 
     fun removeEntities(vararg entityIds: Int): PacketContainer
-
-    fun spawnFireworkParticles(x: Double, y: Double, z: Double, effect: FireworkEffect): List<PacketContainer>
 
     fun containerSetSlot(containerId: Int, stateId: Int, slot: Int, item: ItemStack?): PacketContainer =
         throw UnsupportedOperationException()

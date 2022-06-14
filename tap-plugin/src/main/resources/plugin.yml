@@ -3,7 +3,6 @@ version: ${version}
 main: ${group}.${packageName}.plugin.${pluginName}Plugin
 api-version: 1.18
 libraries:
-  - org.jetbrains.kotlin:kotlin-stdlib:1.6.10
-  - org.jetbrains.kotlin:kotlin-reflect:1.6.10
-  - org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.0
+  - org.jetbrains.kotlin:kotlin-stdlib:1.6.21
+  - org.jetbrains.kotlin:kotlin-reflect:1.6.21
   - org.mariuszgromada.math:MathParser.org-mXparser:4.4.2

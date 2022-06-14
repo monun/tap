@@ -18,28 +18,20 @@
 
 package io.github.monun.tap.v1_18.protocol
 
-import io.github.monun.tap.fake.createFakeEntity
 import io.github.monun.tap.protocol.PacketContainer
 import io.github.monun.tap.protocol.PacketSupport
 import io.github.monun.tap.protocol.toProtocolDegrees
-import io.github.monun.tap.protocol.toProtocolDelta
-import io.github.monun.tap.v1_18.fake.NMSEntityTypes
 import io.netty.buffer.Unpooled
 import it.unimi.dsi.fastutil.ints.IntArrayList
 import net.minecraft.network.FriendlyByteBuf
 import net.minecraft.network.protocol.game.*
 import net.minecraft.world.phys.Vec3
-import org.bukkit.FireworkEffect
 import org.bukkit.craftbukkit.v1_18_R1.entity.CraftEntity
 import org.bukkit.craftbukkit.v1_18_R1.inventory.CraftItemStack
-import org.bukkit.craftbukkit.v1_18_R1.util.CraftVector
 import org.bukkit.entity.Entity
-import org.bukkit.entity.EntityType
-import org.bukkit.entity.Firework
 import org.bukkit.inventory.EquipmentSlot
 import org.bukkit.inventory.ItemStack
 import org.bukkit.util.Vector
-import java.util.*
 import net.minecraft.world.entity.EquipmentSlot as NMSEquipmentSlot
 
 private fun EquipmentSlot.toNMS(): NMSEquipmentSlot {
@@ -54,66 +46,6 @@ private fun EquipmentSlot.toNMS(): NMSEquipmentSlot {
 }
 
 class NMSPacketSupport : PacketSupport {
-    override fun spawnEntity(
-        entityId: Int,
-        uuid: UUID,
-        x: Double,
-        y: Double,
-        z: Double,
-        yaw: Float,
-        pitch: Float,
-        type: EntityType,
-        objectId: Int,
-        velocity: Vector
-    ): NMSPacketContainer {
-        val entityClass = type.entityClass ?: throw IllegalArgumentException("Unknown EntityType: ${type.name}")
-
-        val packet = ClientboundAddEntityPacket(
-            entityId,
-            uuid,
-            x,
-            y,
-            z,
-            yaw,
-            pitch,
-            NMSEntityTypes.findType(entityClass),
-            objectId,
-            CraftVector.toNMS(velocity)
-        )
-
-        return NMSPacketContainer(packet)
-    }
-
-    override fun spawnEntityLiving(
-        entityId: Int,
-        uuid: UUID,
-        typeId: Int,
-        x: Double,
-        y: Double,
-        z: Double,
-        yaw: Float,
-        pitch: Float,
-        roll: Float,
-        velocity: Vector
-    ): NMSPacketContainer {
-        val byteBuf = FriendlyByteBuf(Unpooled.buffer())
-
-        byteBuf.writeVarInt(entityId)
-        byteBuf.writeUUID(uuid)
-        byteBuf.writeVarInt(typeId)
-        byteBuf.writeDouble(x)
-        byteBuf.writeDouble(y)
-        byteBuf.writeDouble(z)
-        byteBuf.writeByte(yaw.toProtocolDegrees())
-        byteBuf.writeByte(pitch.toProtocolDegrees())
-        byteBuf.writeByte(roll.toProtocolDegrees())
-        byteBuf.writeShort(velocity.x.toProtocolDelta())
-        byteBuf.writeShort(velocity.y.toProtocolDelta())
-        byteBuf.writeShort(velocity.z.toProtocolDelta())
-
-        val packet = ClientboundAddMobPacket(byteBuf)
-        return NMSPacketContainer(packet)
-    }
 
     override fun entityMetadata(entity: Entity): NMSPacketContainer {
         entity as CraftEntity
@@ -258,31 +190,6 @@ class NMSPacketSupport : PacketSupport {
 
     override fun removeEntities(vararg entityIds: Int): PacketContainer {
         return NMSPacketContainer(ClientboundRemoveEntitiesPacket(IntArrayList((entityIds))))
-    }
-
-    override fun spawnFireworkParticles(
-        x: Double,
-        y: Double,
-        z: Double,
-        effect: FireworkEffect
-    ): List<NMSPacketContainer> {
-        val firework = requireNotNull(Firework::class.java.createFakeEntity()).apply {
-            fireworkMeta = fireworkMeta.apply { addEffect(effect) }
-        }
-
-        return listOf(
-            spawnEntity(
-                firework.entityId,
-                firework.uniqueId,
-                x, y, z,
-                0.0F, 0.0F,
-                EntityType.FIREWORK,
-                76
-            ),
-            entityMetadata(firework),
-            entityStatus(firework.entityId, 17),
-            removeEntity(firework.entityId)
-        )
     }
 
     override fun containerSetSlot(containerId: Int, stateId: Int, slot: Int, item: ItemStack?): NMSPacketContainer {

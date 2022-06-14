@@ -12,6 +12,3 @@ build/
 
 # Debug server folder
 .debug-server/
-
-# Paper strap
-.paperstrap/

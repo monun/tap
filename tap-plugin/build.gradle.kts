@@ -1,7 +1,12 @@
+plugins {
+    id("io.papermc.paperweight.userdev") version "1.3.7"
+}
+
 val projectAPI = project(":${rootProject.name}-api")
 val projectCORE = project(":${rootProject.name}-core")
 
 dependencies {
+    paperDevBundle("1.19-R0.1-SNAPSHOT")
     implementation(projectAPI)
 }
 

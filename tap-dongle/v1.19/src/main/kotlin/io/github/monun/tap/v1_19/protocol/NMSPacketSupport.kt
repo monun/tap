@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.github.monun.tap.v1_18_2.protocol
+package io.github.monun.tap.v1_19.protocol
 
 import io.github.monun.tap.protocol.PacketContainer
 import io.github.monun.tap.protocol.PacketSupport
@@ -26,8 +26,8 @@ import it.unimi.dsi.fastutil.ints.IntArrayList
 import net.minecraft.network.FriendlyByteBuf
 import net.minecraft.network.protocol.game.*
 import net.minecraft.world.phys.Vec3
-import org.bukkit.craftbukkit.v1_18_R2.entity.CraftEntity
-import org.bukkit.craftbukkit.v1_18_R2.inventory.CraftItemStack
+import org.bukkit.craftbukkit.v1_19_R1.entity.CraftEntity
+import org.bukkit.craftbukkit.v1_19_R1.inventory.CraftItemStack
 import org.bukkit.entity.Entity
 import org.bukkit.inventory.EquipmentSlot
 import org.bukkit.inventory.ItemStack
@@ -193,6 +193,13 @@ class NMSPacketSupport : PacketSupport {
     }
 
     override fun containerSetSlot(containerId: Int, stateId: Int, slot: Int, item: ItemStack?): NMSPacketContainer {
-        return NMSPacketContainer(ClientboundContainerSetSlotPacket(containerId, stateId, slot, CraftItemStack.asNMSCopy(item)))
+        return NMSPacketContainer(
+            ClientboundContainerSetSlotPacket(
+                containerId,
+                stateId,
+                slot,
+                CraftItemStack.asNMSCopy(item)
+            )
+        )
     }
 }
