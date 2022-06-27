@@ -14,6 +14,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * Modified - octomarine
  */
 
 package io.github.monun.tap.fake
@@ -38,6 +40,9 @@ interface FakeEntityServer {
     fun spawnFallingBlock(location: Location, blockData: BlockData): FakeEntity<FallingBlock>
 
     fun spawnItem(location: Location, item: ItemStack): FakeEntity<Item>
+
+    /* Modified */
+    fun spawnPlayer(location: Location, data: PlayerData): FakeEntity<Player>
 
     fun addPlayer(player: Player)
 

@@ -14,6 +14,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * Modified - octomarine
  */
 
 package io.github.monun.tap.fake.internal
@@ -434,10 +436,13 @@ class FakeEntityImpl<T: Entity> internal constructor(
         trackers -= tracker
     }
 
+    /* Modified */
     private fun spawnTo(player: Player) {
         val bukkitEntity = bukkitEntity
 
-        player.sendPacket(bukkitEntity.createSpawnPacket())
+        bukkitEntity.createSpawnPacket().forEach {
+            player.sendPacket(it)
+        }
         player.sendPacket(PacketSupport.entityMetadata(bukkitEntity))
 
         if (bukkitEntity is ArmorStand) {

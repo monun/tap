@@ -14,6 +14,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * Modified - octomarine
  */
 
 package io.github.monun.tap.fake.internal
@@ -90,6 +92,18 @@ class FakeEntityServerImpl(plugin: JavaPlugin) : FakeEntityServer {
             setLocation(location)
         }
         val fakeEntity = FakeEntityImpl(this, bukkitItemEntity, location)
+        _entities += fakeEntity
+        enqueue(fakeEntity)
+
+        return fakeEntity
+    }
+
+    /* Modified */
+    override fun spawnPlayer(location: Location, data: PlayerData): FakeEntity<Player> {
+        val bukkitPlayer = createPlayerEntity(data).apply {
+            setLocation(location)
+        }
+        val fakeEntity = FakeEntityImpl(this, bukkitPlayer, location)
         _entities += fakeEntity
         enqueue(fakeEntity)
 
