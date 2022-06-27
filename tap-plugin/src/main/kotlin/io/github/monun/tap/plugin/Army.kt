@@ -10,7 +10,7 @@ class Army(fakeServer: FakeEntityServer, center: Location) {
     private val army = ArrayList<FakeEntity<Player>>()
 
     init {
-        val data = PlayerData("mango", "dolphin2410")
+        val data = PlayerData("notch", "Notch")
         for (x in -1..1) {
             for (z in -2..2) {
                 val player = fakeServer.spawnPlayer(center.clone().add(x.toDouble(), 0.0, z.toDouble()), data)
