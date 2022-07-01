@@ -27,6 +27,14 @@ class PlayerData(val name: String, private val skin: Pair<String, String>, priva
     }
 }
 
+enum class PlayerInfoAction {
+    ADD,
+    GAME_MODE,
+    LATENCY,
+    DISPLAY_NAME,
+    REMOVE
+}
+
 fun fetchUUID(name: String): String {
     val client = HttpClient.newHttpClient()
     val request = HttpRequest.newBuilder(URI.create("https://api.mojang.com/profiles/minecraft"))

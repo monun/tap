@@ -21,10 +21,7 @@
 package io.github.monun.tap.fake.internal
 
 import com.google.common.collect.ImmutableList
-import io.github.monun.tap.fake.FakeEntity
-import io.github.monun.tap.fake.createSpawnPacket
-import io.github.monun.tap.fake.mountedYOffset
-import io.github.monun.tap.fake.setLocation
+import io.github.monun.tap.fake.*
 import io.github.monun.tap.protocol.AnimationType
 import io.github.monun.tap.protocol.PacketContainer
 import io.github.monun.tap.protocol.PacketSupport
@@ -467,6 +464,10 @@ class FakeEntityImpl<T: Entity> internal constructor(
     }
 
     internal fun despawn() {
+        /* Modified */
+        if (bukkitEntity is Player) {
+            trackers.sendServerPacketAll(PacketSupport.playerInfo(PlayerInfoAction.REMOVE, bukkitEntity))
+        }
         trackers.sendServerPacketAll(PacketSupport.removeEntity((bukkitEntity.entityId)))
     }
 
@@ -475,6 +476,10 @@ class FakeEntityImpl<T: Entity> internal constructor(
     }
 
     internal fun despawnTo(player: Player) {
+        /* Modified */
+        if (bukkitEntity is Player) {
+            player.sendPacket(PacketSupport.playerInfo(PlayerInfoAction.REMOVE, bukkitEntity))
+        }
         player.sendPacket(PacketSupport.removeEntity((bukkitEntity.entityId)))
     }
 
