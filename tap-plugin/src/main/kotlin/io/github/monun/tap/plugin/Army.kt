@@ -8,9 +8,8 @@ import org.bukkit.entity.Player
 
 class Army(fakeServer: FakeEntityServer, center: Location) {
     private val army = ArrayList<FakeEntity<Player>>()
-
     init {
-        val data = PlayerData("notch", "Notch")
+        val data = PlayerData("notch", "notch")
         for (x in -1..1) {
             for (z in -2..2) {
                 val player = fakeServer.spawnPlayer(center.clone().add(x.toDouble(), 0.0, z.toDouble()), data)
@@ -22,8 +21,8 @@ class Army(fakeServer: FakeEntityServer, center: Location) {
 
     fun moveCenter(location: Location) {
             var index = 0
-            for (x in -5..5) {
-                for (z in -5..5) {
+            for (x in -1..1) {
+                for (z in -2..2) {
                     army[index++].moveTo(location.clone().add(x.toDouble(), 0.0, z.toDouble()))
                 }
             }

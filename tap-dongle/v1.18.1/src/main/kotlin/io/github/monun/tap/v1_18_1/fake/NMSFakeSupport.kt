@@ -144,12 +144,14 @@ class NMSFakeSupport : FakeSupport {
 
     /* Modified */
     override fun createPlayerEntity(data: PlayerData): Player {
-        val entity = ServerPlayer(
+        val player = ServerPlayer(
             (Bukkit.getServer() as CraftServer).handle.server,
             (Bukkit.getWorlds().first() as CraftWorld).handle,
             data.toGameProfile()
         )
 
-        return entity.bukkitEntity as Player
+        player.entityData.set(ServerPlayer.DATA_PLAYER_MODE_CUSTOMISATION, (0x01 or 0x02 or 0x04 or 0x08 or 0x10 or 0x20 or 0x40).toByte())
+
+        return player.bukkitEntity as Player
     }
 }
