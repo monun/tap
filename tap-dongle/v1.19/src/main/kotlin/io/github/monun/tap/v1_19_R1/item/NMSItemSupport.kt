@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.github.monun.tap.v1_19.item
+package io.github.monun.tap.v1_19_R1.item
 
 import io.github.monun.tap.item.ItemSupport
 import net.minecraft.nbt.CompoundTag

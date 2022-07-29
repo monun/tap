@@ -18,12 +18,11 @@
  * Modified - octomarine
  */
 
-package io.github.monun.tap.v1_19.fake
+package io.github.monun.tap.v1_19_R1.fake
 
 import io.github.monun.tap.fake.FakeSupport
 import io.github.monun.tap.fake.PlayerData
-import io.github.monun.tap.fake.createSpawnPacket
-import io.github.monun.tap.v1_19.protocol.NMSPacketContainer
+import io.github.monun.tap.v1_19_R1.protocol.NMSPacketContainer
 import net.minecraft.core.Registry
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoPacket
 import net.minecraft.server.level.ServerPlayer
