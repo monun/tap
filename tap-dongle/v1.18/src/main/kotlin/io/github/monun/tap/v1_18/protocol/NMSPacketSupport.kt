@@ -14,10 +14,13 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * Modified - octomarine
  */
 
 package io.github.monun.tap.v1_18.protocol
 
+import io.github.monun.tap.fake.PlayerInfoAction
 import io.github.monun.tap.protocol.PacketContainer
 import io.github.monun.tap.protocol.PacketSupport
 import io.github.monun.tap.protocol.toProtocolDegrees
@@ -27,8 +30,10 @@ import net.minecraft.network.FriendlyByteBuf
 import net.minecraft.network.protocol.game.*
 import net.minecraft.world.phys.Vec3
 import org.bukkit.craftbukkit.v1_18_R1.entity.CraftEntity
+import org.bukkit.craftbukkit.v1_18_R1.entity.CraftPlayer
 import org.bukkit.craftbukkit.v1_18_R1.inventory.CraftItemStack
 import org.bukkit.entity.Entity
+import org.bukkit.entity.Player
 import org.bukkit.inventory.EquipmentSlot
 import org.bukkit.inventory.ItemStack
 import org.bukkit.util.Vector
@@ -42,6 +47,17 @@ private fun EquipmentSlot.toNMS(): NMSEquipmentSlot {
         EquipmentSlot.LEGS -> NMSEquipmentSlot.LEGS
         EquipmentSlot.CHEST -> NMSEquipmentSlot.CHEST
         EquipmentSlot.HEAD -> NMSEquipmentSlot.HEAD
+    }
+}
+
+/* Modified */
+private fun PlayerInfoAction.toNMS(): ClientboundPlayerInfoPacket.Action {
+    return when (this) {
+        PlayerInfoAction.ADD -> ClientboundPlayerInfoPacket.Action.ADD_PLAYER
+        PlayerInfoAction.GAME_MODE -> ClientboundPlayerInfoPacket.Action.UPDATE_GAME_MODE
+        PlayerInfoAction.LATENCY -> ClientboundPlayerInfoPacket.Action.UPDATE_LATENCY
+        PlayerInfoAction.DISPLAY_NAME -> ClientboundPlayerInfoPacket.Action.UPDATE_DISPLAY_NAME
+        PlayerInfoAction.REMOVE -> ClientboundPlayerInfoPacket.Action.REMOVE_PLAYER
     }
 }
 
@@ -194,5 +210,10 @@ class NMSPacketSupport : PacketSupport {
 
     override fun containerSetSlot(containerId: Int, stateId: Int, slot: Int, item: ItemStack?): NMSPacketContainer {
         return NMSPacketContainer(ClientboundContainerSetSlotPacket(containerId, stateId, slot, CraftItemStack.asNMSCopy(item)))
+    }
+
+    /* Modified */
+    override fun playerInfo(action: PlayerInfoAction, player: Player): PacketContainer {
+        return NMSPacketContainer(ClientboundPlayerInfoPacket(action.toNMS(), (player as CraftPlayer).handle))
     }
 }

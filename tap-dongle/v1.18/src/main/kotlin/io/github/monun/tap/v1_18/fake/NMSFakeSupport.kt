@@ -14,26 +14,34 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * Modified - octomarine
  */
 
 package io.github.monun.tap.v1_18.fake
 
 import io.github.monun.tap.fake.FakeSupport
+import io.github.monun.tap.fake.PlayerData
 import io.github.monun.tap.v1_18.protocol.NMSPacketContainer
 import net.minecraft.core.Registry
+import net.minecraft.network.protocol.game.ClientboundPlayerInfoPacket
+import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.entity.item.FallingBlockEntity
 import net.minecraft.world.entity.item.ItemEntity
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.World
 import org.bukkit.block.data.BlockData
+import org.bukkit.craftbukkit.v1_18_R1.CraftServer
 import org.bukkit.craftbukkit.v1_18_R1.CraftWorld
 import org.bukkit.craftbukkit.v1_18_R1.block.data.CraftBlockData
 import org.bukkit.craftbukkit.v1_18_R1.entity.CraftEntity
+import org.bukkit.craftbukkit.v1_18_R1.entity.CraftPlayer
 import org.bukkit.craftbukkit.v1_18_R1.inventory.CraftItemStack
 import org.bukkit.entity.Entity
 import org.bukkit.entity.FallingBlock
 import org.bukkit.entity.Item
+import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 
 /**
@@ -94,10 +102,17 @@ class NMSFakeSupport : FakeSupport {
         return entity.handle.myRidingOffset
     }
 
-    override fun createSpawnPacket(entity: Entity): NMSPacketContainer {
+    /* Modified */
+    override fun createSpawnPacket(entity: Entity): Array<NMSPacketContainer> {
+        val packets = arrayListOf<NMSPacketContainer>()
         entity as CraftEntity
 
-        return NMSPacketContainer(entity.handle.addEntityPacket)
+        if (entity is Player) {
+            packets.add(NMSPacketContainer(ClientboundPlayerInfoPacket(ClientboundPlayerInfoPacket.Action.ADD_PLAYER, entity.handle as ServerPlayer)))
+        }
+        packets.add(NMSPacketContainer(entity.handle.addEntityPacket))
+
+        return packets.toTypedArray()
     }
 
     override fun createFallingBlock(blockData: BlockData): FallingBlock {
@@ -125,5 +140,18 @@ class NMSFakeSupport : FakeSupport {
         entity.setNeverPickUp()
 
         return entity.bukkitEntity as Item
+    }
+
+    /* Modified */
+    override fun createPlayerEntity(data: PlayerData): Player {
+        val player = ServerPlayer(
+            (Bukkit.getServer() as CraftServer).handle.server,
+            (Bukkit.getWorlds().first() as CraftWorld).handle,
+            data.toGameProfile()
+        )
+
+        player.entityData.set(ServerPlayer.DATA_PLAYER_MODE_CUSTOMISATION, (0x01 or 0x02 or 0x04 or 0x08 or 0x10 or 0x20 or 0x40).toByte())
+
+        return player.bukkitEntity as Player
     }
 }

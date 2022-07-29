@@ -19,6 +19,7 @@
 package io.github.monun.tap.plugin
 
 import io.github.monun.tap.fake.FakeEntityServer
+import io.github.monun.tap.fake.PlayerData
 import io.github.monun.tap.protocol.PacketSupport
 import org.bukkit.Bukkit
 import org.bukkit.Material
@@ -26,6 +27,7 @@ import org.bukkit.craftbukkit.v1_19_R1.entity.CraftFrog
 import org.bukkit.entity.Frog
 import org.bukkit.entity.Item
 import org.bukkit.entity.Player
+import org.bukkit.entity.Zombie
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.block.Action
@@ -99,10 +101,10 @@ class FakeTest {
 
                 if (action == Action.LEFT_CLICK_AIR || action == Action.LEFT_CLICK_BLOCK) {
                     val target = player.getTargetBlock(32)!!.location.add(0.5, 1.0, 0.5)
-                    val item = fakeEntityServer.spawnEntity(target, Frog::class.java)
+                    val army = Army(fakeEntityServer, target)
                     server.scheduler.runTaskTimer(this@register, Runnable {
-                        item.moveTo(player.getTargetBlock(32)!!.location.add(0.5, 1.0, 0.5))
-                    }, 0L, 1L)
+                        army.moveCenter(player.getTargetBlock(32)!!.location.add(0.5, 1.0, 0.5))
+                    }, 0L, 5L)
 
                 } else if (action == Action.RIGHT_CLICK_AIR || action == Action.RIGHT_CLICK_BLOCK) {
                     player.getTargetEntity(32)?.let { target ->

@@ -14,6 +14,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * Modified - octomarine
  */
 
 package io.github.monun.tap.fake
@@ -27,6 +29,7 @@ import org.bukkit.block.data.BlockData
 import org.bukkit.entity.Entity
 import org.bukkit.entity.FallingBlock
 import org.bukkit.entity.Item
+import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 
 /**
@@ -47,11 +50,14 @@ interface FakeSupport {
 
     fun getYOffset(entity: Entity): Double
 
-    fun createSpawnPacket(entity: Entity): PacketContainer
+    fun createSpawnPacket(entity: Entity): Array<out PacketContainer>
 
     fun createFallingBlock(blockData: BlockData): FallingBlock
 
     fun createItemEntity(item: ItemStack): Item
+
+    /* Modified */
+    fun createPlayerEntity(data: PlayerData): Player
 }
 
 internal val FakeSupportNMS = LibraryLoader.loadNMS(FakeSupport::class.java)
@@ -81,7 +87,7 @@ fun Entity.setLocation(loc: Location) {
     FakeSupportNMS.setLocation(this, loc)
 }
 
-fun Entity.createSpawnPacket(): PacketContainer {
+fun Entity.createSpawnPacket(): Array<out PacketContainer> {
     return FakeSupportNMS.createSpawnPacket(this)
 }
 
@@ -91,4 +97,9 @@ fun createFallingBlock(blockData: BlockData): FallingBlock {
 
 fun createItemEntity(item: ItemStack): Item {
     return FakeSupportNMS.createItemEntity(item)
+}
+
+/* Modified */
+fun createPlayerEntity(data: PlayerData): Player {
+    return FakeSupportNMS.createPlayerEntity(data)
 }

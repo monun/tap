@@ -18,10 +18,12 @@
 
 package io.github.monun.tap.protocol
 
+import io.github.monun.tap.fake.PlayerInfoAction
 import io.github.monun.tap.loader.LibraryLoader
 import org.bukkit.Location
 import org.bukkit.entity.Entity
 import org.bukkit.entity.LivingEntity
+import org.bukkit.entity.Player
 import org.bukkit.inventory.EquipmentSlot
 import org.bukkit.inventory.ItemStack
 import org.bukkit.util.Vector
@@ -120,6 +122,8 @@ interface PacketSupport {
     fun removeEntity(entityId: Int): PacketContainer
 
     fun removeEntities(vararg entityIds: Int): PacketContainer
+
+    fun playerInfo(action: PlayerInfoAction, player: Player): PacketContainer
 
     fun containerSetSlot(containerId: Int, stateId: Int, slot: Int, item: ItemStack?): PacketContainer =
         throw UnsupportedOperationException()

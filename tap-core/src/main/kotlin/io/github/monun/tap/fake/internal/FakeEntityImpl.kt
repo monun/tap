@@ -14,15 +14,14 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * Modified - octomarine
  */
 
 package io.github.monun.tap.fake.internal
 
 import com.google.common.collect.ImmutableList
-import io.github.monun.tap.fake.FakeEntity
-import io.github.monun.tap.fake.createSpawnPacket
-import io.github.monun.tap.fake.mountedYOffset
-import io.github.monun.tap.fake.setLocation
+import io.github.monun.tap.fake.*
 import io.github.monun.tap.protocol.AnimationType
 import io.github.monun.tap.protocol.PacketContainer
 import io.github.monun.tap.protocol.PacketSupport
@@ -434,10 +433,13 @@ class FakeEntityImpl<T: Entity> internal constructor(
         trackers -= tracker
     }
 
+    /* Modified */
     private fun spawnTo(player: Player) {
         val bukkitEntity = bukkitEntity
 
-        player.sendPacket(bukkitEntity.createSpawnPacket())
+        bukkitEntity.createSpawnPacket().forEach {
+            player.sendPacket(it)
+        }
         player.sendPacket(PacketSupport.entityMetadata(bukkitEntity))
 
         if (bukkitEntity is ArmorStand) {
@@ -462,6 +464,10 @@ class FakeEntityImpl<T: Entity> internal constructor(
     }
 
     internal fun despawn() {
+        /* Modified */
+        if (bukkitEntity is Player) {
+            trackers.sendServerPacketAll(PacketSupport.playerInfo(PlayerInfoAction.REMOVE, bukkitEntity))
+        }
         trackers.sendServerPacketAll(PacketSupport.removeEntity((bukkitEntity.entityId)))
     }
 
@@ -470,6 +476,10 @@ class FakeEntityImpl<T: Entity> internal constructor(
     }
 
     internal fun despawnTo(player: Player) {
+        /* Modified */
+        if (bukkitEntity is Player) {
+            player.sendPacket(PacketSupport.playerInfo(PlayerInfoAction.REMOVE, bukkitEntity))
+        }
         player.sendPacket(PacketSupport.removeEntity((bukkitEntity.entityId)))
     }
 
