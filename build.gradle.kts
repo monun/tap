@@ -1,4 +1,5 @@
 plugins {
+    idea
     kotlin("jvm") version "1.6.21"
     id("org.jetbrains.dokka") version "1.6.21" apply false
 }
@@ -49,5 +50,11 @@ listOf("api", "core").forEach { projectName ->
                 }
             }
         }
+    }
+}
+
+idea {
+    module {
+        excludeDirs.add(file(".debug-server"))
     }
 }
