@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.github.monun.tap.v1_19_R1.fake
+package io.github.monun.tap.v1_19.fake
 
 import net.minecraft.core.Registry
 import net.minecraft.server.MinecraftServer

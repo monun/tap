@@ -18,7 +18,7 @@
  * Modified - octomarine
  */
 
-package io.github.monun.tap.v1_19_R1.protocol
+package io.github.monun.tap.v1_19.protocol
 
 import io.github.monun.tap.fake.PlayerInfoAction
 import io.github.monun.tap.protocol.PacketContainer

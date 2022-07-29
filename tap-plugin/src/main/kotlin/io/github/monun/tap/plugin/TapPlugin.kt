@@ -20,6 +20,7 @@ package io.github.monun.tap.plugin
 
 import io.github.monun.tap.fake.FakeEntityServer
 import io.github.monun.tap.fake.PlayerData
+import io.github.monun.tap.loader.LibraryLoader
 import io.github.monun.tap.protocol.PacketSupport
 import org.bukkit.Bukkit
 import org.bukkit.Material
