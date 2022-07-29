@@ -73,5 +73,6 @@ libraries:
     * FakeFallingBlock 버그 수정
     * Version identifier 추가
     * 일부 코드 향상
+    * FakeEntity에 Player 지원
 
 [![Jetbrains](https://i.ibb.co/fp0CyZ7/jetbrains.png)](https://jb.gg/OpenSource)
