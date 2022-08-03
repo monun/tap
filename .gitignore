@@ -11,4 +11,4 @@ build/
 !gradle-wrapper.properties
 
 # Debug server folder
-.debug-server/
+.server/

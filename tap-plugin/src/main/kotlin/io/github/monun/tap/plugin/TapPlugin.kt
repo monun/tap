@@ -19,16 +19,11 @@
 package io.github.monun.tap.plugin
 
 import io.github.monun.tap.fake.FakeEntityServer
-import io.github.monun.tap.fake.PlayerData
-import io.github.monun.tap.loader.LibraryLoader
 import io.github.monun.tap.protocol.PacketSupport
 import org.bukkit.Bukkit
 import org.bukkit.Material
-import org.bukkit.craftbukkit.v1_19_R1.entity.CraftFrog
-import org.bukkit.entity.Frog
 import org.bukkit.entity.Item
 import org.bukkit.entity.Player
-import org.bukkit.entity.Zombie
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.block.Action

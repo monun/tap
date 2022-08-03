@@ -1,7 +1,7 @@
 plugins {
     idea
-    kotlin("jvm") version "1.6.21"
-    id("org.jetbrains.dokka") version "1.6.21" apply false
+    kotlin("jvm") version Dependency.Kotlin.Version
+    id("org.jetbrains.dokka") version Dependency.Kotlin.Version apply false
 }
 
 java {
@@ -24,7 +24,7 @@ subprojects {
     }
 
     dependencies {
-        compileOnly("io.papermc.paper:paper-api:1.19-R0.1-SNAPSHOT")
+        compileOnly("io.papermc.paper:paper-api:${Dependency.Paper.Version}-R0.1-SNAPSHOT")
 
         implementation(kotlin("stdlib"))
         implementation(kotlin("reflect"))
@@ -53,8 +53,33 @@ listOf("api", "core").forEach { projectName ->
     }
 }
 
+tasks {
+    register<DefaultTask>("setupModules") {
+        doLast {
+            val defaultPrefix = "sample"
+            val projectPrefix = rootProject.name
+
+            if (defaultPrefix != projectPrefix) {
+                fun rename(suffix: String) {
+                    val from = "$defaultPrefix-$suffix"
+                    val to = "$projectPrefix-$suffix"
+                    file(from).takeIf { it.exists() }?.renameTo(file(to))
+                }
+
+                rename("api")
+                rename("core")
+                rename("dongle")
+                rename("plugin")
+                rename("publish")
+            }
+        }
+    }
+}
+
 idea {
     module {
-        excludeDirs.add(file(".debug-server"))
+        excludeDirs.add(file(".server"))
+        excludeDirs.addAll(allprojects.map { it.buildDir })
+        excludeDirs.addAll(allprojects.map { it.file(".gradle") })
     }
 }
