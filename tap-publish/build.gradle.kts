@@ -48,6 +48,7 @@ publishing {
 
             pom {
                 name.set(target.name)
+                description.set("PaperMC extension library written in Kotlin")
                 url.set("https://github.com/monun/${rootProject.name}")
 
                 licenses {
