@@ -39,7 +39,6 @@ import org.bukkit.inventory.EquipmentSlot
 import org.bukkit.inventory.ItemStack
 import org.bukkit.util.Vector
 import java.util.*
-import kotlin.math.pow
 
 class FakeEntityImpl<T : Entity> internal constructor(
     server: FakeEntityServerImpl,
