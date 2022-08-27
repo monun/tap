@@ -471,9 +471,8 @@ class FakeEntityImpl<T : Entity> internal constructor(
     }
 
     internal fun despawn() {
-        /* Modified */
         if (bukkitEntity is Player) {
-            trackers.sendServerPacketAll(PacketSupport.playerInfo(PlayerInfoAction.REMOVE, bukkitEntity))
+            trackers.sendServerPacketAll(PacketSupport.playerInfoAction(PlayerInfoAction.REMOVE, bukkitEntity))
         }
         trackers.sendServerPacketAll(PacketSupport.removeEntity((bukkitEntity.entityId)))
     }
@@ -483,9 +482,8 @@ class FakeEntityImpl<T : Entity> internal constructor(
     }
 
     internal fun despawnTo(player: Player) {
-        /* Modified */
         if (bukkitEntity is Player) {
-            player.sendPacket(PacketSupport.playerInfo(PlayerInfoAction.REMOVE, bukkitEntity))
+            player.sendPacket(PacketSupport.playerInfoAction(PlayerInfoAction.REMOVE, bukkitEntity))
         }
         player.sendPacket(PacketSupport.removeEntity((bukkitEntity.entityId)))
     }
