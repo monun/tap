@@ -123,8 +123,8 @@ interface PacketSupport {
 
     fun removeEntities(vararg entityIds: Int): PacketContainer
 
-    fun playerInfo(action: PlayerInfoAction, player: Player): PacketContainer
-
     fun containerSetSlot(containerId: Int, stateId: Int, slot: Int, item: ItemStack?): PacketContainer =
         throw UnsupportedOperationException()
+
+    fun playerInfoAction(action: PlayerInfoAction, player: Player): PacketContainer
 }

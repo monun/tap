@@ -219,8 +219,7 @@ class NMSPacketSupport : PacketSupport {
         )
     }
 
-    /* Modified */
-    override fun playerInfo(action: PlayerInfoAction, player: Player): PacketContainer {
+    override fun playerInfoAction(action: PlayerInfoAction, player: Player): PacketContainer {
         return NMSPacketContainer(ClientboundPlayerInfoPacket(action.toNMS(), (player as CraftPlayer).handle))
     }
 }
