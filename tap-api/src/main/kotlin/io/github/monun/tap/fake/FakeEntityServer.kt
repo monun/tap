@@ -20,6 +20,7 @@
 
 package io.github.monun.tap.fake
 
+import com.destroystokyo.paper.profile.ProfileProperty
 import io.github.monun.tap.loader.LibraryLoader
 import org.bukkit.Location
 import org.bukkit.block.data.BlockData
@@ -29,20 +30,26 @@ import org.bukkit.entity.Item
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import org.bukkit.plugin.java.JavaPlugin
+import java.util.*
 
 interface FakeEntityServer {
-    companion object: FakeInternal by LibraryLoader.loadImplement(FakeInternal::class.java)
+    companion object : FakeInternal by LibraryLoader.loadImplement(FakeInternal::class.java)
 
     val entities: List<FakeEntity<*>>
 
-    fun <T: Entity> spawnEntity(location: Location, clazz: Class<T>): FakeEntity<T>
+    fun <T : Entity> spawnEntity(location: Location, clazz: Class<T>): FakeEntity<T>
 
     fun spawnFallingBlock(location: Location, blockData: BlockData): FakeEntity<FallingBlock>
 
     fun spawnItem(location: Location, item: ItemStack): FakeEntity<Item>
 
-    /* Modified */
-    fun spawnPlayer(location: Location, data: PlayerData): FakeEntity<Player>
+    fun spawnPlayer(
+        location: Location,
+        name: String,
+        profileProperties: Set<ProfileProperty> = emptySet(),
+        skinParts: FakeSkinParts = defaultFakeSkinParts,
+        uniqueId: UUID = UUID.randomUUID()
+    ): FakeEntity<Player>
 
     fun addPlayer(player: Player)
 
@@ -54,6 +61,8 @@ interface FakeEntityServer {
 
     fun shutdown()
 }
+
+private val defaultFakeSkinParts = FakeSkinParts()
 
 interface FakeInternal {
     fun create(plugin: JavaPlugin): FakeEntityServer

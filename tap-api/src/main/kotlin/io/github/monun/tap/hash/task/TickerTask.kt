@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.github.monun.tap.task
+package io.github.monun.tap.hash.task
 
 import io.github.monun.tap.ref.Weaky
 

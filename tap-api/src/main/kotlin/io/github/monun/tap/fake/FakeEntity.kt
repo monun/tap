@@ -80,3 +80,9 @@ interface FakeEntity<T: Entity> {
 
     fun remove()
 }
+
+fun FakeEntity<Player>.updateSkinParts(skinParts: FakeSkinParts) {
+    updateMetadata {
+        FakeSupportNMS.setSkinParts(this, skinParts.raw)
+    }
+}

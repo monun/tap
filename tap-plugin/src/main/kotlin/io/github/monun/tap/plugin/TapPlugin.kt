@@ -18,115 +18,79 @@
 
 package io.github.monun.tap.plugin
 
+import io.github.monun.tap.fake.FakeEntity
 import io.github.monun.tap.fake.FakeEntityServer
-import io.github.monun.tap.protocol.PacketSupport
 import org.bukkit.Bukkit
-import org.bukkit.Material
-import org.bukkit.entity.Item
+import org.bukkit.entity.Frog
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
-import org.bukkit.event.block.Action
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerQuitEvent
-import org.bukkit.event.player.PlayerToggleSneakEvent
-import org.bukkit.inventory.ItemStack
 import org.bukkit.plugin.java.JavaPlugin
 
 class TapPlugin : JavaPlugin() {
+    private lateinit var fakeTest: FakeTest
+
     override fun onEnable() {
-        FakeTest().apply {
-            register()
-        }
-        SetSlotTest().apply {
-            register()
-        }
+        fakeTest = FakeTest()
+        fakeTest.register(this)
+    }
+
+    override fun onDisable() {
+        fakeTest.unregister()
     }
 }
 
-class SetSlotTest {
-    fun JavaPlugin.register() {
-        fun Player.updateSlot(isSneaking: Boolean = this.isSneaking) {
-            if (isSneaking) {
-                repeat(9) {
-                    PacketSupport.containerSetSlot(-2, 0, 0 + it, ItemStack(Material.RED_CONCRETE)).sendTo(this)
-                }
-            } else {
-                updateInventory()
-            }
-        }
+class FakeTest : Listener, Runnable {
 
-        server.pluginManager.registerEvents(object : Listener {
-            @EventHandler
-            fun onPlayerToggleSneak(event: PlayerToggleSneakEvent) {
-                event.player.updateSlot(event.isSneaking)
-            }
-        }, this)
-
-        server.scheduler.runTaskTimer(this, Runnable {
-            Bukkit.getOnlinePlayers().forEach {
-                if (it.isSneaking) it.updateSlot()
-            }
-        }, 0L, 1L)
-    }
-}
-
-class FakeTest {
     private lateinit var fakeEntityServer: FakeEntityServer
 
-    fun JavaPlugin.register() {
-        fakeEntityServer = FakeEntityServer.create(this)
+    fun register(plugin: TapPlugin) {
+        fakeEntityServer = FakeEntityServer.create(plugin)
+        plugin.server.apply {
+            pluginManager.registerEvents(this@FakeTest, plugin)
+            scheduler.runTaskTimer(plugin, this@FakeTest, 0L, 1L)
+        }
 
-        server.scheduler.runTaskTimer(this, this@FakeTest::update, 0L, 1L)
-        server.pluginManager.registerEvents(object : Listener {
-            @EventHandler
-            fun onJoin(event: PlayerJoinEvent) {
-                fakeEntityServer.addPlayer(event.player)
-            }
-
-            @EventHandler
-            fun onQuit(event: PlayerQuitEvent) {
-                fakeEntityServer.removePlayer(event.player)
-            }
-
-            @EventHandler
-            fun onPlayerInteract(event: PlayerInteractEvent) {
-                val player = event.player
-                val action = event.action
-
-                if (action == Action.LEFT_CLICK_AIR || action == Action.LEFT_CLICK_BLOCK) {
-                    val target = player.getTargetBlock(32)!!.location.add(0.5, 1.0, 0.5)
-                    val army = Army(fakeEntityServer, target)
-                    server.scheduler.runTaskTimer(this@register, Runnable {
-                        army.moveCenter(player.getTargetBlock(32)!!.location.add(0.5, 1.0, 0.5))
-                    }, 0L, 5L)
-
-                } else if (action == Action.RIGHT_CLICK_AIR || action == Action.RIGHT_CLICK_BLOCK) {
-                    player.getTargetEntity(32)?.let { target ->
-                        for (entity in fakeEntityServer.entities) {
-                            val bukkitEntity = entity.bukkitEntity
-
-                            if (bukkitEntity is Item) {
-                                entity.broadcastImmediately(
-                                    PacketSupport.takeItem(
-                                        bukkitEntity.entityId,
-                                        target.entityId,
-                                        1
-                                    )
-                                )
-                                entity.remove()
-                            }
-                        }
-                    }
-                }
-            }
-        }, this)
-
-        Bukkit.getOnlinePlayers().forEach { fakeEntityServer.addPlayer(it) }
+        Bukkit.getOnlinePlayers().forEach {
+            fakeEntityServer.addPlayer(it)
+        }
     }
 
-    private fun update() {
+    fun unregister() {
+        fakeEntityServer.clear()
+    }
+
+    private val fakePlayers = arrayListOf<FakeEntity<*>>()
+
+    override fun run() {
+        Bukkit.getOnlinePlayers().firstOrNull()?.let { player ->
+            val location = player.eyeLocation
+            location.add(location.direction.multiply(4.0))
+            fakePlayers.forEach { it.moveTo(location) }
+        }
+
         fakeEntityServer.update()
+    }
+
+    @EventHandler
+    fun onPlayerJoin(event: PlayerJoinEvent) {
+        fakeEntityServer.addPlayer(event.player)
+    }
+
+    @EventHandler
+    fun onPlayerQuit(event: PlayerQuitEvent) {
+        fakeEntityServer.removePlayer(event.player)
+    }
+
+    @EventHandler
+    fun onPlayerInteract(event: PlayerInteractEvent) {
+        val player = event.player
+        val fakePlayer = fakeEntityServer.spawnPlayer(player.location, "빠큐", Bukkit.getServer().createProfile("ehdgh141").apply {
+            complete()
+        }.properties)
+        fakePlayers.add(fakePlayer)
     }
 }

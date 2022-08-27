@@ -20,9 +20,9 @@
 
 package io.github.monun.tap.fake.internal
 
+import com.destroystokyo.paper.profile.ProfileProperty
 import com.google.common.collect.ImmutableList
 import io.github.monun.tap.fake.*
-import io.github.monun.tap.protocol.PacketSupport.Companion.entityMetadata
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.block.data.BlockData
@@ -99,13 +99,17 @@ class FakeEntityServerImpl(plugin: JavaPlugin) : FakeEntityServer {
         return fakeEntity
     }
 
-    /* Modified */
-    override fun spawnPlayer(location: Location, data: PlayerData): FakeEntity<Player> {
-        val bukkitPlayer = createPlayerEntity(data).apply {
+    override fun spawnPlayer(
+        location: Location,
+        name: String,
+        profileProperties: Set<ProfileProperty>,
+        skinParts: FakeSkinParts,
+        uniqueId: UUID
+    ): FakeEntity<Player> {
+        val bukkitPlayer = createPlayerEntity(name, profileProperties, skinParts, uniqueId).apply {
             setLocation(location)
         }
         val fakeEntity = FakeEntityImpl(this, bukkitPlayer, location)
-        entityMetadata(bukkitPlayer)
 
         _entities += fakeEntity
         enqueue(fakeEntity)

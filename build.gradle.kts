@@ -1,6 +1,7 @@
 plugins {
     idea
     kotlin("jvm") version Dependency.Kotlin.Version
+    kotlin("plugin.serialization") version Dependency.Kotlin.Version apply false
     id("org.jetbrains.dokka") version Dependency.Kotlin.Version apply false
 }
 
@@ -18,16 +19,26 @@ allprojects {
 
 subprojects {
     apply(plugin = "org.jetbrains.kotlin.jvm")
+    apply(plugin = "org.jetbrains.kotlin.plugin.serialization")
 
     repositories {
         maven("https://papermc.io/repo/repository/maven-public/")
     }
 
     dependencies {
-        compileOnly("io.papermc.paper:paper-api:${Dependency.Paper.Version}-R0.1-SNAPSHOT")
+        api("io.papermc.paper:paper-api:${Dependency.Paper.Version}-R0.1-SNAPSHOT")
 
         implementation(kotlin("stdlib"))
         implementation(kotlin("reflect"))
+        implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.2")
+
+        testImplementation("org.junit.jupiter:junit-jupiter:5.7.1")
+    }
+
+    tasks {
+        test {
+            useJUnitPlatform()
+        }
     }
 }
 

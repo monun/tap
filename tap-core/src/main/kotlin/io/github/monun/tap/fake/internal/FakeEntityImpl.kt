@@ -40,7 +40,7 @@ import org.bukkit.inventory.ItemStack
 import org.bukkit.util.Vector
 import java.util.*
 
-class FakeEntityImpl<T: Entity> internal constructor(
+class FakeEntityImpl<T : Entity> internal constructor(
     server: FakeEntityServerImpl,
     override val bukkitEntity: T,
     location: Location
@@ -71,7 +71,7 @@ class FakeEntityImpl<T: Entity> internal constructor(
     private var updateLocation = false
     private var updateTeleport = false
     private var updatePassengers = false
-    private var updateMeta = false
+    internal var updateMeta = false
     private var updateEquipment = false
     private var enqueued = false
 
@@ -354,20 +354,23 @@ class FakeEntityImpl<T: Entity> internal constructor(
         val deltaZ = from.z delta to.z
         val moveDelta = Vector(deltaX / 4096.0, deltaY / 4096.0, deltaZ / 4096.0)
 
-        val result =
-            if (updateTeleport || from.world !== to.world || deltaX < -32768L || deltaX > 32767L || deltaY < -32768L || deltaY > 32767L || deltaZ < -32768L || deltaZ > 32767L) { // Teleport
-                updateTeleport = false
-                deltaLocation.set(to)
-                bukkitEntity.setLocation(to)
-                trackers.sendServerPacketAll(PacketSupport.entityTeleport(bukkitEntity, to))
-                MoveResult.TELEPORT
-            } else {
-                val yaw = to.yaw
-                val pitch = to.pitch
+        val result = if (updateTeleport
+            || from.world !== to.world
+            || deltaX < -32768L || deltaX > 32767L
+            || deltaY < -32768L || deltaY > 32767L
+            || deltaZ < -32768L || deltaZ > 32767L
+        ) { // Teleport
+            updateTeleport = false
+            deltaLocation.set(to)
+            bukkitEntity.setLocation(to)
+            trackers.sendServerPacketAll(PacketSupport.entityTeleport(bukkitEntity, to))
+            MoveResult.TELEPORT
+        } else {
+            val yaw = to.yaw
+            val pitch = to.pitch
 
-                val packet = if (deltaX == 0L && deltaY == 0L && deltaZ == 0L && from.pitch == to.pitch) {
-                    PacketSupport.entityHeadLook(bukkitEntity.entityId, yaw)
-                } else {
+            if (deltaX != 0L || deltaY != 0L || deltaZ != 0L || from.pitch != to.pitch) {
+                trackers.sendServerPacketAll(
                     PacketSupport.relEntityMoveLook(
                         bukkitEntity.entityId,
                         deltaX.toShort(),
@@ -375,20 +378,23 @@ class FakeEntityImpl<T: Entity> internal constructor(
                         deltaZ.toShort(),
                         yaw,
                         pitch,
-                        false
+                        true
                     )
-                }
-
-                deltaLocation.apply {
-                    add(moveDelta)
-                    this.yaw = to.yaw
-                    this.pitch = to.pitch
-                }
-                bukkitEntity.setLocation(deltaLocation)
-
-                trackers.sendServerPacketAll(packet)
-                MoveResult.REL_MOVE
+                )
             }
+            if (from.yaw != to.yaw) {
+                trackers.sendServerPacketAll(PacketSupport.entityHeadLook(bukkitEntity.entityId, yaw))
+            }
+
+            deltaLocation.apply {
+                add(moveDelta)
+                this.yaw = to.yaw
+                this.pitch = to.pitch
+            }
+            bukkitEntity.setLocation(deltaLocation)
+
+            MoveResult.REL_MOVE
+        }
 
         previousLocation.set(currentLocation)
         return result
@@ -440,6 +446,7 @@ class FakeEntityImpl<T: Entity> internal constructor(
         bukkitEntity.createSpawnPacket().forEach {
             player.sendPacket(it)
         }
+        player.sendPacket(PacketSupport.entityHeadLook(bukkitEntity.entityId, location.yaw))
         player.sendPacket(PacketSupport.entityMetadata(bukkitEntity))
 
         if (bukkitEntity is ArmorStand) {

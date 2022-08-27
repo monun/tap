@@ -20,6 +20,7 @@
 
 package io.github.monun.tap.fake
 
+import com.destroystokyo.paper.profile.ProfileProperty
 import io.github.monun.tap.loader.LibraryLoader
 import io.github.monun.tap.protocol.PacketContainer
 import org.bukkit.Bukkit
@@ -31,6 +32,7 @@ import org.bukkit.entity.FallingBlock
 import org.bukkit.entity.Item
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
+import java.util.*
 
 /**
  * @author Nemo
@@ -55,9 +57,14 @@ interface FakeSupport {
     fun createFallingBlock(blockData: BlockData): FallingBlock
 
     fun createItemEntity(item: ItemStack): Item
+    fun createPlayerEntity(
+        name: String,
+        profileProperties: Set<ProfileProperty>,
+        skinParts: FakeSkinParts,
+        uniqueId: UUID
+    ): Player
 
-    /* Modified */
-    fun createPlayerEntity(data: PlayerData): Player
+    fun setSkinParts(player: Player, raw: Int)
 }
 
 internal val FakeSupportNMS = LibraryLoader.loadNMS(FakeSupport::class.java)
@@ -99,7 +106,11 @@ fun createItemEntity(item: ItemStack): Item {
     return FakeSupportNMS.createItemEntity(item)
 }
 
-/* Modified */
-fun createPlayerEntity(data: PlayerData): Player {
-    return FakeSupportNMS.createPlayerEntity(data)
+fun createPlayerEntity(
+    name: String,
+    profileProperties: Set<ProfileProperty>,
+    skinParts: FakeSkinParts,
+    uniqueId: UUID = UUID.randomUUID()
+): Player {
+    return FakeSupportNMS.createPlayerEntity(name, profileProperties, skinParts, uniqueId)
 }
