@@ -21,8 +21,6 @@ package io.github.monun.tap.plugin
 import io.github.monun.tap.fake.FakeEntity
 import io.github.monun.tap.fake.FakeEntityServer
 import org.bukkit.Bukkit
-import org.bukkit.entity.Frog
-import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerInteractEvent
