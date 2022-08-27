@@ -20,8 +20,11 @@
 
 package io.github.monun.tap.v1_18_2.fake
 
+import com.destroystokyo.paper.profile.ProfileProperty
+import com.mojang.authlib.GameProfile
+import com.mojang.authlib.properties.Property
+import io.github.monun.tap.fake.FakeSkinParts
 import io.github.monun.tap.fake.FakeSupport
-import io.github.monun.tap.fake.PlayerData
 import io.github.monun.tap.v1_18_2.protocol.NMSPacketContainer
 import net.minecraft.core.Registry
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoPacket
@@ -36,12 +39,14 @@ import org.bukkit.craftbukkit.v1_18_R2.CraftServer
 import org.bukkit.craftbukkit.v1_18_R2.CraftWorld
 import org.bukkit.craftbukkit.v1_18_R2.block.data.CraftBlockData
 import org.bukkit.craftbukkit.v1_18_R2.entity.CraftEntity
+import org.bukkit.craftbukkit.v1_18_R2.entity.CraftPlayer
 import org.bukkit.craftbukkit.v1_18_R2.inventory.CraftItemStack
 import org.bukkit.entity.Entity
 import org.bukkit.entity.FallingBlock
 import org.bukkit.entity.Item
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
+import java.util.*
 
 /**
  * @author Nemo
@@ -141,16 +146,36 @@ class NMSFakeSupport : FakeSupport {
         return entity.bukkitEntity as Item
     }
 
-    /* Modified */
-    override fun createPlayerEntity(data: PlayerData): Player {
+
+
+    override fun createPlayerEntity(
+        name: String,
+        profileProperties: Set<ProfileProperty>,
+        skinParts: FakeSkinParts,
+        uniqueId: UUID
+    ): Player {
         val player = ServerPlayer(
             (Bukkit.getServer() as CraftServer).handle.server,
             (Bukkit.getWorlds().first() as CraftWorld).handle,
-            data.toGameProfile()
+            GameProfile(UUID.randomUUID(), name).apply {
+                for (property in profileProperties) {
+                    val propertyName = property.name
+                    properties.put(propertyName, Property(propertyName, property.value, property.signature))
+                }
+            }
         )
 
-        player.entityData.set(ServerPlayer.DATA_PLAYER_MODE_CUSTOMISATION, (0x01 or 0x02 or 0x04 or 0x08 or 0x10 or 0x20 or 0x40).toByte())
+        player.entityData.set(
+            ServerPlayer.DATA_PLAYER_MODE_CUSTOMISATION,
+            skinParts.raw.toByte()
+        )
 
-        return player.bukkitEntity as Player
+        return player.bukkitEntity
+    }
+
+    override fun setSkinParts(player: Player, raw: Int) {
+        (player as CraftPlayer).handle.apply {
+            entityData.set(ServerPlayer.DATA_PLAYER_MODE_CUSTOMISATION, raw.toByte())
+        }
     }
 }
