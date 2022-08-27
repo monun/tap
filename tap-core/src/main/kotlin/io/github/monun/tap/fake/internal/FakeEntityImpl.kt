@@ -39,6 +39,7 @@ import org.bukkit.inventory.EquipmentSlot
 import org.bukkit.inventory.ItemStack
 import org.bukkit.util.Vector
 import java.util.*
+import kotlin.math.pow
 
 class FakeEntityImpl<T : Entity> internal constructor(
     server: FakeEntityServerImpl,
@@ -400,7 +401,7 @@ class FakeEntityImpl<T : Entity> internal constructor(
         return result
     }
 
-    private fun updateTrackers() {
+    internal fun updateTrackers() {
         for (tracker in server.trackers) {
             computeTracker(tracker)
         }
@@ -410,8 +411,8 @@ class FakeEntityImpl<T : Entity> internal constructor(
         if (!tracker.valid) return
 
         if (isVisible && tracker.player !in exclusion) {
-            val spawnDistanceSquared = 240.0 * 240.0
-            val despawnDistanceSquared = 256.0 * 256.0
+            val spawnDistanceSquared = server.spawnDistance.let { it * it }
+            val despawnDistanceSquared = server.despawnDistance.let { it * it }
             val entityLocation = deltaLocation
             val trackerLocation = tracker.location
 

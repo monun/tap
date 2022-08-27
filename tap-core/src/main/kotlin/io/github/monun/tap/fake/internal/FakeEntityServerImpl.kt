@@ -41,6 +41,20 @@ import java.util.*
 
 class FakeEntityServerImpl(plugin: JavaPlugin) : FakeEntityServer {
 
+    override var spawnDistance: Double = 160.0
+        set(value) {
+            require(value < despawnDistance) { "spawnDistance < despawnDistance" }
+            field = value
+            _entities.forEach { it.updateTrackers() }
+        }
+
+    override var despawnDistance: Double = 176.0
+        set(value) {
+            require(value > spawnDistance) { "despawnDistance > spawnDistance" }
+            field = value
+            _entities.forEach { it.updateTrackers() }
+        }
+
     internal val _entities = ArrayList<FakeEntityImpl<*>>()
     private val updateQueue = ArrayDeque<FakeEntityImpl<*>>()
 

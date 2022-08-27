@@ -35,6 +35,28 @@ import java.util.*
 interface FakeEntityServer {
     companion object : FakeInternal by LibraryLoader.loadImplement(FakeInternal::class.java)
 
+    /**
+     * 스폰거리
+     * 
+     * [Player]와 [FakeEntity]의 거리가 [spawnDistance]보다 작을 때 클라이언트에 스폰됨
+     *
+     * 디스폰 거리보다 작아야함
+     * 
+     * @exception IllegalArgumentException
+     */
+    var spawnDistance: Double
+
+    /**
+     * [FakeEntity] 디스폰 거리
+     * 
+     * [Player]와 [FakeEntity]의 거리가 [spawnDistance]보다 클 때 클라이언트에서 디스폰됨
+     *
+     * 스폰 거리보다 커야함
+     * 
+     * @exception IllegalArgumentException
+     */
+    var despawnDistance: Double
+
     val entities: List<FakeEntity<*>>
 
     fun <T : Entity> spawnEntity(location: Location, clazz: Class<T>): FakeEntity<T>
