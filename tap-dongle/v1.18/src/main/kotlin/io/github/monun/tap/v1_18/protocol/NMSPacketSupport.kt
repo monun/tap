@@ -36,29 +36,32 @@ import org.bukkit.inventory.ItemStack
 import org.bukkit.util.Vector
 import net.minecraft.world.entity.EquipmentSlot as NMSEquipmentSlot
 
-private fun EquipmentSlot.toNMS(): NMSEquipmentSlot {
-    return when (this) {
-        EquipmentSlot.HAND -> NMSEquipmentSlot.MAINHAND
-        EquipmentSlot.OFF_HAND -> NMSEquipmentSlot.OFFHAND
-        EquipmentSlot.FEET -> NMSEquipmentSlot.FEET
-        EquipmentSlot.LEGS -> NMSEquipmentSlot.LEGS
-        EquipmentSlot.CHEST -> NMSEquipmentSlot.CHEST
-        EquipmentSlot.HEAD -> NMSEquipmentSlot.HEAD
-    }
-}
-
-/* Modified */
-private fun PlayerInfoAction.toNMS(): ClientboundPlayerInfoPacket.Action {
-    return when (this) {
-        PlayerInfoAction.ADD -> ClientboundPlayerInfoPacket.Action.ADD_PLAYER
-        PlayerInfoAction.GAME_MODE -> ClientboundPlayerInfoPacket.Action.UPDATE_GAME_MODE
-        PlayerInfoAction.LATENCY -> ClientboundPlayerInfoPacket.Action.UPDATE_LATENCY
-        PlayerInfoAction.DISPLAY_NAME -> ClientboundPlayerInfoPacket.Action.UPDATE_DISPLAY_NAME
-        PlayerInfoAction.REMOVE -> ClientboundPlayerInfoPacket.Action.REMOVE_PLAYER
-    }
-}
 
 class NMSPacketSupport : PacketSupport {
+
+    companion object {
+        private fun EquipmentSlot.toNMS(): NMSEquipmentSlot {
+            return when (this) {
+                EquipmentSlot.HAND -> NMSEquipmentSlot.MAINHAND
+                EquipmentSlot.OFF_HAND -> NMSEquipmentSlot.OFFHAND
+                EquipmentSlot.FEET -> NMSEquipmentSlot.FEET
+                EquipmentSlot.LEGS -> NMSEquipmentSlot.LEGS
+                EquipmentSlot.CHEST -> NMSEquipmentSlot.CHEST
+                EquipmentSlot.HEAD -> NMSEquipmentSlot.HEAD
+            }
+        }
+
+        /* Modified */
+        private fun PlayerInfoAction.toNMS(): ClientboundPlayerInfoPacket.Action {
+            return when (this) {
+                PlayerInfoAction.ADD -> ClientboundPlayerInfoPacket.Action.ADD_PLAYER
+                PlayerInfoAction.GAME_MODE -> ClientboundPlayerInfoPacket.Action.UPDATE_GAME_MODE
+                PlayerInfoAction.LATENCY -> ClientboundPlayerInfoPacket.Action.UPDATE_LATENCY
+                PlayerInfoAction.DISPLAY_NAME -> ClientboundPlayerInfoPacket.Action.UPDATE_DISPLAY_NAME
+                PlayerInfoAction.REMOVE -> ClientboundPlayerInfoPacket.Action.REMOVE_PLAYER
+            }
+        }
+    }
 
     override fun entityMetadata(entity: Entity): NMSPacketContainer {
         entity as CraftEntity
