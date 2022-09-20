@@ -133,6 +133,17 @@ class NMSPacketSupport : PacketSupport {
         return NMSPacketContainer(packet)
     }
 
+    override fun entityRotation(entityId: Int, yaw: Float, pitch: Float, onGround: Boolean): PacketContainer {
+        return NMSPacketContainer(
+            ClientboundMoveEntityPacket.Rot(
+                entityId,
+                yaw.toProtocolDegrees().toByte(),
+                pitch.toProtocolDegrees().toByte(),
+                onGround
+            )
+        )
+    }
+
     override fun entityHeadLook(entityId: Int, yaw: Float): NMSPacketContainer {
         val byteBuf = FriendlyByteBuf(Unpooled.buffer())
         byteBuf.writeVarInt(entityId)

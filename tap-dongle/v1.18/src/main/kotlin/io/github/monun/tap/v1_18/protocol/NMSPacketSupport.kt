@@ -133,6 +133,17 @@ class NMSPacketSupport : PacketSupport {
         return NMSPacketContainer(packet)
     }
 
+    override fun entityRotation(entityId: Int, yaw: Float, pitch: Float, onGround: Boolean): PacketContainer {
+        return NMSPacketContainer(
+            ClientboundMoveEntityPacket.Rot(
+                entityId,
+                yaw.toProtocolDegrees().toByte(),
+                pitch.toProtocolDegrees().toByte(),
+                onGround
+            )
+        )
+    }
+
     override fun entityHeadLook(entityId: Int, yaw: Float): NMSPacketContainer {
         val byteBuf = FriendlyByteBuf(Unpooled.buffer())
         byteBuf.writeVarInt(entityId)
@@ -206,7 +217,14 @@ class NMSPacketSupport : PacketSupport {
     }
 
     override fun containerSetSlot(containerId: Int, stateId: Int, slot: Int, item: ItemStack?): NMSPacketContainer {
-        return NMSPacketContainer(ClientboundContainerSetSlotPacket(containerId, stateId, slot, CraftItemStack.asNMSCopy(item)))
+        return NMSPacketContainer(
+            ClientboundContainerSetSlotPacket(
+                containerId,
+                stateId,
+                slot,
+                CraftItemStack.asNMSCopy(item)
+            )
+        )
     }
 
     override fun playerInfoAction(action: PlayerInfoAction, player: Player): PacketContainer {

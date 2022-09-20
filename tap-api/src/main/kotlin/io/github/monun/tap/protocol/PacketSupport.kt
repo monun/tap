@@ -102,6 +102,8 @@ interface PacketSupport {
         )
     }
 
+    fun entityRotation(entityId: Int, yaw: Float, pitch: Float, onGround: Boolean): PacketContainer
+
     fun entityHeadLook(entityId: Int, yaw: Float): PacketContainer
 
     fun entityVelocity(entityId: Int, vector: Vector): PacketContainer
