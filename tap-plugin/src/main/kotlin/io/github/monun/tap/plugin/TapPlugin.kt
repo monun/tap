@@ -20,6 +20,7 @@ package io.github.monun.tap.plugin
 import io.github.monun.tap.fake.FakeEntity
 import io.github.monun.tap.fake.FakeEntityServer
 import org.bukkit.Bukkit
+import org.bukkit.entity.Cow
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerInteractEvent
@@ -64,9 +65,10 @@ class FakeTest : Listener, Runnable {
 
     override fun run() {
         Bukkit.getOnlinePlayers().firstOrNull()?.let { player ->
-            val location = player.eyeLocation
-            location.add(location.direction.multiply(4.0))
-            fakePlayers.forEach { it.moveTo(location) }
+            fakePlayers.forEach {
+                val loc = player.location
+                it.rotate(loc.yaw, loc.pitch)
+            }
         }
 
         fakeEntityServer.update()
@@ -85,9 +87,11 @@ class FakeTest : Listener, Runnable {
     @EventHandler
     fun onPlayerInteract(event: PlayerInteractEvent) {
         val player = event.player
-        val fakePlayer = fakeEntityServer.spawnPlayer(player.location, "빠큐", Bukkit.getServer().createProfile("ehdgh141").apply {
+        val fakePlayer = fakeEntityServer.spawnPlayer(player.location, "ㅋㅌ", Bukkit.getServer().createProfile("ehdgh141").apply {
             complete()
         }.properties)
+        val fakeVehicle = fakeEntityServer.spawnEntity(player.location, Cow::class.java)
+        fakeVehicle.addPassenger(fakePlayer)
         fakePlayers.add(fakePlayer)
     }
 }
