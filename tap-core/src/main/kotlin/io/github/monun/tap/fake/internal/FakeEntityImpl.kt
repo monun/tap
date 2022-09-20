@@ -204,6 +204,19 @@ class FakeEntityImpl<T : Entity> internal constructor(
         updatePassengerLocation()
     }
 
+    override fun rotate(yaw: Float, pitch: Float) {
+        if (dead) return
+
+        currentLocation.apply {
+            this.yaw = yaw
+            this.pitch = pitch
+        }
+        updateLocation = true
+        moveTicks = 20
+        enqueue()
+
+    }
+
     private fun updatePassengerLocation() {
         for (passenger in _passengers) {
             passenger.updateLocation = true
@@ -325,26 +338,37 @@ class FakeEntityImpl<T : Entity> internal constructor(
     private fun updateLocation(): MoveResult {
         val bukkitEntity = bukkitEntity
 
+        val from = deltaLocation
+        val to = currentLocation
+
         vehicle?.let { vehicle ->
             val yOffset = vehicle.bukkitEntity.mountedYOffset
             deltaLocation.mount(vehicle.deltaLocation, yOffset)
-            previousLocation.mount(vehicle.previousLocation, yOffset)
+            previousLocation.set(currentLocation)
             currentLocation.mount(vehicle.currentLocation, yOffset)
             bukkitEntity.setLocation(deltaLocation)
 
+            // 탈것이 보이지 않는 트래커에게는 텔레포트로 이동
             for (tracker in trackers) {
                 if (tracker !in vehicle.trackers) {
-                    tracker.player.sendPacket(
-                        PacketSupport.entityTeleport(bukkitEntity, deltaLocation)
-                    )
+                    tracker.player.sendPacket(PacketSupport.entityTeleport(bukkitEntity, deltaLocation))
                 }
             }
 
+            if (to.pitch != from.pitch) {
+                trackers.sendServerPacketAll(
+                    PacketSupport.entityRotation(
+                        bukkitEntity.entityId, to.yaw, to.pitch, true
+                    )
+                ) // yaw가 클라이언트에서 업데이트 되지 않는 버그가 있음
+            }
+
+            if (to.yaw != from.yaw) {
+                trackers.sendServerPacketAll(PacketSupport.entityHeadLook(bukkitEntity.entityId, to.yaw))
+            } // 이 패킷으로 yaw 지정해주기
+
             return MoveResult.VEHICLE
         }
-
-        val from = deltaLocation
-        val to = currentLocation
 
         val deltaX = from.x delta to.x
         val deltaY = from.y delta to.y
@@ -379,6 +403,7 @@ class FakeEntityImpl<T : Entity> internal constructor(
                     )
                 )
             }
+
             if (from.yaw != to.yaw) {
                 trackers.sendServerPacketAll(PacketSupport.entityHeadLook(bukkitEntity.entityId, yaw))
             }
@@ -436,7 +461,6 @@ class FakeEntityImpl<T : Entity> internal constructor(
         trackers -= tracker
     }
 
-    /* Modified */
     private fun spawnTo(player: Player) {
         val bukkitEntity = bukkitEntity
 

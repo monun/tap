@@ -54,6 +54,8 @@ interface FakeEntity<T: Entity> {
         })
     }
 
+    fun rotate(yaw: Float, pitch: Float)
+
     fun updateMetadata(applier: T.() -> Unit)
 
     fun updateEquipment(applier: EntityEquipment.() -> Unit)
