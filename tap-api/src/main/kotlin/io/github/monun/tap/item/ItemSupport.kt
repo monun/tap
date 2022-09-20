@@ -23,7 +23,7 @@ import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.PlayerInventory
 
 interface ItemSupport {
-    companion object: ItemSupport by  LibraryLoader.loadNMS(ItemSupport::class.java)
+    companion object : ItemSupport by LibraryLoader.loadNMS(ItemSupport::class.java)
 
     fun saveToJsonString(item: ItemStack): String {
         error("Unsupported nms version")

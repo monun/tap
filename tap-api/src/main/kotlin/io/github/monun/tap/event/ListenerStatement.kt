@@ -94,7 +94,14 @@ class ListenerStatement(val listenerClass: Class<*>, handlerStatements: ArrayLis
 
             val executor = EventExecutor.create(method, eventClass.asSubclass(Event::class.java))
 
-            return HandlerStatement(eventClass, registrationClass, provider, handler.priority, handler.ignoreCancelled, executor)
+            return HandlerStatement(
+                eventClass,
+                registrationClass,
+                provider,
+                handler.priority,
+                handler.ignoreCancelled,
+                executor
+            )
         }
     }
 }

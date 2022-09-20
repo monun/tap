@@ -21,7 +21,11 @@ import com.google.common.collect.ImmutableList
 import org.bukkit.event.Listener
 
 @Suppress("unused", "MemberVisibilityCanBePrivate", "CanBeParameter")
-class RegisteredEntityListener(private val eventEntity: EventEntity, val statement: ListenerStatement, val listener: Listener) {
+class RegisteredEntityListener(
+    private val eventEntity: EventEntity,
+    val statement: ListenerStatement,
+    val listener: Listener
+) {
     val handlers: ImmutableList<RegisteredEntityHandler>
 
     fun unregister() {

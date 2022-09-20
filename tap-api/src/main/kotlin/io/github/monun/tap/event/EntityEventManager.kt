@@ -29,7 +29,10 @@ import org.bukkit.plugin.EventExecutor
 import org.bukkit.plugin.Plugin
 
 @Suppress("unused")
-class EntityEventManager @JvmOverloads constructor(private val plugin: Plugin, private val priority: EventPriority = EventPriority.NORMAL) {
+class EntityEventManager @JvmOverloads constructor(
+    private val plugin: Plugin,
+    private val priority: EventPriority = EventPriority.NORMAL
+) {
     private val statements = HashMap<Class<*>, ListenerStatement>()
 
     private val listeners = HashMap<Class<*>, EventListener>()
@@ -69,7 +72,14 @@ class EntityEventManager @JvmOverloads constructor(private val plugin: Plugin, p
 
         val listener = listeners.computeIfAbsent(registrationClass) { clazz: Class<*> ->
             val newListener = EventListener()
-            plugin.server.pluginManager.registerEvent(clazz.asSubclass(Event::class.java), newListener, priority, eventExecutor, plugin, false)
+            plugin.server.pluginManager.registerEvent(
+                clazz.asSubclass(Event::class.java),
+                newListener,
+                priority,
+                eventExecutor,
+                plugin,
+                false
+            )
 
             newListener
         }

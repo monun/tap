@@ -22,7 +22,8 @@ import org.bukkit.event.Event
 import org.bukkit.event.EventException
 import org.bukkit.event.Listener
 
-class RegisteredEntityHandler(val statement: HandlerStatement, val listener: Listener) : Comparable<RegisteredEntityHandler> {
+class RegisteredEntityHandler(val statement: HandlerStatement, val listener: Listener) :
+    Comparable<RegisteredEntityHandler> {
     private val generatedTime = System.currentTimeMillis()
 
     var isValid = true

@@ -109,7 +109,14 @@ class NMSFakeSupport : FakeSupport {
         entity as CraftEntity
 
         if (entity is Player) {
-            packets.add(NMSPacketContainer(ClientboundPlayerInfoPacket(ClientboundPlayerInfoPacket.Action.ADD_PLAYER, entity.handle as ServerPlayer)))
+            packets.add(
+                NMSPacketContainer(
+                    ClientboundPlayerInfoPacket(
+                        ClientboundPlayerInfoPacket.Action.ADD_PLAYER,
+                        entity.handle as ServerPlayer
+                    )
+                )
+            )
         }
         packets.add(NMSPacketContainer(entity.handle.addEntityPacket))
 
@@ -142,7 +149,6 @@ class NMSFakeSupport : FakeSupport {
 
         return entity.bukkitEntity as Item
     }
-
 
 
     override fun createPlayerEntity(

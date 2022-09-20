@@ -36,8 +36,9 @@ object EventTools {
             clazz
         } catch (e: NoSuchMethodException) {
             if (clazz.superclass != null
-                    && clazz.superclass != Event::class.java
-                    && Event::class.java.isAssignableFrom(clazz.superclass)) {
+                && clazz.superclass != Event::class.java
+                && Event::class.java.isAssignableFrom(clazz.superclass)
+            ) {
                 getRegistrationClass(clazz.superclass.asSubclass(Event::class.java))
             } else {
                 throw IllegalPluginAccessException("Unable to find handler list for event ${clazz.name}. Static getHandlerList method required!")
@@ -67,7 +68,9 @@ object EventTools {
     fun getOrCreateCustomProvide(providerClass: Class<*>): EventEntityProvider {
         return CUSTOM_PROVIDERS.computeIfAbsent(providerClass) { clazz: Class<*> ->
             try {
-                return@computeIfAbsent EventEntityProvider(clazz.asSubclass(EntityProvider::class.java).getConstructor().newInstance() as EntityProvider<Event>)
+                return@computeIfAbsent EventEntityProvider(
+                    clazz.asSubclass(EntityProvider::class.java).getConstructor().newInstance() as EntityProvider<Event>
+                )
             } catch (e: InstantiationException) {
                 throw AssertionError(e)
             } catch (e: IllegalAccessException) {
@@ -102,7 +105,11 @@ object EventTools {
             if (EntityProvider::class.java.isAssignableFrom(clazz)) {
                 try {
                     @Suppress("UNCHECKED_CAST")
-                    defaultProviders.add(EventEntityProvider(clazz.getConstructor().newInstance() as EntityProvider<Event>))
+                    defaultProviders.add(
+                        EventEntityProvider(
+                            clazz.getConstructor().newInstance() as EntityProvider<Event>
+                        )
+                    )
                 } catch (e: Exception) {
                     throw AssertionError(e)
                 }

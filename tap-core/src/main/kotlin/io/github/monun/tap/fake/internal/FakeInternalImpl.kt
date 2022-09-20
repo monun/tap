@@ -21,7 +21,7 @@ import io.github.monun.tap.fake.FakeEntityServer
 import io.github.monun.tap.fake.FakeInternal
 import org.bukkit.plugin.java.JavaPlugin
 
-class FakeInternalImpl: FakeInternal {
+class FakeInternalImpl : FakeInternal {
     override fun create(plugin: JavaPlugin): FakeEntityServer {
         return FakeEntityServerImpl(plugin)
     }

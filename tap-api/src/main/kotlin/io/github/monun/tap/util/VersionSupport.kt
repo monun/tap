@@ -25,11 +25,11 @@ import kotlin.math.max
  * 0.1 < 0.1.1
  *
  * 0.1 == 0.01
- * 
+ *
  * 0.1-beta < 0.1-release
  *
  * 0.1-final < 0.1
- * 
+ *
  */
 
 enum class MavenVersionIdentifier(val priority: Int) {
@@ -47,7 +47,7 @@ enum class MavenVersionIdentifier(val priority: Int) {
 
 private val String.identifier: MavenVersionIdentifier
     get() {
-        return if(equals("0")) {
+        return if (equals("0")) {
             MavenVersionIdentifier.NONE
         } else {
             try {
@@ -58,7 +58,7 @@ private val String.identifier: MavenVersionIdentifier
         }
     }
 
-private val String.isValidLong: Boolean 
+private val String.isValidLong: Boolean
     get() {
         return try {
             toLong(0x10)
@@ -69,8 +69,8 @@ private val String.isValidLong: Boolean
     }
 
 infix fun String.compareVersion(other: String): Int {
-    if(!matches("""^\d+(\.\d+)*(-[a-zA-Z]*)?$""".toRegex()) || !other.matches("""^\d+(\.\d+)*(-[a-zA-Z]*)?$""".toRegex())) {
-       throw RuntimeException("The version format does not valid.")
+    if (!matches("""^\d+(\.\d+)*(-[a-zA-Z]*)?$""".toRegex()) || !other.matches("""^\d+(\.\d+)*(-[a-zA-Z]*)?$""".toRegex())) {
+        throw RuntimeException("The version format does not valid.")
     }
     val split = replace("-", ".").split('.')
     val otherSplit = other.replace("-", ".").split('.')
@@ -80,9 +80,9 @@ infix fun String.compareVersion(other: String): Int {
         val b = otherSplit.getOrNull(i) ?: "0"
         var compare = 0
         val isLastInIndex = i == max(split.count(), otherSplit.count()) - 1
-        
+
         kotlin.runCatching {
-            compare = if(isLastInIndex && (!a.isValidLong || !b.isValidLong)) {
+            compare = if (isLastInIndex && (!a.isValidLong || !b.isValidLong)) {
                 a.identifier.priority.compareTo(b.identifier.priority)
             } else {
                 a.toLong(0x10).compareTo(b.toLong(0x10))

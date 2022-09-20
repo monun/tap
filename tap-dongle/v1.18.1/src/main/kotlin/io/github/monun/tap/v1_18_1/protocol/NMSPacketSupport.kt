@@ -37,7 +37,6 @@ import org.bukkit.util.Vector
 import net.minecraft.world.entity.EquipmentSlot as NMSEquipmentSlot
 
 
-
 class NMSPacketSupport : PacketSupport {
 
     companion object {
@@ -221,7 +220,14 @@ class NMSPacketSupport : PacketSupport {
     }
 
     override fun containerSetSlot(containerId: Int, stateId: Int, slot: Int, item: ItemStack?): NMSPacketContainer {
-        return NMSPacketContainer(ClientboundContainerSetSlotPacket(containerId, stateId, slot, CraftItemStack.asNMSCopy(item)))
+        return NMSPacketContainer(
+            ClientboundContainerSetSlotPacket(
+                containerId,
+                stateId,
+                slot,
+                CraftItemStack.asNMSCopy(item)
+            )
+        )
     }
 
     override fun playerInfoAction(action: PlayerInfoAction, player: Player): PacketContainer {

@@ -33,7 +33,8 @@ object LibraryLoader {
 
             val constructor = kotlin.runCatching {
                 internalClass.getConstructor(*parameterTypes)
-            }.getOrNull() ?: throw UnsupportedOperationException("${type.name} does not have Constructor for [${parameterTypes.joinToString()}]")
+            }.getOrNull()
+                ?: throw UnsupportedOperationException("${type.name} does not have Constructor for [${parameterTypes.joinToString()}]")
             constructor.newInstance(*initArgs) as T
         } catch (exception: ClassNotFoundException) {
             throw UnsupportedOperationException("${type.name} a does not have implement", exception)
@@ -77,7 +78,8 @@ object LibraryLoader {
             }.firstOrNull() ?: throw ClassNotFoundException("Not found nms library class: $candidates")
             val constructor = kotlin.runCatching {
                 nmsClass.getConstructor(*parameterTypes)
-            }.getOrNull() ?: throw UnsupportedOperationException("${type.name} does not have Constructor for [${parameterTypes.joinToString()}]")
+            }.getOrNull()
+                ?: throw UnsupportedOperationException("${type.name} does not have Constructor for [${parameterTypes.joinToString()}]")
             constructor.newInstance(*initArgs) as T
         } catch (exception: ClassNotFoundException) {
             throw UnsupportedOperationException(

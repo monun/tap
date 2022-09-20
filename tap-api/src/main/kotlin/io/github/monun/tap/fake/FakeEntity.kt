@@ -25,7 +25,7 @@ import org.bukkit.entity.Entity
 import org.bukkit.entity.Player
 import org.bukkit.inventory.EntityEquipment
 
-interface FakeEntity<T: Entity> {
+interface FakeEntity<T : Entity> {
     val server: FakeEntityServer
     val bukkitEntity: T
     val location: Location

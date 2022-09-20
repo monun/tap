@@ -87,9 +87,10 @@ class FakeTest : Listener, Runnable {
     @EventHandler
     fun onPlayerInteract(event: PlayerInteractEvent) {
         val player = event.player
-        val fakePlayer = fakeEntityServer.spawnPlayer(player.location, "ㅋㅌ", Bukkit.getServer().createProfile("ehdgh141").apply {
-            complete()
-        }.properties)
+        val fakePlayer =
+            fakeEntityServer.spawnPlayer(player.location, "ㅋㅌ", Bukkit.getServer().createProfile("ehdgh141").apply {
+                complete()
+            }.properties)
         val fakeVehicle = fakeEntityServer.spawnEntity(player.location, Cow::class.java)
         fakeVehicle.addPassenger(fakePlayer)
         fakePlayers.add(fakePlayer)
