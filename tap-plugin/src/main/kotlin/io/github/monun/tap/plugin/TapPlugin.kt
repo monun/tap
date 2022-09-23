@@ -19,6 +19,7 @@ package io.github.monun.tap.plugin
 
 import io.github.monun.tap.fake.FakeEntity
 import io.github.monun.tap.fake.FakeEntityServer
+import io.github.monun.tap.mojangapi.MojangAPI
 import org.bukkit.Bukkit
 import org.bukkit.entity.Cow
 import org.bukkit.event.EventHandler
@@ -87,10 +88,10 @@ class FakeTest : Listener, Runnable {
     @EventHandler
     fun onPlayerInteract(event: PlayerInteractEvent) {
         val player = event.player
+        val profile = MojangAPI.fetchProfile("notch")!!
+        val property = MojangAPI.fetchSkinProfile(profile.uuid())!!
         val fakePlayer =
-            fakeEntityServer.spawnPlayer(player.location, "ㅋㅌ", Bukkit.getServer().createProfile("ehdgh141").apply {
-                complete()
-            }.properties)
+            fakeEntityServer.spawnPlayer(player.location, "놏치", property.profileProperties().toSet())
         val fakeVehicle = fakeEntityServer.spawnEntity(player.location, Cow::class.java)
         fakeVehicle.addPassenger(fakePlayer)
         fakePlayers.add(fakePlayer)
