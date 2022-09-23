@@ -95,12 +95,18 @@ object MojangAPI {
 
     @Serializable
     data class Textures(
-        val SKIN: TextureURL,
-        val CAPE: TextureURL? = null
+        val SKIN: TextureSkin,
+        val CAPE: TextureCape? = null
     )
 
     @Serializable
-    data class TextureURL(val url: String)
+    data class TextureSkin(val url: String, val metadata: TextureMetadata? = null)
+
+    @Serializable
+    data class TextureMetadata(val model: String)
+
+    @Serializable
+    data class TextureCape(val url: String)
 
     fun fetchSkinProfileAsync(trimmedUUID: String) =
         fetchAsync<SkinProfile>("https://sessionserver.mojang.com/session/minecraft/profile/$trimmedUUID?unsigned=false")
