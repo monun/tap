@@ -44,7 +44,7 @@ object MojangAPI {
         }
     }
 
-    private inline fun <reified T> fetch(url: String): CompletableFuture<T?> {
+    private inline fun <reified T> fetchAsync(url: String): CompletableFuture<T?> {
         val client = HttpClient.newHttpClient()
         val request = HttpRequest.newBuilder(URI.create(url))
             .GET()
@@ -57,7 +57,7 @@ object MojangAPI {
     }
 
     fun fetchProfileAsync(username: String) =
-        fetch<Profile>("https://api.mojang.com/users/profiles/minecraft/$username")
+        fetchAsync<Profile>("https://api.mojang.com/users/profiles/minecraft/$username")
 
     fun fetchProfile(username: String) = fetchProfileAsync(username).get()
 
@@ -103,7 +103,7 @@ object MojangAPI {
     data class TextureURL(val url: String)
 
     fun fetchSkinProfileAsync(trimmedUUID: String) =
-        fetch<SkinProfile>("https://sessionserver.mojang.com/session/minecraft/profile/$trimmedUUID?unsigned=false")
+        fetchAsync<SkinProfile>("https://sessionserver.mojang.com/session/minecraft/profile/$trimmedUUID?unsigned=false")
 
     fun fetchSkinProfile(trimmedUUID: String) = fetchSkinProfileAsync(trimmedUUID).get()
 
