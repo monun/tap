@@ -158,7 +158,7 @@ class NMSFakeSupport : FakeSupport {
         val player = ServerPlayer(
             (Bukkit.getServer() as CraftServer).handle.server,
             (Bukkit.getWorlds().first() as CraftWorld).handle,
-            GameProfile(UUID.randomUUID(), name).apply {
+            GameProfile(uniqueId, name).apply {
                 for (property in profileProperties) {
                     val propertyName = property.name
                     properties.put(propertyName, Property(propertyName, property.value, property.signature))
