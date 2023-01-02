@@ -15,17 +15,16 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package io.github.monun.tap.fake
+package io.github.monun.tap.v1_19_3.protocol
 
-/**
- * @author octomarine
- */
-enum class PlayerInfoAction {
-    ADD,
-    GAME_MODE,
-    LATENCY,
-    DISPLAY_NAME,
-    INITIALIZE_CHAT,
-    LISTED,
-    REMOVE
+import io.github.monun.tap.protocol.PacketContainer
+import net.minecraft.network.protocol.Packet
+import org.bukkit.craftbukkit.v1_19_R2.entity.CraftPlayer
+import org.bukkit.entity.Player
+
+
+class NMSPacketContainer(private val packet: Packet<*>) : PacketContainer {
+    override fun sendTo(player: Player) {
+        (player as CraftPlayer).handle.connection.send(packet, null)
+    }
 }
