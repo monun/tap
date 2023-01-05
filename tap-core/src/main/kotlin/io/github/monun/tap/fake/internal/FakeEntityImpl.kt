@@ -470,7 +470,7 @@ class FakeEntityImpl<T : Entity> internal constructor(
         player.sendPacket(PacketSupport.entityHeadLook(bukkitEntity.entityId, location.yaw))
         player.sendPacket(PacketSupport.entityMetadata(bukkitEntity))
 
-        if (bukkitEntity is ArmorStand) {
+        if (bukkitEntity is LivingEntity) {
             PacketSupport.entityEquipment(bukkitEntity).let { packet ->
                 player.sendPacket(packet)
             }
