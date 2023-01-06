@@ -84,10 +84,18 @@ class FakeEntityImpl<T : Entity> internal constructor(
         private val itemsBySlot = EnumMap<EquipmentSlot, ItemStack>(EquipmentSlot::class.java)
 
         fun update() {
-            val armorStand = bukkitEntity as ArmorStand
+            val bukkitEntity = bukkitEntity
 
             for (slot in EquipmentSlot.values()) {
-                val current = armorStand.getItem(slot)
+                val current = when (bukkitEntity) {
+                    is Player -> {
+                        bukkitEntity.inventory.getItem(slot) ?: ItemStack(Material.AIR)
+                    }
+                    is ArmorStand -> {
+                        bukkitEntity.getItem(slot)
+                    }
+                    else -> return
+                }
                 val old = itemsBySlot.put(slot, current)
 
                 if ((old == null && current.type != Material.AIR)
@@ -95,7 +103,7 @@ class FakeEntityImpl<T : Entity> internal constructor(
                 ) {
                     trackers.sendServerPacketAll(
                         PacketSupport.entityEquipment(
-                            armorStand.entityId,
+                            bukkitEntity.entityId,
                             mapOf(slot to current)
                         )
                     )
@@ -125,7 +133,7 @@ class FakeEntityImpl<T : Entity> internal constructor(
     private val exclusion = Collections.newSetFromMap(WeakHashMap<Player, Boolean>())
 
     init {
-        if (bukkitEntity is ArmorStand) {
+        if (bukkitEntity is ArmorStand || bukkitEntity is Player) {
             equipmentData = ItemData()
         }
     }
@@ -470,8 +478,8 @@ class FakeEntityImpl<T : Entity> internal constructor(
         player.sendPacket(PacketSupport.entityHeadLook(bukkitEntity.entityId, location.yaw))
         player.sendPacket(PacketSupport.entityMetadata(bukkitEntity))
 
-        if (bukkitEntity is LivingEntity) {
-            PacketSupport.entityEquipment(bukkitEntity).let { packet ->
+        if (bukkitEntity is ArmorStand || bukkitEntity is Player) {
+            PacketSupport.entityEquipment(bukkitEntity as LivingEntity).let { packet ->
                 player.sendPacket(packet)
             }
         }

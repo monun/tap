@@ -69,6 +69,10 @@ class FakeTest : Listener, Runnable {
             fakePlayers.forEach {
                 val loc = player.location
                 it.rotate(loc.yaw, loc.pitch)
+                it.updateEquipment {
+                    setItemInMainHand(player.inventory.itemInMainHand)
+                    setItemInOffHand(player.inventory.itemInOffHand)
+                }
             }
         }
 
