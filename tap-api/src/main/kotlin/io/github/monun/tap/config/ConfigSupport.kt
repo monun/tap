@@ -156,8 +156,10 @@ object ConfigSupport {
                     value?.let { input ->
                         try {
                             field.set(target, input)
-                        } catch (e: Exception) {
+                        }  catch (e: IllegalArgumentException) {
                             error("Type mismatch! ${type.name} != ${input.javaClass.name}")
+                        } catch (e: Exception) {
+                            throw IllegalStateException("Failed to access field ${field.name}", e)
                         }
                     }
 
