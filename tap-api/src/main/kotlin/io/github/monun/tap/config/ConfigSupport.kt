@@ -53,6 +53,10 @@ object ConfigSupport {
     private val primitiveAdapters = HashMap<Class<*>, (Field, Any) -> Any>()
 
     init {
+        primitiveAdapters[Boolean::class.java] = { _, value ->
+            value as Boolean
+        }
+
         primitiveAdapters[Int::class.java] = { field, value ->
             value as Number
             var i = value.toInt()
