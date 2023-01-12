@@ -20,15 +20,15 @@ package io.github.monun.tap.plugin
 import io.github.monun.tap.fake.FakeEntity
 import io.github.monun.tap.fake.FakeEntityServer
 import org.bukkit.Bukkit
+import org.bukkit.Location
 import org.bukkit.Material
+import org.bukkit.block.data.BlockData
 import org.bukkit.entity.ArmorStand
-import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerQuitEvent
-import org.bukkit.event.player.PlayerToggleSneakEvent
 import org.bukkit.inventory.ItemStack
 import org.bukkit.plugin.java.JavaPlugin
 
@@ -88,6 +88,19 @@ class FakeTest : Listener, Runnable {
         fakeEntityServer.removePlayer(event.player)
     }
 
+    private fun testSpawnBasic(loc: Location, blockData: BlockData) {
+        val armorStand = fakeEntityServer.spawnEntity(loc, ArmorStand::class.java).apply {
+            updateMetadata {
+                isMarker = true
+            }
+            updateEquipment {
+                helmet = ItemStack(Material.DIAMOND_HELMET)
+            }
+        }
+        val passenger = fakeEntityServer.spawnFallingBlock(loc, blockData)
+        armorStand.addPassenger(passenger)
+    }
+
     @EventHandler
     fun onPlayerInteract(event: PlayerInteractEvent) {
         val player = event.player
@@ -97,16 +110,25 @@ class FakeTest : Listener, Runnable {
             z = blockZ + 0.5
         }
 
-        if (event.item?.type == Material.COMPOSTER) {
-            val armorStand = fakeEntityServer.spawnEntity(loc, ArmorStand::class.java).apply {
-                updateMetadata {
-                    isMarker = true
+        val item = event.item ?: return
+        val type = item.type
+
+        if (type.isBlock) {
+            testSpawnBasic(loc, type.createBlockData())
+        } else {
+            val profile = Bukkit.createProfile("Notch").apply {
+                complete()
+            }
+            fakeEntityServer.spawnPlayer(loc, "놏히", profile.properties).apply {
+                updateEquipment {
+                    helmet = ItemStack(Material.DIAMOND_HELMET)
+                    chestplate = ItemStack(Material.DIAMOND_CHESTPLATE)
+                    leggings = ItemStack(Material.DIAMOND_LEGGINGS)
+                    boots = ItemStack(Material.DIAMOND_BOOTS)
+                    setItemInMainHand(item.clone())
+                    setItemInOffHand(item.clone())
                 }
             }
-
-            val passenger = fakeEntityServer.spawnFallingBlock(loc, Material.DIRT.createBlockData())
-
-            armorStand.addPassenger(passenger)
         }
     }
 }
