@@ -19,6 +19,10 @@ package io.github.monun.tap.event
 
 import kotlin.reflect.KClass
 
+/**
+ * 이벤트를 수신할 대상을 지정합니다.
+ * [EntityProvider]를 구현한 클래스를 지정할 수 있습니다.
+ */
 @Retention(AnnotationRetention.RUNTIME)
 @Target(AnnotationTarget.FUNCTION, AnnotationTarget.PROPERTY_GETTER, AnnotationTarget.PROPERTY_SETTER)
 annotation class TargetEntity(val value: KClass<out EntityProvider<*>>)

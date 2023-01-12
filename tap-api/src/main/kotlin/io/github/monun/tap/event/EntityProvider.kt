@@ -23,6 +23,11 @@ import org.bukkit.event.Event
 import org.bukkit.event.entity.*
 import org.bukkit.event.player.PlayerInteractEntityEvent
 
+/**
+ * 이벤트를 수신할 대상을 지정합니다.
+ * [EntityDamageByEntityEvent]와 같이 [Entity]가 여러개 포함된 이벤트일 경우
+ * [EntityProvider.EntityDamageByEntity.Damager]를 사용하여 공격자를 대상으로 지정할 수 있습니다.
+ */
 @Suppress("unused")
 fun interface EntityProvider<T : Event> {
     fun getFrom(event: T): Entity?

@@ -20,6 +20,9 @@ package io.github.monun.tap.collection
 import java.util.*
 
 @Suppress("unused")
+/**
+ * 요소 추가삭제시 자동으로 정렬하는 리스트
+ */
 class SortedList<E> : AbstractList<E>, RandomAccess, Cloneable {
     private val list: ArrayList<E>
     private val comparator: Comparator<E>?

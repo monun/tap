@@ -29,6 +29,11 @@ import org.bukkit.plugin.EventExecutor
 import org.bukkit.plugin.Plugin
 
 @Suppress("unused")
+/**
+ * 지정한 [Entity] 전용 이벤트를 처리하는 클래스
+ * 이 클래스는 Thread-Unsafe 입니다.
+ * Async된 [Event]는 지원이 불확실합니다
+ */
 class EntityEventManager @JvmOverloads constructor(
     private val plugin: Plugin,
     private val priority: EventPriority = EventPriority.NORMAL
@@ -43,6 +48,12 @@ class EntityEventManager @JvmOverloads constructor(
         (listener as EventListener).onEvent(event)
     }
 
+    /**
+     * 지정한 [Entity] 전용 이벤트 리스너를 등록합니다.
+     *
+     * @param entity 대상
+     * @param listener 이벤트리스너
+     */
     fun registerEvents(entity: Entity, listener: Listener): RegisteredEntityListener {
         require(entity.isValid || (entity is Player && entity.isOnline)) { "Invalid entity: $entity" }
 
@@ -87,6 +98,12 @@ class EntityEventManager @JvmOverloads constructor(
         listener.addProvider(statement.provider)
     }
 
+    /**
+     * 지정한 [Entity] 전용 이벤트 리스너를 제거합니다.
+     *
+     * @param entity 대상
+     * @param listener 이벤트리스너
+     */
     fun unregisterEvent(entity: Entity, listener: Listener) {
         val eventEntity = entities[entity]
 
@@ -99,6 +116,9 @@ class EntityEventManager @JvmOverloads constructor(
         }
     }
 
+    /**
+     * 등록된 모든 리스너를 제거합니다.
+     */
     fun unregisterAll() {
         for (eventEntity in entities.values) {
             eventEntity.unregisterAll()

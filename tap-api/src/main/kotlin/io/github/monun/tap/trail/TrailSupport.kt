@@ -23,7 +23,17 @@ import org.bukkit.World
 import org.bukkit.util.Vector
 import kotlin.math.max
 
+/**
+ * 궤적 계산 지원
+ */
 object TrailSupport {
+    /**
+     * 궤적을 계산합니다.
+     * @param start 시작 위치
+     * @param vector 방향 벡터 (정규화 필요 없음)
+     * @param interval 지점간 간격
+     * @param trailer 지점 소비 함수
+     */
     fun trail(
         start: Location,
         vector: Vector,
@@ -50,6 +60,13 @@ object TrailSupport {
         }
     }
 
+    /**
+     * 궤적을 계산합니다.
+     * @param start 시작 위치
+     * @param end 마지막 위치
+     * @param interval 지점간 간격
+     * @param trailer 지점 소비 함수
+     */
     fun trail(
         start: Location,
         end: Location,

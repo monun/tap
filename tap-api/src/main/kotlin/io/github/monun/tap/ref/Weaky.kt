@@ -22,6 +22,11 @@ import java.lang.ref.ReferenceQueue
 import java.lang.ref.WeakReference
 import kotlin.reflect.KProperty
 
+/**
+ * WeakReference를 Delegate로 사용하기 위한 클래스입니다.
+ *
+ * [weaky] 함수로 간단하게 이용하세요.
+ */
 class Weaky<T> : WeakReference<T> {
     internal constructor(referent: T) : super(referent)
     internal constructor(
