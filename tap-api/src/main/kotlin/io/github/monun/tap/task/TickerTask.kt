@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Monun
+ * Copyright (C) 2023 Monun
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package io.github.monun.tap.hash.task
+package io.github.monun.tap.task
 
 import io.github.monun.tap.ref.Weaky
 
