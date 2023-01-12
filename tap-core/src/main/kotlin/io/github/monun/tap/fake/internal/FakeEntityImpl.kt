@@ -24,7 +24,6 @@ import io.github.monun.tap.ref.getValue
 import io.github.monun.tap.ref.weaky
 import org.bukkit.Location
 import org.bukkit.Material
-import org.bukkit.entity.ArmorStand
 import org.bukkit.entity.Entity
 import org.bukkit.entity.LivingEntity
 import org.bukkit.entity.Player
@@ -81,20 +80,15 @@ class FakeEntityImpl<T : Entity> internal constructor(
         private val itemsBySlot = EnumMap<EquipmentSlot, ItemStack>(EquipmentSlot::class.java)
 
         fun update() {
-            val armorStand = bukkitEntity as ArmorStand
+            val equipment = (bukkitEntity as LivingEntity).equipment ?: return
 
             for (slot in EquipmentSlot.values()) {
-                val current = armorStand.getItem(slot)
-                val old = itemsBySlot.put(slot, current)
+                val current = equipment.getItem(slot)
+                val prev = itemsBySlot.put(slot, current)
 
-                if ((old == null && current.type != Material.AIR)
-                    || !current.isSimilar(old)
-                ) {
+                if ((prev == null && current.type != Material.AIR) || !current.isSimilar(prev)) {
                     trackers.sendServerPacketAll(
-                        PacketSupport.entityEquipment(
-                            armorStand.entityId,
-                            mapOf(slot to current)
-                        )
+                        PacketSupport.entityEquipment(bukkitEntity.entityId, mapOf(slot to current))
                     )
                 }
             }
@@ -122,7 +116,7 @@ class FakeEntityImpl<T : Entity> internal constructor(
     private val exclusion = Collections.newSetFromMap(WeakHashMap<Player, Boolean>())
 
     init {
-        if (bukkitEntity is ArmorStand) {
+        if (bukkitEntity is LivingEntity) {
             equipmentData = ItemData()
         }
     }
@@ -467,7 +461,7 @@ class FakeEntityImpl<T : Entity> internal constructor(
         player.sendPacket(PacketSupport.entityHeadLook(bukkitEntity.entityId, location.yaw))
         player.sendPacket(PacketSupport.entityMetadata(bukkitEntity))
 
-        if (bukkitEntity is ArmorStand) {
+        if (bukkitEntity is LivingEntity) {
             PacketSupport.entityEquipment(bukkitEntity).let { packet ->
                 player.sendPacket(packet)
             }
@@ -506,7 +500,6 @@ class FakeEntityImpl<T : Entity> internal constructor(
         player.sendPacket(PacketSupport.removeEntity((bukkitEntity.entityId)))
     }
 
-    @Suppress("UNCHECKED_CAST")
     override fun updateMetadata(applier: T.() -> Unit) {
         if (dead) return
 
@@ -517,7 +510,7 @@ class FakeEntityImpl<T : Entity> internal constructor(
     }
 
     override fun updateEquipment(applier: EntityEquipment.() -> Unit) {
-        if (dead) return
+        if (dead || bukkitEntity !is LivingEntity) return
 
         val living = bukkitEntity as LivingEntity
         living.equipment?.let { equipment ->
