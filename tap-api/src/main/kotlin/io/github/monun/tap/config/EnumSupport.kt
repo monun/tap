@@ -21,7 +21,6 @@ internal object EnumSupport {
     @Suppress("UNCHECKED_CAST")
     @JvmStatic
     fun valueOf(enumType: Class<*>, name: String): Enum<*> {
-        @Suppress("TYPE_MISMATCH_WARNING")
         return java.lang.Enum.valueOf(enumType as Class<out Enum<*>>, name)
     }
 
