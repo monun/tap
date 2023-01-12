@@ -17,7 +17,7 @@
 
 package io.github.monun.tap.fake
 
-import io.github.monun.tap.math.copy
+import io.github.monun.tap.math.copyTo
 import io.github.monun.tap.math.vector
 import org.bukkit.Location
 import org.bukkit.util.Vector
@@ -40,7 +40,7 @@ open class FakeProjectile(
 
     var targetLocation: Location
         get() = _targetLocation.clone()
-        set(value) = _targetLocation.copy(value)
+        set(value) = _targetLocation.copyTo(value)
 
     var velocity: Vector
         get() = _velocity.clone()
@@ -49,7 +49,7 @@ open class FakeProjectile(
 
             if (this::_targetLocation.isInitialized) {
                 _targetLocation.apply {
-                    copy(_location)
+                    copyTo(_location)
                     add(value)
                 }
             }
@@ -93,9 +93,9 @@ open class FakeProjectile(
         val movement = Movement(current.clone(), target.clone())
 
         onMove(movement)
-        target.copy(movement.to)
-        previous.copy(current)
-        current.copy(target)
+        target.copyTo(movement.to)
+        previous.copyTo(current)
+        current.copyTo(target)
 
         if (previous.world === current.world) {
             vector = previous vector current
