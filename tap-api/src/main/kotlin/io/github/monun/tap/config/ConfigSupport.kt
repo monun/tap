@@ -53,6 +53,10 @@ object ConfigSupport {
     private val primitiveAdapters = HashMap<Class<*>, (Field, Any) -> Any>()
 
     init {
+        primitiveAdapters[Boolean::class.java] = { _, value ->
+            value as Boolean
+        }
+
         primitiveAdapters[Int::class.java] = { field, value ->
             value as Number
             var i = value.toInt()
@@ -152,8 +156,10 @@ object ConfigSupport {
                     value?.let { input ->
                         try {
                             field.set(target, input)
-                        } catch (e: Exception) {
+                        }  catch (e: IllegalArgumentException) {
                             error("Type mismatch! ${type.name} != ${input.javaClass.name}")
+                        } catch (e: Exception) {
+                            throw IllegalStateException("Failed to access field ${field.name}", e)
                         }
                     }
 
