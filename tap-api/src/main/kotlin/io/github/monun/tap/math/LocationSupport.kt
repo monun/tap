@@ -20,7 +20,7 @@ package io.github.monun.tap.math
 import org.bukkit.Location
 import org.bukkit.util.Vector
 
-fun Location.copy(other: Location) {
+fun Location.copyTo(other: Location) {
     world = other.world
     set(other.x, other.y, other.z)
     yaw = other.yaw
