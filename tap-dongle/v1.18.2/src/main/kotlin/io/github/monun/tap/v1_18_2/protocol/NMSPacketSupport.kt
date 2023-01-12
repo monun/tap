@@ -17,7 +17,7 @@
 
 package io.github.monun.tap.v1_18_2.protocol
 
-import io.github.monun.tap.fake.PlayerInfoAction
+import io.github.monun.tap.protocol.PlayerInfoAction
 import io.github.monun.tap.protocol.PacketContainer
 import io.github.monun.tap.protocol.PacketSupport
 import io.github.monun.tap.protocol.toProtocolDegrees

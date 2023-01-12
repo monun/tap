@@ -17,10 +17,7 @@
 
 package io.github.monun.tap.v1_19_3.protocol
 
-import io.github.monun.tap.fake.PlayerInfoAction
-import io.github.monun.tap.protocol.PacketContainer
-import io.github.monun.tap.protocol.PacketSupport
-import io.github.monun.tap.protocol.toProtocolDegrees
+import io.github.monun.tap.protocol.*
 import io.netty.buffer.Unpooled
 import it.unimi.dsi.fastutil.ints.IntArrayList
 import net.minecraft.network.FriendlyByteBuf
@@ -35,6 +32,7 @@ import org.bukkit.inventory.EquipmentSlot
 import org.bukkit.inventory.ItemStack
 import org.bukkit.util.Vector
 import java.lang.IllegalArgumentException
+import java.util.*
 import net.minecraft.world.entity.EquipmentSlot as NMSEquipmentSlot
 
 class NMSPacketSupport : PacketSupport {
@@ -47,16 +45,6 @@ class NMSPacketSupport : PacketSupport {
                 EquipmentSlot.LEGS -> NMSEquipmentSlot.LEGS
                 EquipmentSlot.CHEST -> NMSEquipmentSlot.CHEST
                 EquipmentSlot.HEAD -> NMSEquipmentSlot.HEAD
-            }
-        }
-
-        private fun PlayerInfoAction.toNMS(): ClientboundPlayerInfoUpdatePacket.Action {
-            return when (this) {
-                PlayerInfoAction.ADD -> ClientboundPlayerInfoUpdatePacket.Action.ADD_PLAYER
-                PlayerInfoAction.GAME_MODE -> ClientboundPlayerInfoUpdatePacket.Action.UPDATE_GAME_MODE
-                PlayerInfoAction.LATENCY -> ClientboundPlayerInfoUpdatePacket.Action.UPDATE_LATENCY
-                PlayerInfoAction.DISPLAY_NAME -> ClientboundPlayerInfoUpdatePacket.Action.UPDATE_DISPLAY_NAME
-                PlayerInfoAction.REMOVE -> throw IllegalArgumentException("Unsupported type on 1.19.3")
             }
         }
     }
@@ -229,7 +217,37 @@ class NMSPacketSupport : PacketSupport {
         )
     }
 
+    @Suppress("DEPRECATION", "OVERRIDE_DEPRECATION")
     override fun playerInfoAction(action: PlayerInfoAction, player: Player): PacketContainer {
-        return NMSPacketContainer(ClientboundPlayerInfoUpdatePacket(action.toNMS(), (player as CraftPlayer).handle))
+        if (action == PlayerInfoAction.REMOVE) {
+            return NMSPacketContainer(ClientboundPlayerInfoRemovePacket(listOf(player.uniqueId)))
+        }
+
+        when (action) {
+            PlayerInfoAction.ADD -> ClientboundPlayerInfoUpdatePacket.Action.ADD_PLAYER
+            PlayerInfoAction.GAME_MODE -> ClientboundPlayerInfoUpdatePacket.Action.UPDATE_GAME_MODE
+            PlayerInfoAction.LATENCY -> ClientboundPlayerInfoUpdatePacket.Action.UPDATE_LATENCY
+            PlayerInfoAction.DISPLAY_NAME -> ClientboundPlayerInfoUpdatePacket.Action.UPDATE_DISPLAY_NAME
+            else -> throw IllegalArgumentException("impossible")
+        }.let { nmsAction ->
+            return NMSPacketContainer(ClientboundPlayerInfoUpdatePacket(nmsAction, (player as CraftPlayer).handle))
+        }
+    }
+
+    override fun playerInfoUpdate(action: PlayerInfoUpdateAction, player: Player): PacketContainer {
+        return when (action) {
+            PlayerInfoUpdateAction.ADD_PLAYER -> ClientboundPlayerInfoUpdatePacket.Action.ADD_PLAYER
+            PlayerInfoUpdateAction.INITIALIZE_CHAT -> ClientboundPlayerInfoUpdatePacket.Action.INITIALIZE_CHAT
+            PlayerInfoUpdateAction.UPDATE_GAME_MODE -> ClientboundPlayerInfoUpdatePacket.Action.UPDATE_GAME_MODE
+            PlayerInfoUpdateAction.UPDATE_LISTED -> ClientboundPlayerInfoUpdatePacket.Action.UPDATE_LISTED
+            PlayerInfoUpdateAction.UPDATE_LATENCY -> ClientboundPlayerInfoUpdatePacket.Action.UPDATE_LATENCY
+            PlayerInfoUpdateAction.UPDATE_DISPLAY_NAME -> ClientboundPlayerInfoUpdatePacket.Action.UPDATE_DISPLAY_NAME
+        }.let { nmsAction ->
+            NMSPacketContainer(ClientboundPlayerInfoUpdatePacket(nmsAction, (player as CraftPlayer).handle))
+        }
+    }
+
+    override fun playerInfoRemove(list: List<UUID>): PacketContainer {
+        return NMSPacketContainer(ClientboundPlayerInfoRemovePacket(list))
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Monun
+ * Copyright (C) 2023 Monun
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,15 +15,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package io.github.monun.tap.fake
+package io.github.monun.tap.protocol
 
-/**
- * @author octomarine
- */
-enum class PlayerInfoAction {
-    ADD,
-    GAME_MODE,
-    LATENCY,
-    DISPLAY_NAME,
-    REMOVE
+enum class PlayerInfoUpdateAction {
+    ADD_PLAYER,
+    INITIALIZE_CHAT,
+    UPDATE_GAME_MODE,
+    UPDATE_LISTED,
+    UPDATE_LATENCY,
+    UPDATE_DISPLAY_NAME
 }

@@ -17,7 +17,6 @@
 
 package io.github.monun.tap.protocol
 
-import io.github.monun.tap.fake.PlayerInfoAction
 import io.github.monun.tap.loader.LibraryLoader
 import org.bukkit.Location
 import org.bukkit.entity.Entity
@@ -26,6 +25,8 @@ import org.bukkit.entity.Player
 import org.bukkit.inventory.EquipmentSlot
 import org.bukkit.inventory.ItemStack
 import org.bukkit.util.Vector
+import java.lang.IllegalArgumentException
+import java.util.UUID
 
 fun Double.toProtocolDelta(): Int {
     return (this.coerceIn(-3.9, 3.9) * 8000.0).toInt()
@@ -127,5 +128,32 @@ interface PacketSupport {
     fun containerSetSlot(containerId: Int, stateId: Int, slot: Int, item: ItemStack?): PacketContainer =
         throw UnsupportedOperationException()
 
+    // 1.19.3 이후 제거 예정
+    @Deprecated(
+        "Use playerInfoUpdate or playerInfoRemove",
+        ReplaceWith("playerInfoUpdate(action, player)")
+    )
     fun playerInfoAction(action: PlayerInfoAction, player: Player): PacketContainer
+
+    // 1.19.3 이전 하위 구현하지 않음
+    fun playerInfoUpdate(action: PlayerInfoUpdateAction, player: Player): PacketContainer {
+        return when (action) {
+            PlayerInfoUpdateAction.ADD_PLAYER -> PlayerInfoAction.ADD
+            PlayerInfoUpdateAction.UPDATE_GAME_MODE -> PlayerInfoAction.GAME_MODE
+            PlayerInfoUpdateAction.UPDATE_LATENCY -> PlayerInfoAction.LATENCY
+            PlayerInfoUpdateAction.UPDATE_DISPLAY_NAME -> PlayerInfoAction.DISPLAY_NAME
+            else -> throw IllegalArgumentException("Unsupported action: $action in ${LibraryLoader.bukkitVersion}")
+        }.let { convertedAction ->
+            playerInfoAction(convertedAction, player)
+        }
+    }
+
+    fun playerInfoRemove(player: Player): PacketContainer = playerInfoAction(PlayerInfoAction.REMOVE, player)
+
+    /**
+     * Unsupported in 1.18 ~ 1.19.2
+     */
+    fun playerInfoRemove(list: List<UUID>): PacketContainer {
+        throw UnsupportedOperationException("Unsupported in ${LibraryLoader.bukkitVersion}")
+    }
 }
