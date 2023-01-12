@@ -9,6 +9,8 @@
 
 ### Paper 확장 라이브러리
 
+컨텐츠 제작에 자주 사용하는 기능을 제공합니다.
+
 ---
 
 * #### Features
@@ -18,7 +20,7 @@
     * 개체별 이벤트 리스너
     * YamlConfiguration을 이용한 문자열 템플릿
     * 추가적인 인벤토리 함수
-    * GitHub를 통한 업데이트 (BETA)
+    * GitHub를 통한 업데이트
     * Tick 기반 태스크 스케쥴러 (Ticker)
 
 * #### Supported minecraft versions
@@ -28,10 +30,11 @@
     * 1.19
     * 1.19.1
     * 1.19.2
+    * 1.19.3
 
 ---
 
-#### Gradle
+### Gradle `tap-api`
 
 ```kotlin
 repositories {
@@ -45,7 +48,7 @@ dependencies {
 }
 ```
 
-### plugin.yml
+### plugin.yml `tap-core`
 
 ```yaml
 name: ...
@@ -55,12 +58,15 @@ libraries:
   - io.github.monun:tap-core:<version>
 ```
 
+#### !!주의!!
+ * `Gradle`과 `plugin.yml`의 의존성 패키지가 다르므로 주의해주세요.
+ * 모든 코드는 ShadowJar를 고려하여 작성되지 않았습니다.
+
 ---
 
 ### NOTE
 
 * 라이센스는 GPL-3.0이며 변경 혹은 삭제를 금합니다.
-* `./gradlew setupDependencies` 명령을 통해 의존성을 구축 할 수 있습니다.
 
 ---
 
