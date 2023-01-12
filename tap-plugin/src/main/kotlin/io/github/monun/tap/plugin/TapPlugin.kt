@@ -19,14 +19,17 @@ package io.github.monun.tap.plugin
 
 import io.github.monun.tap.fake.FakeEntity
 import io.github.monun.tap.fake.FakeEntityServer
-import io.github.monun.tap.mojangapi.MojangAPI
 import org.bukkit.Bukkit
-import org.bukkit.entity.Cow
+import org.bukkit.Material
+import org.bukkit.entity.ArmorStand
+import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerQuitEvent
+import org.bukkit.event.player.PlayerToggleSneakEvent
+import org.bukkit.inventory.ItemStack
 import org.bukkit.plugin.java.JavaPlugin
 
 class TapPlugin : JavaPlugin() {
@@ -88,12 +91,22 @@ class FakeTest : Listener, Runnable {
     @EventHandler
     fun onPlayerInteract(event: PlayerInteractEvent) {
         val player = event.player
-        val profile = MojangAPI.fetchProfile("notch")!!
-        val property = MojangAPI.fetchSkinProfile(profile.uuid())!!
-        val fakePlayer =
-            fakeEntityServer.spawnPlayer(player.location, "놏치", property.profileProperties().toSet())
-        val fakeVehicle = fakeEntityServer.spawnEntity(player.location, Cow::class.java)
-        fakeVehicle.addPassenger(fakePlayer)
-        fakePlayers.add(fakePlayer)
+        val loc = player.location.apply {
+            x = blockX.toDouble()
+            y = blockY.toDouble()
+            z = blockZ + 0.5
+        }
+
+        if (event.item?.type == Material.COMPOSTER) {
+            val armorStand = fakeEntityServer.spawnEntity(loc, ArmorStand::class.java).apply {
+                updateMetadata {
+                    isMarker = true
+                }
+            }
+
+            val passenger = fakeEntityServer.spawnFallingBlock(loc, Material.DIRT.createBlockData())
+
+            armorStand.addPassenger(passenger)
+        }
     }
 }

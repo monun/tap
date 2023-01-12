@@ -89,7 +89,7 @@ class FakeEntityServerImpl(plugin: JavaPlugin) : FakeEntityServer {
     }
 
     override fun spawnFallingBlock(location: Location, blockData: BlockData): FakeEntity<FallingBlock> {
-        val bukkitFallingBlock = createFallingBlock(blockData).apply {
+        val bukkitFallingBlock = blockData.createFallingBlock().apply {
             setLocation(location)
         }
         val fakeEntity = FakeEntityImpl(this, bukkitFallingBlock, location)
@@ -100,7 +100,7 @@ class FakeEntityServerImpl(plugin: JavaPlugin) : FakeEntityServer {
     }
 
     override fun spawnItem(location: Location, item: ItemStack): FakeEntity<Item> {
-        val bukkitItemEntity = createItemEntity(item).apply {
+        val bukkitItemEntity = item.createItemEntity().apply {
             setLocation(location)
         }
         val fakeEntity = FakeEntityImpl(this, bukkitItemEntity, location)

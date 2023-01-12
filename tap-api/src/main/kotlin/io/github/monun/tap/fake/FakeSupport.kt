@@ -17,11 +17,13 @@
 
 package io.github.monun.tap.fake
 
+import com.destroystokyo.paper.profile.PlayerProfile
 import com.destroystokyo.paper.profile.ProfileProperty
 import io.github.monun.tap.loader.LibraryLoader
 import io.github.monun.tap.protocol.PacketContainer
 import org.bukkit.Bukkit
 import org.bukkit.Location
+import org.bukkit.OfflinePlayer
 import org.bukkit.World
 import org.bukkit.block.data.BlockData
 import org.bukkit.entity.Entity
@@ -95,12 +97,21 @@ fun Entity.createSpawnPacket(): Array<out PacketContainer> {
     return FakeSupportNMS.createSpawnPacket(this)
 }
 
-fun createFallingBlock(blockData: BlockData): FallingBlock {
-    return FakeSupportNMS.createFallingBlock(blockData)
+fun BlockData.createFallingBlock(): FallingBlock {
+    return FakeSupportNMS.createFallingBlock(this)
 }
 
-fun createItemEntity(item: ItemStack): Item {
-    return FakeSupportNMS.createItemEntity(item)
+fun ItemStack.createItemEntity(): Item {
+    return FakeSupportNMS.createItemEntity(this)
+}
+
+fun PlayerProfile.createPlayerEntity(
+    name: String = this.name ?: error("PlayerProfile.name is null"),
+    profileProperties: Set<ProfileProperty> = this.properties,
+    skinParts: FakeSkinParts = FakeSkinParts().apply { enableAll() },
+    uniqueId: UUID = UUID.randomUUID()
+): Player {
+    return FakeSupportNMS.createPlayerEntity(name, profileProperties, skinParts, uniqueId)
 }
 
 fun createPlayerEntity(
