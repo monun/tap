@@ -18,7 +18,10 @@
 package io.github.monun.tap.fake.internal
 
 import com.google.common.collect.ImmutableList
-import io.github.monun.tap.fake.*
+import io.github.monun.tap.fake.FakeEntity
+import io.github.monun.tap.fake.createSpawnPacket
+import io.github.monun.tap.fake.mountedYOffset
+import io.github.monun.tap.fake.setLocation
 import io.github.monun.tap.protocol.*
 import io.github.monun.tap.ref.getValue
 import io.github.monun.tap.ref.weaky

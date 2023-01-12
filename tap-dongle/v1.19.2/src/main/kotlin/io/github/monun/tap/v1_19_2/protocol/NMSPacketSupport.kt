@@ -17,9 +17,9 @@
 
 package io.github.monun.tap.v1_19_2.protocol
 
-import io.github.monun.tap.protocol.PlayerInfoAction
 import io.github.monun.tap.protocol.PacketContainer
 import io.github.monun.tap.protocol.PacketSupport
+import io.github.monun.tap.protocol.PlayerInfoAction
 import io.github.monun.tap.protocol.toProtocolDegrees
 import io.netty.buffer.Unpooled
 import it.unimi.dsi.fastutil.ints.IntArrayList

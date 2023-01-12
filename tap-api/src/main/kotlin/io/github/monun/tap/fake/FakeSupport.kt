@@ -23,7 +23,6 @@ import io.github.monun.tap.loader.LibraryLoader
 import io.github.monun.tap.protocol.PacketContainer
 import org.bukkit.Bukkit
 import org.bukkit.Location
-import org.bukkit.OfflinePlayer
 import org.bukkit.World
 import org.bukkit.block.data.BlockData
 import org.bukkit.entity.Entity

@@ -25,8 +25,7 @@ import org.bukkit.entity.Player
 import org.bukkit.inventory.EquipmentSlot
 import org.bukkit.inventory.ItemStack
 import org.bukkit.util.Vector
-import java.lang.IllegalArgumentException
-import java.util.UUID
+import java.util.*
 
 fun Double.toProtocolDelta(): Int {
     return (this.coerceIn(-3.9, 3.9) * 8000.0).toInt()

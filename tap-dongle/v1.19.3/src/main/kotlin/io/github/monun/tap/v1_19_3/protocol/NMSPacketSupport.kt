@@ -31,7 +31,6 @@ import org.bukkit.entity.Player
 import org.bukkit.inventory.EquipmentSlot
 import org.bukkit.inventory.ItemStack
 import org.bukkit.util.Vector
-import java.lang.IllegalArgumentException
 import java.util.*
 import net.minecraft.world.entity.EquipmentSlot as NMSEquipmentSlot
 
