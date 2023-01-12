@@ -137,7 +137,7 @@ class NMSPacketSupport : PacketSupport {
         return NMSPacketContainer(
             ClientboundMoveEntityPacket.Rot(
                 entityId,
-                180.toByte(),
+                yaw.toProtocolDegrees().toByte(),
                 pitch.toProtocolDegrees().toByte(),
                 onGround
             )
