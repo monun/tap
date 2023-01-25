@@ -89,7 +89,7 @@ class ListenerStatement(val listenerClass: Class<*>, handlerStatements: ArrayLis
             val provider = if (targetEntity == null) {
                 EventTools.findDefaultProvider(eventClass)
             } else {
-                EventTools.getOrCreateCustomProvide(targetEntity.value.java)
+                EventTools.getOrCreateCustomProvider(targetEntity.value.java)
             }
 
             val executor = EventExecutor.create(method, eventClass.asSubclass(Event::class.java))
