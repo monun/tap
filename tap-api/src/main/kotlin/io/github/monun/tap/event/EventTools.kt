@@ -65,7 +65,7 @@ object EventTools {
 
     @Suppress("UNCHECKED_CAST")
     @JvmStatic
-    fun getOrCreateCustomProvide(providerClass: Class<*>): EventEntityProvider {
+    fun getOrCreateCustomProvider(providerClass: Class<*>): EventEntityProvider {
         return CUSTOM_PROVIDERS.computeIfAbsent(providerClass) { clazz: Class<*> ->
             try {
                 return@computeIfAbsent EventEntityProvider(
