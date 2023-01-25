@@ -210,7 +210,7 @@ object ConfigSupport {
     fun compute(target: Any, configFile: File, separateByClass: Boolean = false): Boolean {
         if (!configFile.exists()) {
             val config = YamlConfiguration()
-            compute(target, config)
+            compute(target, config, separateByClass)
             config.save(configFile)
 
             return true
