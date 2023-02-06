@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Monun
+ * Copyright (C) 2023 Monun
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,8 +17,12 @@
 
 package io.github.monun.tap.plugin
 
+import com.destroystokyo.paper.event.player.PlayerJumpEvent
 import io.github.monun.tap.fake.FakeEntity
 import io.github.monun.tap.fake.FakeEntityServer
+import io.github.monun.tap.pdc.getValue
+import io.github.monun.tap.pdc.get
+import io.github.monun.tap.pdc.set
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.Material
@@ -81,11 +85,21 @@ class FakeTest : Listener, Runnable {
     @EventHandler
     fun onPlayerJoin(event: PlayerJoinEvent) {
         fakeEntityServer.addPlayer(event.player)
+
+        val jumpCount: Int? by event.player.persistentDataContainer
+        event.player.sendMessage("그 동안 점프를 ${jumpCount}번 했습니다.")
     }
 
     @EventHandler
     fun onPlayerQuit(event: PlayerQuitEvent) {
         fakeEntityServer.removePlayer(event.player)
+    }
+
+    @EventHandler
+    fun onPlayerJump(event: PlayerJumpEvent) {
+        val dataContainer = event.player.persistentDataContainer
+
+        dataContainer["jumpCount"] = (dataContainer["jumpCount"]?: 0) + 1
     }
 
     private fun testSpawnBasic(loc: Location, blockData: BlockData) {
