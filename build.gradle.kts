@@ -2,7 +2,7 @@ plugins {
     idea
     kotlin("jvm") version Dependency.Kotlin.Version
     kotlin("plugin.serialization") version Dependency.Kotlin.Version apply false
-    id("org.jetbrains.dokka") version Dependency.Kotlin.Version apply false
+    id("org.jetbrains.dokka") version Dependency.Dokka.Version apply false
 }
 
 java {
@@ -26,11 +26,12 @@ subprojects {
     }
 
     dependencies {
-        compileOnly("io.papermc.paper:paper-api:${Dependency.Paper.Version}-R0.1-SNAPSHOT")
+        implementation("io.papermc.paper:paper-api:${Dependency.Paper.Version}-R0.1-SNAPSHOT")
 
         implementation(kotlin("stdlib"))
         implementation(kotlin("reflect"))
-        implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.2")
+        implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.1")
+        implementation("org.jetbrains.kotlinx:kotlinx-serialization-protobuf:1.4.1")
 
         testImplementation("org.junit.jupiter:junit-jupiter:5.7.1")
     }
