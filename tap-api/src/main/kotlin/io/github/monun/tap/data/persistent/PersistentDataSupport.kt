@@ -10,6 +10,7 @@ import org.bukkit.persistence.PersistentDataHolder
 import org.bukkit.persistence.PersistentDataType
 import org.bukkit.plugin.java.JavaPlugin
 import org.bukkit.plugin.java.PluginClassLoader
+import kotlin.reflect.KProperty
 
 /**
  * [PersistentDataContainer] 을 확장하여 플러그인에 종속적인 영구 데이터를 사용할 수 있게 해줍니다.
@@ -142,3 +143,7 @@ value class PersistentDataSupport(val container: PersistentDataContainer) {
 
 inline val PersistentDataHolder.persistentData
     get() = PersistentDataSupport(persistentDataContainer)
+
+inline operator fun <reified T> PersistentDataSupport.getValue(thisRef: Any?, property: KProperty<*>): T? {
+    return get(property.name)
+}

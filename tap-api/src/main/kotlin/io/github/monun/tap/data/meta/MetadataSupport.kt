@@ -7,6 +7,7 @@ import org.bukkit.metadata.Metadatable
 import org.bukkit.plugin.java.JavaPlugin
 import org.bukkit.plugin.java.PluginClassLoader
 import java.util.concurrent.Callable
+import kotlin.reflect.KProperty
 
 /**
  *  [Metadatable] 을 확장하여 플러그인에 종속적인 메타데이터를 사용할 수 있게 해줍니다.
@@ -57,3 +58,7 @@ value class MetadataSupport(private val metadatable: Metadatable) {
  */
 val Metadatable.metadata: MetadataSupport
     get() = MetadataSupport(this)
+
+operator fun <T> MetadataSupport.getValue(thisRef: Any?, property: KProperty<*>): T? {
+    return get<T>(property.name)
+}
