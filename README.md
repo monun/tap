@@ -1,8 +1,8 @@
 # Tap
 
 [![Kotlin](https://img.shields.io/badge/java-17-ED8B00.svg?logo=java)](https://www.azul.com/)
-[![Kotlin](https://img.shields.io/badge/kotlin-1.6.21-585DEF.svg?logo=kotlin)](http://kotlinlang.org)
-[![Gradle](https://img.shields.io/badge/gradle-7.4.2-02303A.svg?logo=gradle)](https://gradle.org)
+[![Kotlin](https://img.shields.io/badge/kotlin-1.7.21-585DEF.svg?logo=kotlin)](http://kotlinlang.org)
+[![Gradle](https://img.shields.io/badge/gradle-7.6-02303A.svg?logo=gradle)](https://gradle.org)
 [![Maven Central](https://img.shields.io/maven-central/v/io.github.monun/tap-core)](https://search.maven.org/artifact/io.github.monun/tap-core)
 [![GitHub](https://img.shields.io/github/license/monun/tap)](https://www.gnu.org/licenses/gpl-3.0.html)
 [![Kotlin](https://img.shields.io/badge/youtube-각별-red.svg?logo=youtube)](https://www.youtube.com/channel/UCDrAR1OWC2MD4s0JLetN0MA)
@@ -22,6 +22,7 @@
     * 추가적인 인벤토리 함수
     * GitHub를 통한 업데이트
     * Tick 기반 태스크 스케쥴러 (Ticker)
+    * Metadata & PersistentData API 접근성 개선
 
 * #### Supported minecraft versions
     * 1.18
@@ -59,8 +60,9 @@ libraries:
 ```
 
 #### !!주의!!
- * `Gradle`과 `plugin.yml`의 의존성 패키지가 다르므로 주의해주세요.
- * 모든 코드는 ShadowJar를 고려하여 작성되지 않았습니다.
+
+* `Gradle`과 `plugin.yml`의 의존성 패키지가 다르므로 주의해주세요.
+* 모든 코드는 ShadowJar를 고려하여 작성되지 않았습니다.
 
 ---
 
