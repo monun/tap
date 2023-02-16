@@ -1,4 +1,4 @@
-package io.github.monun.tap.data.persistent
+package io.github.monun.tap.data
 
 import org.bukkit.NamespacedKey
 import org.bukkit.persistence.PersistentDataType

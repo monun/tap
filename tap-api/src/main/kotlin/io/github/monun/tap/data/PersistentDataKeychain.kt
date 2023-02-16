@@ -1,4 +1,4 @@
-package io.github.monun.tap.data.persistent
+package io.github.monun.tap.data
 
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.decodeFromByteArray
@@ -38,7 +38,7 @@ abstract class PersistentDataKeychain {
      *
      * @exception IllegalArgumentException [T] 가 원시 타입이 아닐 경우
      */
-    protected inline fun <reified T> castPrimitive(name: String): PersistentDataKey<T, T> {
+    protected inline fun <reified T> primitive(name: String): PersistentDataKey<T, T> {
         return cast(
             name,
             PersistentDataSupport.primitiveTypeOf(T::class.java)
@@ -52,7 +52,7 @@ abstract class PersistentDataKeychain {
      * @param Z [PersistentDataType] 의 복합 타입
      */
     @OptIn(ExperimentalSerializationApi::class)
-    protected inline fun <reified Z> castComplex(
+    protected inline fun <reified Z> complex(
         name: String
     ): PersistentDataKey<ByteArray, Z> {
         return cast(name, object : PersistentDataType<ByteArray, Z> {
@@ -84,7 +84,7 @@ abstract class PersistentDataKeychain {
      * @param toPrimitive 복합 타입을 원시 타입으로 변환하는 함수
      * @param fromPrimitive 원시 타입을 복합 타입으로 변환하는 함수
      */
-    protected inline fun <reified T, reified Z> castComplex(
+    protected inline fun <reified T, reified Z> complex(
         name: String,
         crossinline toPrimitive: (Z & Any) -> T & Any,
         crossinline fromPrimitive: (T & Any) -> Z & Any
