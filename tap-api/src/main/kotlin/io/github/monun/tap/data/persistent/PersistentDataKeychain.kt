@@ -6,9 +6,7 @@ import kotlinx.serialization.encodeToByteArray
 import kotlinx.serialization.protobuf.ProtoBuf
 import org.bukkit.NamespacedKey
 import org.bukkit.persistence.PersistentDataAdapterContext
-import org.bukkit.persistence.PersistentDataContainer
 import org.bukkit.persistence.PersistentDataType
-import org.bukkit.plugin.java.PluginClassLoader
 
 /**
  * [PersistentDataSupport] 에서 사용하는 키 묶음용 클래스입니다
