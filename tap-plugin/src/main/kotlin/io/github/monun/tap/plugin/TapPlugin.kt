@@ -17,14 +17,19 @@
 
 package io.github.monun.tap.plugin
 
-import io.github.monun.tap.data.persistent.PersistentDataKeychain
-import io.github.monun.tap.data.persistent.persistentData
-import kotlinx.serialization.ExperimentalSerializationApi
-import kotlinx.serialization.Serializable
-import org.bukkit.Material
-import org.bukkit.inventory.ItemStack
+import io.github.monun.tap.plugin.test.TapTest
+import org.bukkit.command.Command
+import org.bukkit.command.CommandSender
 import org.bukkit.plugin.java.JavaPlugin
 
 class TapPlugin : JavaPlugin() {
-    
+
+    override fun onEnable() {
+        TapTest.init(this)
+    }
+
+    override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>?): Boolean {
+        TapTest.testSimpleAll()
+        return true
+    }
 }

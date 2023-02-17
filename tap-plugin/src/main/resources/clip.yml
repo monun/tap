@@ -2,6 +2,11 @@ name: ${pluginName}
 version: ${version}
 main: ${group}.${packageName}.plugin.${pluginName}Plugin
 api-version: ${paperVersion}
+commands:
+  test:
+    description: Test command
+    usage: /${pluginName} test
+    tab-complete: 0
 libraries:
   - org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}
   - org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}
