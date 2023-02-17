@@ -4,11 +4,12 @@ import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.decodeFromByteArray
 import kotlinx.serialization.encodeToByteArray
 import kotlinx.serialization.protobuf.ProtoBuf
+import org.bukkit.Bukkit
 import org.bukkit.NamespacedKey
 import org.bukkit.persistence.PersistentDataContainer
 import org.bukkit.persistence.PersistentDataHolder
 import org.bukkit.persistence.PersistentDataType
-import org.bukkit.plugin.java.JavaPlugin
+import org.bukkit.plugin.Plugin
 import org.bukkit.plugin.java.PluginClassLoader
 import kotlin.reflect.KProperty
 
@@ -36,7 +37,29 @@ import kotlin.reflect.KProperty
 @JvmInline
 value class PersistentDataSupport(val container: PersistentDataContainer) {
     companion object {
-        internal val plugin: JavaPlugin = (PersistentDataKeychain::class.java.classLoader as PluginClassLoader).plugin
+
+        internal val plugin: Plugin
+
+        init {
+            val classLoader = PersistentDataSupport::class.java.classLoader
+
+            val plugin = if (classLoader is PluginClassLoader) {    // shadowed
+                classLoader.plugin
+            } else {                                                // library
+                val field = PluginClassLoader::class.java.declaredFields.find {
+                    ClassLoader::class.java.isAssignableFrom(it.type)
+                }!!.apply { isAccessible = true }
+
+                Bukkit.getPluginManager().plugins.find { plugin ->
+                    val pluginClassLoader = plugin.javaClass.classLoader
+                    val libraryLoader = field.get(pluginClassLoader)
+
+                    libraryLoader === classLoader
+                }
+            }
+
+            this.plugin = plugin ?: throw IllegalStateException("Cannot find plugin instance")
+        }
 
         /**
          * 자바 타입을 [PersistentDataType] 으로 변환합니다.
@@ -59,8 +82,6 @@ value class PersistentDataSupport(val container: PersistentDataContainer) {
                 else -> null
             } as PersistentDataType<T, T>?
         }
-
-
     }
 
     inline val isEmpty
