@@ -22,7 +22,7 @@
     * 추가적인 인벤토리 함수
     * GitHub를 통한 업데이트
     * Tick 기반 태스크 스케쥴러 (Ticker)
-    * Metadata & PersistentData API 접근성 개선
+    * PersistentData API 접근성 개선
 
 * #### Supported minecraft versions
     * 1.18
