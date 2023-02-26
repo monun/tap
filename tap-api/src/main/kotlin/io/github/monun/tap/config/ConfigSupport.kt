@@ -172,7 +172,8 @@ object ConfigSupport {
                     continue
                 }
 
-                if (value.javaClass.isEnum) {
+
+                if (field.type.isEnum) {
                     value = EnumSupport.name(value)
                 }
 
