@@ -4,9 +4,16 @@ import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.decodeFromByteArray
 import kotlinx.serialization.encodeToByteArray
 import kotlinx.serialization.protobuf.ProtoBuf
+import org.bukkit.Bukkit
+import org.bukkit.Location
+import org.bukkit.util.Vector
 import org.bukkit.NamespacedKey
+import org.bukkit.block.Block
+import org.bukkit.inventory.ItemStack
 import org.bukkit.persistence.PersistentDataAdapterContext
 import org.bukkit.persistence.PersistentDataType
+import java.nio.ByteBuffer
+import java.util.*
 
 /**
  * [PersistentDataSupport] 에서 사용하는 키 묶음용 클래스입니다
@@ -14,16 +21,15 @@ import org.bukkit.persistence.PersistentDataType
  * 예제 코드입니다
  * ```
  * object MyKeychain : PersistentDataKeychain() {
- *   val primKey = castPrimitive<Int>("myKey")
+ *   val primKey = primitive<Int>("myKey")
  *
- *   val compKey = castComplex<MyData>("myData") // MyData 는 kotlinx.serialization.Serializable 을 구현해야 합니다
+ *   val compKey = complex<MyData>("myData") // MyData 는 kotlinx.serialization.Serializable 을 구현해야 합니다
  * }
  * ```
  *
  * @author Monun
  */
 abstract class PersistentDataKeychain {
-
     /**
      * 지정된 이름과 타입으로 된 [PersistentDataKey] 를 생성합니다
      */
@@ -105,6 +111,96 @@ abstract class PersistentDataKeychain {
             override fun fromPrimitive(primitive: T & Any, context: PersistentDataAdapterContext): Z & Any {
                 return fromPrimitive(primitive)
             }
+        })
+    }
+
+    // 아래는 사용빈도가 높은 기타 키 주조 함수들
+    protected inline fun <reified T : Enum<T>> enum(
+        name: String
+    ): PersistentDataKey<String, Enum<*>> {
+        val enumClass = T::class.java
+
+        return complex(name, {
+            it.name
+        }, {
+            enumClass.enumConstants.first { enum -> enum.name == it }
+        })
+    }
+
+    protected fun uuid(name: String): PersistentDataKey<ByteArray, UUID> {
+        return complex(name, {
+            ByteBuffer.wrap(ByteArray(16)).apply {
+                putLong(it.mostSignificantBits)
+                putLong(it.leastSignificantBits)
+            }.array()
+        }, {
+            ByteBuffer.wrap(it).run { UUID(long, long) }
+        })
+    }
+
+    protected fun block(name: String): PersistentDataKey<ByteArray, Block> {
+        return complex(name, {
+            ByteBuffer.wrap(ByteArray(40)).apply {
+                val worldUUID = it.world.uid
+                putLong(worldUUID.mostSignificantBits) // 8
+                putLong(worldUUID.leastSignificantBits) // 8
+                putInt(it.x) // 4
+                putInt(it.y) // 4
+                putInt(it.z) // 4
+            }.array()
+        }, {
+            ByteBuffer.wrap(it).run {
+                val uniqueId = UUID(long, long)
+                Bukkit.getWorld(uniqueId)?.getBlockAt(int, int, int) ?: error("Block not found for $uniqueId")
+            }
+        })
+    }
+
+    protected fun location(name: String): PersistentDataKey<ByteArray, Location> {
+        return complex(name, {
+            ByteBuffer.wrap(ByteArray(48)).apply {
+                val worldUUID = it.world?.uid
+                putLong(worldUUID?.mostSignificantBits ?: 0) // 8
+                putLong(worldUUID?.leastSignificantBits ?: 0) // 8
+                putDouble(it.x) // 8
+                putDouble(it.y) // 8
+                putDouble(it.z) // 8
+                putFloat(it.yaw)// 4
+                putFloat(it.pitch) // 4
+            }.array()
+        }, {
+            ByteBuffer.wrap(it).run {
+                Location(
+                    Bukkit.getWorld(UUID(long, long)),
+                    double,
+                    double,
+                    double,
+                    float,
+                    float
+                )
+            }
+        })
+    }
+
+    protected fun vector(name: String): PersistentDataKey<ByteArray, Vector> {
+        return complex(name, {
+            ByteBuffer.wrap(ByteArray(24)).apply {
+                putDouble(it.x) // 8
+                putDouble(it.y) // 8
+                putDouble(it.z) // 8
+            }.array()
+        }, {
+            ByteBuffer.wrap(it).run {
+                Vector(double, double, double)
+            }
+        })
+    }
+
+    protected fun itemStack(name: String): PersistentDataKey<ByteArray, ItemStack> {
+        return complex(name, {
+            it.serializeAsBytes()
+        }, {
+            ItemStack.deserializeBytes(it)
         })
     }
 }

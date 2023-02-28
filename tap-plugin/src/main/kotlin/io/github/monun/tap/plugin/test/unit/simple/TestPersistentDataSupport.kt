@@ -5,9 +5,13 @@ import io.github.monun.tap.data.getValue
 import io.github.monun.tap.data.persistentData
 import io.github.monun.tap.plugin.test.SimpleTestUnit
 import kotlinx.serialization.Serializable
+import net.kyori.adventure.text.Component.text
+import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.inventory.ItemStack
+import org.bukkit.util.Vector
 import java.time.Instant
+import java.util.*
 
 class TestPersistentDataSupport : SimpleTestUnit() {
 
@@ -40,7 +44,14 @@ class TestPersistentDataSupport : SimpleTestUnit() {
                             prevComplex.numbers + listOf(prevComplex.numbers.count()),
                             prevComplex.float * 1.1f
                         )
+                    data[TestKeychain.loc] = Location(null, 1.0, 2.0, 3.0, 4.0F, 5.0F)
+                    data[TestKeychain.vector] = Vector(1.0, 2.0, 3.0)
+                    data[TestKeychain.uuid] = UUID.randomUUID()
+                    data[TestKeychain.enum] = TestEnum.values().random()
+                    data[TestKeychain.itemStack] =
+                        ItemStack(Material.STONE).apply { editMeta { it.displayName(text("Hello world")) } }
                     data["message"] = prevMessage + (prevMessage.lastOrNull()?.inc() ?: "A")
+
                 }
             }
 
@@ -49,6 +60,11 @@ class TestPersistentDataSupport : SimpleTestUnit() {
                 message("power: ${data[TestKeychain.power]}")
                 message("timestamp: ${data[TestKeychain.timestamp]}")
                 message("complex: ${data[TestKeychain.complex]}")
+                message("loc: ${data[TestKeychain.loc]}")
+                message("vector: ${data[TestKeychain.vector]}")
+                message("uuid: ${data[TestKeychain.uuid]}")
+                message("enum: ${data[TestKeychain.enum]}")
+                message("data: ${data[TestKeychain.itemStack]}")
                 val message: String? by data
                 message("message: $message")
 
@@ -63,7 +79,12 @@ object TestKeychain : PersistentDataKeychain() {
     val level = primitive<Int>("level")
     val power = primitive<Double>("power")
     val timestamp = primitive<String>("timestamp")
+    val loc = location("loc")
+    val vector = vector("vector")
+    val uuid = uuid("uuid")
     val complex = complex<TestComplexData>("complex")
+    val enum = enum<TestEnum>("enum")
+    val itemStack = itemStack("itemStack")
 }
 
 @Serializable
@@ -71,3 +92,7 @@ data class TestComplexData(
     val numbers: List<Int>,
     val float: Float
 )
+
+enum class TestEnum {
+    A, B, C
+}
