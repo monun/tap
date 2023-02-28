@@ -78,7 +78,7 @@ class FakeEntityServerImpl(plugin: JavaPlugin) : FakeEntityServer {
         val bukkitEntity = requireNotNull(clazz.createFakeEntity(bukkitWorld)) {
             "Cannot create entity $clazz"
         }.apply {
-            setLocation(location)
+            tap().location = location
         }
 
         val fakeEntity = FakeEntityImpl(this, bukkitEntity, location)
@@ -90,7 +90,7 @@ class FakeEntityServerImpl(plugin: JavaPlugin) : FakeEntityServer {
 
     override fun spawnFallingBlock(location: Location, blockData: BlockData): FakeEntity<FallingBlock> {
         val bukkitFallingBlock = blockData.createFallingBlock().apply {
-            setLocation(location)
+            tap().location = location
         }
         val fakeEntity = FakeEntityImpl(this, bukkitFallingBlock, location)
         _entities += fakeEntity
@@ -101,7 +101,7 @@ class FakeEntityServerImpl(plugin: JavaPlugin) : FakeEntityServer {
 
     override fun spawnItem(location: Location, item: ItemStack): FakeEntity<Item> {
         val bukkitItemEntity = item.createItemEntity().apply {
-            setLocation(location)
+            tap().location = location
         }
         val fakeEntity = FakeEntityImpl(this, bukkitItemEntity, location)
         _entities += fakeEntity
@@ -118,7 +118,7 @@ class FakeEntityServerImpl(plugin: JavaPlugin) : FakeEntityServer {
         uniqueId: UUID
     ): FakeEntity<Player> {
         val bukkitPlayer = createPlayerEntity(name, profileProperties, skinParts, uniqueId).apply {
-            setLocation(location)
+            tap().location = location
         }
         val fakeEntity = FakeEntityImpl(this, bukkitPlayer, location)
 

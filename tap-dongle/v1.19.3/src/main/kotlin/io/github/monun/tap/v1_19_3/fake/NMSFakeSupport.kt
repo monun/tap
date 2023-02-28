@@ -38,10 +38,7 @@ import org.bukkit.craftbukkit.v1_19_R2.block.data.CraftBlockData
 import org.bukkit.craftbukkit.v1_19_R2.entity.CraftEntity
 import org.bukkit.craftbukkit.v1_19_R2.entity.CraftPlayer
 import org.bukkit.craftbukkit.v1_19_R2.inventory.CraftItemStack
-import org.bukkit.entity.Entity
-import org.bukkit.entity.FallingBlock
-import org.bukkit.entity.Item
-import org.bukkit.entity.Player
+import org.bukkit.entity.*
 import org.bukkit.inventory.ItemStack
 import java.util.*
 
@@ -76,6 +73,11 @@ class NMSFakeSupport : FakeSupport {
         val nmsEntity = entity.handle
 
         nmsEntity.isInvisible = invisible
+    }
+
+    private val nmsPoses = net.minecraft.world.entity.Pose.values()
+    override fun setPose(entity: Entity, pose: Pose) {
+        (entity as CraftEntity).handle.pose = nmsPoses[pose.ordinal]
     }
 
     override fun setLocation(

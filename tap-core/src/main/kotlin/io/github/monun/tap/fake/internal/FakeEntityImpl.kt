@@ -20,8 +20,7 @@ package io.github.monun.tap.fake.internal
 import com.google.common.collect.ImmutableList
 import io.github.monun.tap.fake.FakeEntity
 import io.github.monun.tap.fake.createSpawnPacket
-import io.github.monun.tap.fake.mountedYOffset
-import io.github.monun.tap.fake.setLocation
+import io.github.monun.tap.fake.tap
 import io.github.monun.tap.protocol.*
 import io.github.monun.tap.ref.getValue
 import io.github.monun.tap.ref.weaky
@@ -336,11 +335,11 @@ class FakeEntityImpl<T : Entity> internal constructor(
         val to = currentLocation
 
         vehicle?.let { vehicle ->
-            val yOffset = vehicle.bukkitEntity.mountedYOffset
+            val yOffset = vehicle.bukkitEntity.tap().mountedYOffset
             deltaLocation.mount(vehicle.deltaLocation, yOffset)
             previousLocation.set(currentLocation)
             currentLocation.mount(vehicle.currentLocation, yOffset)
-            bukkitEntity.setLocation(deltaLocation)
+            bukkitEntity.tap().location = deltaLocation
 
             // 탈것이 보이지 않는 트래커에게는 텔레포트로 이동
             for (tracker in trackers) {
@@ -377,7 +376,7 @@ class FakeEntityImpl<T : Entity> internal constructor(
         ) { // Teleport
             updateTeleport = false
             deltaLocation.set(to)
-            bukkitEntity.setLocation(to)
+            bukkitEntity.tap().location = to
             trackers.sendServerPacketAll(PacketSupport.entityTeleport(bukkitEntity, to))
             MoveResult.TELEPORT
         } else {
@@ -407,7 +406,7 @@ class FakeEntityImpl<T : Entity> internal constructor(
                 this.yaw = to.yaw
                 this.pitch = to.pitch
             }
-            bukkitEntity.setLocation(deltaLocation)
+            bukkitEntity.tap().location = deltaLocation
 
             MoveResult.REL_MOVE
         }

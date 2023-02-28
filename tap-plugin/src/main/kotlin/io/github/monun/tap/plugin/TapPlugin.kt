@@ -28,8 +28,18 @@ class TapPlugin : JavaPlugin() {
         TapTest.init(this)
     }
 
-    override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>?): Boolean {
-        TapTest.testSimpleAll()
+    override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
+        if (args.isEmpty())
+            return false
+
+        if (args[0] == "simple") {
+            TapTest.testSimpleAll()
+        } else if (args[0] == "run") {
+            TapTest.runTestComplexTestAll()
+        } else if (args[0] == "stop") {
+            TapTest.cancelTestComplexTestAll()
+        }
+
         return true
     }
 }

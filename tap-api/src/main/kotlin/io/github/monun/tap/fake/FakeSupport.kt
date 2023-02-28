@@ -29,6 +29,7 @@ import org.bukkit.entity.Entity
 import org.bukkit.entity.FallingBlock
 import org.bukkit.entity.Item
 import org.bukkit.entity.Player
+import org.bukkit.entity.Pose
 import org.bukkit.inventory.ItemStack
 import java.util.*
 
@@ -45,6 +46,8 @@ interface FakeSupport {
     fun setInvisible(entity: Entity, invisible: Boolean)
 
     fun isInvisible(entity: Entity): Boolean
+
+    fun setPose(entity: Entity, pose: Pose)
 
     fun getMountedYOffset(entity: Entity): Double
 
@@ -67,29 +70,40 @@ interface FakeSupport {
 
 internal val FakeSupportNMS = LibraryLoader.loadNMS(FakeSupport::class.java)
 
-val Entity.networkId
-    get() = FakeSupportNMS.getNetworkId(this)
+@JvmInline
+value class TapEntity(val entity: Entity) {
+    val networkId
+        get() = FakeSupportNMS.getNetworkId(entity)
 
-var Entity.invisible
-    get() = FakeSupportNMS.isInvisible(this)
-    set(value) {
-        FakeSupportNMS.setInvisible(this, value)
-    }
+    var pose: Pose
+        get() = entity.pose
+        set(value) {
+            FakeSupportNMS.setPose(entity, value)
+        }
 
-val Entity.mountedYOffset
-    get() = FakeSupportNMS.getMountedYOffset(this)
+    var isInvisible
+        get() = FakeSupportNMS.isInvisible(entity)
+        set(value) {
+            FakeSupportNMS.setInvisible(entity, value)
+        }
 
-val Entity.yOffset
-    get() = FakeSupportNMS.getYOffset(this)
+    val mountedYOffset
+        get() = FakeSupportNMS.getMountedYOffset(entity)
 
-//this.locY() + this.aS() + entity.aR()
+    val yOffset
+        get() = FakeSupportNMS.getYOffset(entity)
+
+    var location: Location
+        get() = entity.location
+        set(value) {
+            FakeSupportNMS.setLocation(entity, value)
+        }
+}
+
+fun Entity.tap() = TapEntity(this)
 
 fun <T : Entity> Class<T>.createFakeEntity(world: World = Bukkit.getWorlds().first()): T {
     return FakeSupportNMS.createEntity(this, world)
-}
-
-fun Entity.setLocation(loc: Location) {
-    FakeSupportNMS.setLocation(this, loc)
 }
 
 fun Entity.createSpawnPacket(): Array<out PacketContainer> {
@@ -104,6 +118,7 @@ fun ItemStack.createItemEntity(): Item {
     return FakeSupportNMS.createItemEntity(this)
 }
 
+// TODO 아래 함수 두개 리펙토링 해야할듯? 230301
 fun PlayerProfile.createPlayerEntity(
     name: String = this.name ?: error("PlayerProfile.name is null"),
     profileProperties: Set<ProfileProperty> = this.properties,

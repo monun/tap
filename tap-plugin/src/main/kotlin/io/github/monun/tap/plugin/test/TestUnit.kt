@@ -25,6 +25,8 @@ abstract class SimpleTestUnit : TestUnit() {
 }
 
 abstract class ComplexTestUnit : TestUnit(), Listener, Runnable {
+    var task: org.bukkit.scheduler.BukkitTask? = null
+
     abstract fun register(plugin: Plugin)
 
     abstract fun unregister()

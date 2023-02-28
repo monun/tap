@@ -1,7 +1,10 @@
 package io.github.monun.tap.plugin.test
 
+import io.github.monun.tap.plugin.test.unit.complex.TestFakeEntityPose
 import io.github.monun.tap.plugin.test.unit.simple.TestConfigSupport
 import io.github.monun.tap.plugin.test.unit.simple.TestPersistentDataSupport
+import org.bukkit.Bukkit
+import org.bukkit.event.HandlerList
 import org.bukkit.plugin.Plugin
 
 object TapTest {
@@ -12,9 +15,10 @@ object TapTest {
         "config-test" to ::TestConfigSupport
     )
 
-    private val complexTestList: List<ComplexTestUnit> = listOf(
-
+    private val complexTestMap: Map<String, () -> ComplexTestUnit> = mapOf(
+        "fake-entity-pose" to ::TestFakeEntityPose
     )
+    private val runningComplexTestList = mutableListOf<ComplexTestUnit>()
 
     fun init(plugin: Plugin) {
         this.plugin = plugin
@@ -38,5 +42,24 @@ object TapTest {
         }
     }
 
+    fun runTestComplexTestAll() {
+        runningComplexTestList += complexTestMap.map { (name, factory) ->
+            val test = factory()
+            test.name = name
+            test.logger = plugin.logger
+            test.register(plugin)
+            test.task = Bukkit.getScheduler().runTaskTimer(plugin, test, 1L, 1L)
+            Bukkit.getPluginManager().registerEvents(test, plugin)
+            test
+        }
+    }
+
+    fun cancelTestComplexTestAll() {
+        runningComplexTestList.onEach {
+            HandlerList.unregisterAll(it)
+            it.task?.cancel()
+            it.unregister()
+        }.clear()
+    }
 }
 
