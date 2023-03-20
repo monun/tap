@@ -38,7 +38,7 @@ class NMSItemSupport : ItemSupport {
     override fun damageArmor(playerInventory: BukkitPlayerInventory, attackDamage: Double) {
         val nmsInventory = (playerInventory as CraftInventoryPlayer).inventory
 
-        nmsInventory.hurtArmor(nmsInventory.player.level.damageSources().lava(), attackDamage.toFloat(), Inventory.ALL_ARMOR_SLOTS)
+        nmsInventory.hurtArmor(nmsInventory.player.damageSources().lava(), attackDamage.toFloat(), Inventory.ALL_ARMOR_SLOTS)
     }
 
     override fun damageSlot(playerInventory: BukkitPlayerInventory, slot: EquipmentSlot, damage: Int) {
