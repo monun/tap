@@ -537,6 +537,10 @@ class FakeEntityImpl<T : Entity> internal constructor(
         trackers.sendServerPacketAll(PacketSupport.entityAnimation(bukkitEntity.entityId, action))
     }
 
+    override fun playHurtAnimation() {
+        trackers.sendServerPacketAll(PacketSupport.hurtAnimation(bukkitEntity.entityId, 0.0F))
+    }
+
     override fun excludeTracker(player: Player) {
         if (exclusion.add(player)) {
             updateTrackers = true

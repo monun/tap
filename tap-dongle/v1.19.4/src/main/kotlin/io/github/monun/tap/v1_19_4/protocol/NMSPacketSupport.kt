@@ -172,6 +172,16 @@ class NMSPacketSupport : PacketSupport {
         return NMSPacketContainer(ClientboundAnimatePacket(byteBuf))
     }
 
+    override fun hurtAnimation(entityId: Int, yaw: Float): PacketContainer {
+        val byteBuf = FriendlyByteBuf(Unpooled.buffer())
+
+        byteBuf.writeVarInt(entityId)
+        byteBuf.writeFloat(yaw)
+
+        val packet = ClientboundHurtAnimationPacket(byteBuf)
+        return NMSPacketContainer(packet)
+    }
+
     override fun mount(
         entityId: Int,
         mountEntityIds: IntArray

@@ -116,6 +116,8 @@ interface PacketSupport {
         return entityAnimation(entityId, action.ordinal)
     }
 
+    fun hurtAnimation(entityId: Int, yaw: Float): PacketContainer = throw UnsupportedOperationException()
+
     fun mount(entityId: Int, mountEntityIds: IntArray): PacketContainer
 
     fun takeItem(entityId: Int, collectorId: Int, stackAmount: Int): PacketContainer
@@ -155,4 +157,5 @@ interface PacketSupport {
     fun playerInfoRemove(list: List<UUID>): PacketContainer {
         throw UnsupportedOperationException("Unsupported in ${LibraryLoader.bukkitVersion}")
     }
+
 }

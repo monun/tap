@@ -69,6 +69,11 @@ interface FakeEntity<T : Entity> {
 
     fun playAnimation(action: AnimationType)
 
+    /**
+     * 1.19.4 이상에서만 동작합니다.
+     */
+    fun playHurtAnimation()
+
     fun excludeTracker(player: Player)
 
     fun includeTracker(player: Player)
