@@ -17,6 +17,7 @@
 
 package io.github.monun.tap.fake.internal
 
+import com.destroystokyo.paper.event.player.PlayerUseUnknownEntityEvent
 import com.destroystokyo.paper.profile.ProfileProperty
 import com.google.common.collect.ImmutableList
 import io.github.monun.tap.fake.*
@@ -28,6 +29,7 @@ import org.bukkit.entity.FallingBlock
 import org.bukkit.entity.Item
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
+import org.bukkit.event.EventPriority
 import org.bukkit.event.HandlerList
 import org.bukkit.event.Listener
 import org.bukkit.event.entity.PlayerDeathEvent
@@ -226,6 +228,17 @@ class FakeEntityServerImpl(plugin: JavaPlugin) : FakeEntityServer {
         @EventHandler
         fun onPlayerQuit(event: PlayerQuitEvent) {
             trackersByPlayer.remove(event.player)?.clear()
+        }
+
+        @EventHandler(priority = EventPriority.HIGH)
+        fun onInteract(event: PlayerUseUnknownEntityEvent) {
+            val fakeEntity = entities.find { it.bukkitEntity.entityId == event.entityId } ?: return
+            PlayerInteractFakeEntityEvent(
+                event.player,
+                fakeEntity,
+                event.isAttack,
+                event.hand
+            ).callEvent()
         }
     }
 }
