@@ -232,6 +232,7 @@ class FakeEntityServerImpl(plugin: JavaPlugin) : FakeEntityServer {
 
         @EventHandler(priority = EventPriority.HIGH)
         fun onInteract(event: PlayerUseUnknownEntityEvent) {
+            if (event.player !in trackersByPlayer) return
             val fakeEntity = entities.find { it.bukkitEntity.entityId == event.entityId } ?: return
             PlayerInteractFakeEntityEvent(
                 event.player,
