@@ -241,6 +241,7 @@ class FakeEntityServerImpl(plugin: JavaPlugin) : FakeEntityServer {
 //                (entity !== event.player || event.player.gameMode == GameMode.SPECTATOR)
 //                위에 기능은 카메라 시점기능인데 구현하기 뭐한감이 있어 삭제
             ) {
+                if (event.isAttack) event.player.resetCooldown()
                 PlayerInteractFakeEntityEvent(
                     event.player,
                     fakeEntity,
