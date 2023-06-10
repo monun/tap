@@ -19,7 +19,6 @@ package io.github.monun.tap.v1_19_4.item
 
 import io.github.monun.tap.item.ItemSupport
 import net.minecraft.nbt.CompoundTag
-import net.minecraft.world.damagesource.DamageSource
 import net.minecraft.world.entity.player.Inventory
 import net.minecraft.world.item.ItemStack
 import org.bukkit.craftbukkit.v1_19_R3.CraftEquipmentSlot
@@ -40,7 +39,7 @@ class NMSItemSupport : ItemSupport {
         val nmsInventory = (playerInventory as CraftInventoryPlayer).inventory
         
         nmsInventory.hurtArmor(
-            nmsInventory.player.level.damageSources().lava(),
+            nmsInventory.player.damageSources().lava(),
             attackDamage.toFloat(),
             Inventory.ALL_ARMOR_SLOTS
         )
