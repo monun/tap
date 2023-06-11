@@ -15,16 +15,16 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package io.github.monun.tap.v1_19_4.item
+package io.github.monun.tap.v1_20.item
 
 import io.github.monun.tap.item.ItemSupport
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.world.entity.player.Inventory
 import net.minecraft.world.item.ItemStack
-import org.bukkit.craftbukkit.v1_19_R3.CraftEquipmentSlot
-import org.bukkit.craftbukkit.v1_19_R3.entity.CraftPlayer
-import org.bukkit.craftbukkit.v1_19_R3.inventory.CraftInventoryPlayer
-import org.bukkit.craftbukkit.v1_19_R3.inventory.CraftItemStack
+import org.bukkit.craftbukkit.v1_20_R1.CraftEquipmentSlot
+import org.bukkit.craftbukkit.v1_20_R1.entity.CraftPlayer
+import org.bukkit.craftbukkit.v1_20_R1.inventory.CraftInventoryPlayer
+import org.bukkit.craftbukkit.v1_20_R1.inventory.CraftItemStack
 import org.bukkit.inventory.EquipmentSlot
 import org.bukkit.inventory.ItemStack as BukkitItemStack
 import org.bukkit.inventory.PlayerInventory as BukkitPlayerInventory
