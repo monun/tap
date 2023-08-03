@@ -52,7 +52,7 @@ object MojangAPI {
 
         return client.sendAsync(request, HttpResponse.BodyHandlers.ofString()).thenApply { response ->
             val body = response.body()
-            if (body.isBlank()) null else Json.decodeFromString<T>(body)
+            if (body.isBlank()) null else Json { ignoreUnknownKeys = true }.decodeFromString<T>(body)
         }
     }
 
@@ -69,7 +69,7 @@ object MojangAPI {
     ) {
         fun textureProfile() = properties.find { it.name == "textures" }?.let { textures ->
             val string = Base64.getDecoder().decode(textures.value).decodeToString()
-            Json.decodeFromString<TextureProfile>(string)
+            Json { ignoreUnknownKeys = true }.decodeFromString<TextureProfile>(string)
         }
 
         fun profileProperties() = properties.map { it.profileProperty() }
