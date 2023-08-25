@@ -203,4 +203,12 @@ abstract class PersistentDataKeychain {
             ItemStack.deserializeBytes(it)
         })
     }
+
+    protected fun boolean(name: String): PersistentDataKey<Byte, Boolean> {
+        return complex(name, {
+            if (it) 1.toByte() else 0.toByte()
+        }, {
+            it != 0.toByte()
+        })
+    }
 }
