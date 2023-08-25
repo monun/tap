@@ -50,8 +50,8 @@ class TestPersistentDataSupport : SimpleTestUnit() {
                     data[TestKeychain.enum] = TestEnum.values().random()
                     data[TestKeychain.itemStack] =
                         ItemStack(Material.STONE).apply { editMeta { it.displayName(text("Hello world")) } }
+                    data[TestKeychain.boolean] = true
                     data["message"] = prevMessage + (prevMessage.lastOrNull()?.inc() ?: "A")
-
                 }
             }
 
@@ -65,6 +65,7 @@ class TestPersistentDataSupport : SimpleTestUnit() {
                 message("uuid: ${data[TestKeychain.uuid]}")
                 message("enum: ${data[TestKeychain.enum]}")
                 message("data: ${data[TestKeychain.itemStack]}")
+                message("bool: ${data[TestKeychain.boolean]}")
                 val message: String? by data
                 message("message: $message")
 
@@ -85,6 +86,7 @@ object TestKeychain : PersistentDataKeychain() {
     val complex = complex<TestComplexData>("complex")
     val enum = enum<TestEnum>("enum")
     val itemStack = itemStack("itemStack")
+    val boolean = boolean("bool")
 }
 
 @Serializable
