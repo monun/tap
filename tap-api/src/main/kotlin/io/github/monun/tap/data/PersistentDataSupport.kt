@@ -110,7 +110,6 @@ value class PersistentDataSupport(val container: PersistentDataContainer) {
     }
 
 
-    @Suppress("OPT_IN_USAGE")
     operator fun <T, Z> get(name: String, type: PersistentDataType<T, Z>): Z? {
         return container[NamespacedKey(plugin, name), type]
     }
