@@ -38,27 +38,33 @@ import kotlin.reflect.KProperty
 value class PersistentDataSupport(val container: PersistentDataContainer) {
     companion object {
 
-        internal val plugin: Plugin
-
-        init {
+        internal val plugin: Plugin by lazy {
             val classLoader = PersistentDataSupport::class.java.classLoader
+            val paperPluginClassLoader =
+                Class.forName("io.papermc.paper.plugin.entrypoint.classloader.PaperPluginClassLoader")
 
-            val plugin = if (classLoader is PluginClassLoader) {    // shadowed
+            val pluginInstance = if (classLoader is PluginClassLoader) { // shadowed
                 classLoader.plugin
-            } else {                                                // library
+            } else {                                                            // library
                 val field = PluginClassLoader::class.java.declaredFields.find {
+                    ClassLoader::class.java.isAssignableFrom(it.type)
+                }!!.apply { isAccessible = true }
+                val paperPluginsField = paperPluginClassLoader.declaredFields.find {
                     ClassLoader::class.java.isAssignableFrom(it.type)
                 }!!.apply { isAccessible = true }
 
                 Bukkit.getPluginManager().plugins.find { plugin ->
                     val pluginClassLoader = plugin.javaClass.classLoader
-                    val libraryLoader = field.get(pluginClassLoader)
+                    val libraryLoader = if (paperPluginClassLoader.isInstance(pluginClassLoader)) {
+                        // Paper Plugins
+                        paperPluginsField.get(pluginClassLoader)
+                    } else field.get(pluginClassLoader) // PluginClassLoader
 
                     libraryLoader === classLoader
                 }
             }
 
-            this.plugin = plugin ?: throw IllegalStateException("Cannot find plugin instance")
+            pluginInstance ?: throw IllegalStateException("Cannot find plugin instance")
         }
 
         /**
