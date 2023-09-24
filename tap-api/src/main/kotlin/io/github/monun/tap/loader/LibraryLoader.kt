@@ -113,21 +113,11 @@ object LibraryLoader {
     }
 
     val bukkitVersion by lazy {
-        with("v\\d+_\\d+_R\\d+".toPattern().matcher(Bukkit.getServer()::class.java.`package`.name)) {
-            when {
-                find() -> group()
-                else -> throw NoSuchElementException("No such bukkit version exists")
-            }
-        }
+        Bukkit.getServer().bukkitVersion
     }
 
     val minecraftVersion by lazy {
-        with("(?<=\\(MC: )[\\d.]+?(?=\\))".toPattern().matcher(Bukkit.getVersion())) {
-            when {
-                find() -> group()
-                else -> throw NoSuchElementException("No such minecraft version exists")
-            }
-        }
+        Bukkit.getServer().minecraftVersion
     }
 
     val libraryVersion by lazy { "v${minecraftVersion.replace('.', '_')}" }
