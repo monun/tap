@@ -3,6 +3,7 @@ package io.github.monun.tap.plugin.test
 import io.github.monun.tap.plugin.test.unit.complex.TestFakeEntityPose
 import io.github.monun.tap.plugin.test.unit.simple.TestConfigSupport
 import io.github.monun.tap.plugin.test.unit.simple.TestPersistentDataSupport
+import io.github.monun.tap.plugin.test.unit.simple.TestNewVersionFetchSupport
 import org.bukkit.Bukkit
 import org.bukkit.event.HandlerList
 import org.bukkit.plugin.Plugin
@@ -12,7 +13,8 @@ object TapTest {
 
     private val simpleTestMap: Map<String, () -> SimpleTestUnit> = mapOf(
         "persistent-data" to ::TestPersistentDataSupport,
-        "config-test" to ::TestConfigSupport
+        "config-test" to ::TestConfigSupport,
+        "version-fetch-test" to ::TestNewVersionFetchSupport
     )
 
     private val complexTestMap: Map<String, () -> ComplexTestUnit> = mapOf(
