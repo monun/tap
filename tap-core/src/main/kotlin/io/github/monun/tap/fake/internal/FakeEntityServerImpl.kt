@@ -17,20 +17,21 @@
 
 package io.github.monun.tap.fake.internal
 
+import com.destroystokyo.paper.event.player.PlayerUseUnknownEntityEvent
 import com.destroystokyo.paper.profile.ProfileProperty
 import com.google.common.collect.ImmutableList
 import io.github.monun.tap.fake.*
+import net.kyori.adventure.text.Component
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.block.data.BlockData
-import org.bukkit.entity.Entity
-import org.bukkit.entity.FallingBlock
-import org.bukkit.entity.Item
-import org.bukkit.entity.Player
+import org.bukkit.entity.*
 import org.bukkit.event.EventHandler
+import org.bukkit.event.EventPriority
 import org.bukkit.event.HandlerList
 import org.bukkit.event.Listener
 import org.bukkit.event.entity.PlayerDeathEvent
+import org.bukkit.event.player.PlayerKickEvent
 import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.inventory.ItemStack
 import org.bukkit.plugin.java.JavaPlugin
@@ -226,6 +227,34 @@ class FakeEntityServerImpl(plugin: JavaPlugin) : FakeEntityServer {
         @EventHandler
         fun onPlayerQuit(event: PlayerQuitEvent) {
             trackersByPlayer.remove(event.player)?.clear()
+        }
+
+        @EventHandler(priority = EventPriority.HIGH)
+        fun onInteract(event: PlayerUseUnknownEntityEvent) {
+            if (event.player !in trackersByPlayer) return
+            val fakeEntity = entities.find { it.bukkitEntity.entityId == event.entityId } ?: return
+            val entity = fakeEntity.bukkitEntity
+            if (
+                entity !is Item &&
+                entity !is ExperienceOrb &&
+                entity !is AbstractArrow
+//                (entity !== event.player || event.player.gameMode == GameMode.SPECTATOR)
+//                위에 기능은 카메라 시점기능인데 구현하기 뭐한감이 있어 삭제
+            ) {
+                if (event.isAttack) event.player.resetCooldown()
+                PlayerInteractFakeEntityEvent(
+                    event.player,
+                    fakeEntity,
+                    event.isAttack,
+                    event.hand
+                ).callEvent()
+            } else {
+                event.player.kick(
+                    Component.translatable("multiplayer.disconnect.invalid_entity_attacked"),
+                    PlayerKickEvent.Cause.INVALID_ENTITY_ATTACKED
+                )
+                Bukkit.getLogger().warning("Player ${event.player.name} tried to attack an invalid entity")
+            }
         }
     }
 }
